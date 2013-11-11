@@ -1,0 +1,4 @@
+# GraphDB
+graphdb.uri=plocal:localhost/brain_test
+graphdb.user=root
+graphdb.password=54573D2F1FABD12711585451F952E0750B953AD9EA98968F1EAF138215D743B7

@@ -23,8 +23,29 @@
  */
 package brain.models
 
-case class Knowledge(topics:Set[Topic])
+import aimltoxml.aiml.Aiml
+
+case class Knowledge(val name: String, val topics: Set[Topic], val knowledges: Set[Knowledge]) {
+    require(name != null && !name.isEmpty(), "Name is required.")
+
+    def canEqual(other: Any) = {
+        other.isInstanceOf[brain.models.Knowledge]
+    }
+
+    override def equals(other: Any) = {
+        other match {
+            case that: brain.models.Knowledge => that.canEqual(Knowledge.this) && name == that.name && topics == that.topics && knowledges == that.knowledges
+            case _                            => false
+        }
+    }
+
+    override def hashCode() = {
+        val prime = 41
+        prime * (prime * (prime + name.hashCode) + topics.hashCode) + knowledges.hashCode
+    }
+
+}
 
 class KnowledgeToAimlAdapter(knowledge: Knowledge) {
-    
+    def toAiml = Aiml(knowledge.name, knowledge.topics.map(_.toAiml))
 }

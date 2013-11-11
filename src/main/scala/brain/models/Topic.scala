@@ -23,9 +23,32 @@
  */
 package brain.models
 
+case class Topic(val name: String, val teachings: Set[Teaching]) {
+    require(name != null && !name.isEmpty(), "Name is required.")
+    
+    def toAiml: aimltoxml.aiml.Topic = new TopicToAimlTopicAdapter(this).toAimlTopic
 
-case class Topic(name:String, teachings:Set[Teaching])
+    def canEqual(other: Any) = {
+        other.isInstanceOf[brain.models.Topic]
+    }
 
-class TopicToAimlTopicAdapter(topic: Topic){
-    def toAimlTopic = Set.empty[aimltoxml.aiml.Topic]
+    override def equals(other: Any) = {
+        other match {
+            case that: brain.models.Topic => that.canEqual(Topic.this) && name == that.name && teachings == that.teachings
+            case _                        => false
+        }
+    }
+
+    override def hashCode() = {
+        val prime = 41
+        prime * (prime + name.hashCode) + teachings.hashCode
+    }
+
+}
+
+class TopicToAimlTopicAdapter(topic: Topic) {
+    require(topic != null, "The topic is required to be converted into a Aiml Topic")
+    require(topic.teachings != null && !topic.teachings.isEmpty, "Topic's teachings is required.")
+
+    def toAimlTopic = aimltoxml.aiml.Topic(topic.name, topic.teachings.map(_.toAiml).flatten)
 } 

@@ -29,18 +29,30 @@ import aimltoxml.aiml.Text
 import aimltoxml.aiml.Category
 import aimltoxml.aiml.Srai
 
-case class Teaching(whenUserSays: Option[Set[String]], respondingTo: Option[String], say: Option[Set[String]]) extends DbObject {
+case class Teaching(whenUserSays: Set[String], respondingTo: String, say: Set[String]) extends DbObject {
     def toAiml: Set[Category] = { new TeachingToCategoryAdapter(this).toCategory }
 
-    def isValid: Boolean = { false }
+    def canEqual(other: Any) = other.isInstanceOf[brain.models.Teaching]
+
+    override def equals(other: Any) = {
+        other match {
+            case that: brain.models.Teaching => that.canEqual(Teaching.this) && whenUserSays == that.whenUserSays && respondingTo == that.respondingTo && say == that.say
+            case _                           => false
+        }
+    }
+
+    override def hashCode() = {
+        val prime = 41
+        prime * (prime * (prime + whenUserSays.hashCode) + respondingTo.hashCode) + say.hashCode
+    }
+
 }
 
 class TeachingToCategoryAdapter(teaching: Teaching) {
     require(teaching != null, "The teaching is required to be converted to a Category.")
-    require(teaching.isValid, "The teaching must be valid in order to be converted to a Category.")
 
-    val whatWasSaid: Set[String] = teaching.whenUserSays.get.filter(whenUserSays => whenUserSays.trim().size > 0)
-    val whatToSay: Set[String] = teaching.say.get.filter(say => say.trim().size > 0)
+    val whatWasSaid: Set[String] = teaching.whenUserSays.filter(!_.isEmpty)
+    val whatToSay: Set[String] = teaching.say.filter(!_.isEmpty)
     val respondingTo = teaching.respondingTo
 
     def selectDefaultPattern(setOfWhatWasSaid: Set[String]) = {
@@ -60,10 +72,10 @@ class TeachingToCategoryAdapter(teaching: Teaching) {
 
     // it should be a selectDefaultPattern's local function, but is not for tests purposes.
     def calculateThePatternComplexity(pattern: String): Double = {
-        def countStarsIn(p: String) = { countSpecialChar("*", p) }
-        def countUnderscoreIn(p: String) = { countSpecialChar("_", p) }
+        def countStarsIn(p: String) = countSpecialChar("*", p)
+        def countUnderscoreIn(p: String) = countSpecialChar("_", p)
 
-        val amountOfChar = pattern.length()
+        val amountOfChar = pattern.length
         val amountOfStar = countStarsIn(pattern)
         val amountOfUnderscore = countUnderscoreIn(pattern)
 
@@ -75,15 +87,13 @@ class TeachingToCategoryAdapter(teaching: Teaching) {
 
     def createCategory(whatWasSaid: String, defaultPattern: String, respondingTo: String, say: Set[String]) = {
         if (whatWasSaid == defaultPattern) Category(whatWasSaid, createTemplateElements(say))
-        else Category(whatWasSaid, Srai(defaultPattern))
+        else Category(whatWasSaid, Set(Srai(defaultPattern)))
     }
 
-    def createTemplateElements(say: Set[String]): Set[TemplateElement] = {
-        say.map { Text(_) }
-    }
+    def createTemplateElements(say: Set[String]): Set[TemplateElement] = say.map { Text(_) }
 
     def toCategory: Set[Category] = {
-        val defaultPattern = selectDefaultPattern(teaching.whenUserSays.get)
-        whatWasSaid.map(wasSaid => createCategory(wasSaid, defaultPattern, "", whatToSay))
+        val defaultPattern = selectDefaultPattern(teaching.whenUserSays)
+        whatWasSaid.map(createCategory(_, defaultPattern, respondingTo, whatToSay))
     }
 }

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <head>
+     <meta name="viewport" content="width=device-width, initial-scale=1.0"></meta>
+     
+     <!-- CSS Files -->
+     <link type="text/css" href="/resources/js/jit/css/base.css" rel="stylesheet" />
+     <link type="text/css" href="/resources/js/jit/css/Spacetree.css" rel="stylesheet" />
+
+     <!--[if IE]><script language="javascript" type="text/javascript" src="/resources/js/jit/Extras/excanvas.js"></script><![endif]-->
+     
+     
+     <script type="text/javascript" src="/classpath/fobo/jquery.js"></script>
+     <script type="text/javascript" src="/resources/js/jit/jit.js"></script>
+     <script type="text/javascript" src="/resources/js/jit/example1.js"></script>
+
+     <!--Main css for the Bootstrap module option-->
+     <link href="/classpath/fobo/bootstrap.css" type="text/css" rel="stylesheet"></link>
+     <link href="/classpath/fobo/bootstrap-responsive.css" type="text/css" rel="stylesheet"></link>
+     
+     <!--Main css for the Font-Awesome module option-->
+     <link rel="stylesheet" href="/classpath/fobo/font-awesome.css"></link>
+     
+     <!--app specific tweeks and overrides external to module goes here-->
+     <link href="/resources/css/app.css" rel="stylesheet" ></link>
+     <title>Brain</title>
+     
+     
+     
+    <style type="text/css">
+      #knowledgeContextMenu {
+        position: fixed;
+        display:none;
+      }
+    </style>
+     
+  </head>
+  
+  <body>
+    <span class='lift:embed?what=_defaultEmbededTopNavbar'>Embed the top toolbar here.</span>
+  
+    <div id="content">The main content will get bound here</div>
+  
+    <!--In end of page (for fast pageload) add the scripts you need--> 
+		<script type="text/javascript" src="/classpath/fobo/bootstrap.js"></script>
+		<script id="json" src="/classpath/json.js" type="text/javascript"></script>
+    <script type="text/javascript">jitInit();</script>
+  </body>        
+</html> 

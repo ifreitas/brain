@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta content="text/html; charset=UTF-8" http-equiv="content-type"></meta>
+<title>Brain</title>
+
+</head>
+
+<body class="lift:content_id=main">
+    <div id="main" class="lift:surround?with=default;at=content">
+        <!-- jit -->
+        <div id="container" class="c">
+            <div id="center-container">
+                <div id="infovis" ></div>
+            </div>
+
+            <div id="right-container">
+
+                <h4>Tree Orientation</h4>
+                <table>
+                    <tr>
+                        <td><label for="r-left">Left </label></td>
+                        <td><input type="radio" id="r-left"
+                            name="orientation" checked="checked"
+                            value="left" /></td>
+                    </tr>
+                    <tr>
+                        <td><label for="r-top">Top </label></td>
+                        <td><input type="radio" id="r-top"
+                            name="orientation" value="top" /></td>
+                    </tr>
+                    <tr>
+                        <td><label for="r-bottom">Bottom </label></td>
+                        <td><input type="radio" id="r-bottom"
+                            name="orientation" value="bottom" /></td>
+                    </tr>
+                    <tr>
+                        <td><label for="r-right">Right </label></td>
+                        <td><input type="radio" id="r-right"
+                            name="orientation" value="right" /></td>
+                    </tr>
+                </table>
+
+            </div>
+            
+            
+            <div id="knowledgeContextMenu" class="dropdown clearfix">
+                <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu" style="display:block;position:static;margin-bottom:5px;">
+                  <li><a tabindex="-1" href="#">Add Knowledge</a></li>
+                  <li class="divider"></li>
+                  <li><a tabindex="-1" href="#">Move to Knowledge</a></li>
+                  <li><a tabindex="-1" href="#">Copy to Knowledge</a></li>
+                  <li class="divider"></li>
+                  <li><a tabindex="-1" href="#">Rename</a></li>
+                  <li><a tabindex="-1" href="#">Delete</a></li>
+                  <li class="divider"></li>
+                  <li><a tabindex="-1" href="#">Topics</a></li>
+                </ul>
+            </div>
+
+            <div id="log"></div>
+        </div>
+        <!-- /jit -->
+
+<script type="text/javascript">
+var $knowledgeContextMenu = $("#knowledgeContextMenu");
+
+
+$(document).click(function () { $knowledgeContextMenu.hide(); });
+</script>
+
+    </div>
+    <!-- /main -->
+</body>
+</html>
