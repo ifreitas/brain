@@ -42,31 +42,37 @@
                 </table>
 
             </div>
+
             
-            
-            <div id="knowledgeContextMenu" class="dropdown clearfix">
-                <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu" style="display:block;position:static;margin-bottom:5px;">
-                  <li><a tabindex="-1" href="#">Add Knowledge</a></li>
-                  <li class="divider"></li>
-                  <li><a tabindex="-1" href="#">Move to Knowledge</a></li>
-                  <li><a tabindex="-1" href="#">Copy to Knowledge</a></li>
-                  <li class="divider"></li>
-                  <li><a tabindex="-1" href="#">Rename</a></li>
-                  <li><a tabindex="-1" href="#">Delete</a></li>
-                  <li class="divider"></li>
-                  <li><a tabindex="-1" href="#">Topics</a></li>
-                </ul>
-            </div>
+
 
             <div id="log"></div>
         </div>
         <!-- /jit -->
+        
+        
+        <div id="knowledgeContextMenu" class="dropdown clearfix">
+            <ul class="dropdown-menu  pull-left" role="menu" aria-labelledby="dropdownMenu" style="display:block;position:static;margin-bottom:5px;">
+              <li><a tabindex="-1" href="#">Add Knowledge</a></li>
+              <li><a tabindex="-1" href="#">Rename</a></li>
+              <li><a tabindex="-1" href="#">Delete</a></li>
+              <li class="divider"></li>
+              <li><a tabindex="-1" href="#">Move to</a></li>
+              <li><a tabindex="-1" href="#">Copy to</a></li>
+              <li class="divider"></li>
+              <li><a tabindex="-1" href="#">Topics</a></li>
+            </ul>
+        </div>
 
 <script type="text/javascript">
 var $knowledgeContextMenu = $("#knowledgeContextMenu");
+document.onclick = function(e) { 
+	$knowledgeContextMenu.hide(); 
+};
+document.oncontextmenu = function(e){
+	return false;
+};
 
-
-$(document).click(function () { $knowledgeContextMenu.hide(); });
 </script>
 
     </div>

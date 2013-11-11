@@ -123,6 +123,6 @@
 	<classpathentry kind="lib" path="/Users/israelfreitas/.ivy2/cache/io.netty/netty/bundles/netty-3.5.2.Final.jar" sourcepath="/Users/israelfreitas/.ivy2/cache/io.netty/netty/srcs/netty-3.5.2.Final-sources.jar"/>
 	<classpathentry kind="lib" path="/Users/israelfreitas/.ivy2/cache/org.seleniumhq.selenium/selenium-support/jars/selenium-support-2.35.0.jar" sourcepath="/Users/israelfreitas/.ivy2/cache/org.seleniumhq.selenium/selenium-support/srcs/selenium-support-2.35.0-sources.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="src/lib/aimltoxml-v0.14.0.jar"/>
+	<classpathentry kind="lib" path="lib/aimltoxml-v0.14.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
