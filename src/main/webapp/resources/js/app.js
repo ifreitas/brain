@@ -747,35 +747,27 @@ function jitInit(){
     //init Spacetree
     //Create a new ST instance
     var st = new $jit.ST({
-        //id of viz container element
-   		injectInto: 'infovis', // canvas
-        //set duration for the animation
-        duration: 800, // fx
-        //set animation transition type
-        transition: $jit.Trans.Quart.easeInOut, // fx
-        //set distance between node and its children
+   		injectInto: 'infovis', 
+        duration: 800,
+        transition: $jit.Trans.Quart.easeInOut,
         levelDistance: 50,
-        //enable panning
         Navigation: {
           enable:true//,
           //panning:true//, //requer ajuste no jit.js. VER: https://groups.google.com/forum/#!searchin/javascript-information-visualization-toolkit/mouse$20position|sort:date/javascript-information-visualization-toolkit/hGyn-Cvsn7g/K2fxD8XRD7kJ
           //zooming: 50 // requer ajuste no jit.js pois o node propriamente dito(a parte clic‡vel) n‹o cresce nem dimimui junto com o zoom. 
         },
         
-        //set node and edge styles
-        //set overridable=true for styling individual
-        //nodes or edges
         Node: {
             height: 20,
             width: 60,
             type: 'rectangle',
-            color: '#aaa',
-            overridable: true
+            overridable: false
         },
         
         Edge: {
-            type: 'bezier',
-            overridable: true
+            type: 'arrow',
+            color: '#A7B6FF',
+            overridable: false
         },
         
         onBeforeCompute: function(node){
@@ -792,30 +784,33 @@ function jitInit(){
         onCreateLabel: function(label, node){
             label.id = node.id;            
             label.innerHTML = node.name;
-            label.onclick = function(){
-            	  st.onClick(node.id);
-            };
+            label.onclick = function(){ st.onClick(node.id); };
             label.oncontextmenu = function(e){
             	window.getSelection().removeAllRanges();
             	
-        		$knowledgeContextMenu.hide();
+        		$knowledgeContextMenu.hide();// inicializado no index
         		$knowledgeContextMenu.css({
         		      display: "block",
         		      left:    e.clientX,
         		      top:     e.clientY
-        		    });// inicializado no index
+        		    });
         		return false;
             };
             
             //set label styles
-            var style = label.style;
-            style.width = 60 + 'px';
-            style.height = 17 + 'px';            
-            style.cursor = 'pointer';
-            style.color = '#333';
-            style.fontSize = '0.8em';
-            style.textAlign= 'center';
-            style.paddingTop = '3px';
+            var style         = label.style;
+            style.width       = 60 + 'px';
+            style.height      = 17 + 'px';
+            style.borderColor = '#99BBE8';
+            style.borderStyle = "solid";
+            style.borderWidth = "1px";
+            style.color       = '#15428B';
+            style.textAlign   = 'center';
+            style.fontWeight  = 'bold';
+            style.fontFamily  = 'tahoma,arial,verdana,sans-serif';
+            style.fontSize    = '11px';
+            style.overflow    = "hidden";
+            style.cursor      = 'pointer';
         },
         
         //This method is called right before plotting

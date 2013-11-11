@@ -46,21 +46,162 @@
             
 
 
-            <div id="log"></div>
+            <div id="log">
+            </div>
         </div>
         <!-- /jit -->
         
+        <!-- Modal -->
+        <div class="modal fade" id="addKnowledgeModal" tabindex="-1" role="dialog" aria-labelledby="addKnowledgeModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="addKnowledgeModalLabel">Add Knowledge</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form role="form">
+                            <div class="form-group">
+                                <label for="addKnowledgeNameInput">Name</label>
+                                <input type="text" class="form-control" id="addKnowledgeNameInput" placeholder="Enter new Knowledge name">
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary">Save changes</button>
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+        <!-- /.modal -->
         
+        <!-- Modal -->
+        <div class="modal fade" id="renameKnowledgeModal" tabindex="-1" role="dialog" aria-labelledby="renameKnowledgeModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="renameKnowledgeModalLabel">Rename Knowledge</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form role="form">
+                            <div class="form-group">
+                                <label for="renameKnowledgeNameInput">Name</label>
+                                <input type="text" class="form-control" id="renameKnowledgeNameInput"  placeholder="Enter new Knowledge name">
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary">Save changes</button>
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+        <!-- /.modal -->
+        
+        <!-- Modal -->
+        <div class="modal fade" id="deleteKnowledgeModal" tabindex="-1" role="dialog" aria-labelledby="deleteKnowledgeModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="deleteKnowledgeModalLabel">Delete Knowledge</h4>
+                    </div>
+                    <div class="modal-body">
+                    Confirm to delete?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary">Save changes</button>
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+        <!-- /.modal -->
+        
+        <!-- Modal -->
+        <div class="modal fade" id="moveKnowledgeModal" tabindex="-1" role="dialog" aria-labelledby="moveKnowledgeModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="moveKnowledgeModalLabel">Move Knowledge</h4>
+                    </div>
+                    <div class="modal-body">
+                    Select the knowledge to move for:
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary">Save changes</button>
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+        <!-- /.modal -->
+        
+        <!-- Modal -->
+        <div class="modal fade" id="copyKnowledgeModal" tabindex="-1" role="dialog" aria-labelledby="copyKnowledgeModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="copyKnowledgeModalLabel">Copy Knowledge</h4>
+                    </div>
+                    <div class="modal-body">
+                    Select the knowledge to copy for:
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary">Save changes</button>
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+        <!-- /.modal -->
+        
+        <!-- Modal -->
+        <div class="modal fade" id="topicModal" tabindex="-1" role="dialog" aria-labelledby="topicModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="topicModalLabel">Topics of knowledge X</h4>
+                    </div>
+                    <div class="modal-body">
+                    Topics 
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+        <!-- /.modal -->
+
         <div id="knowledgeContextMenu" class="dropdown clearfix">
             <ul class="dropdown-menu  pull-left" role="menu" aria-labelledby="dropdownMenu" style="display:block;position:static;margin-bottom:5px;">
-              <li><a tabindex="-1" href="#">Add Knowledge</a></li>
-              <li><a tabindex="-1" href="#">Rename</a></li>
-              <li><a tabindex="-1" href="#">Delete</a></li>
+              <li><a tabindex="-1" data-toggle="modal" href="#addKnowledgeModal">Add Knowledge</a></li>
+              <li><a tabindex="-1" data-toggle="modal" href="#renameKnowledgeModal">Rename</a></li>
+              <li><a tabindex="-1" data-toggle="modal" href="#deleteKnowledgeModal">Delete</a></li>
               <li class="divider"></li>
-              <li><a tabindex="-1" href="#">Move to</a></li>
-              <li><a tabindex="-1" href="#">Copy to</a></li>
+              <li><a tabindex="-1" data-toggle="modal" href="#moveKnowledgeModal">Move to</a></li>
+              <li><a tabindex="-1" data-toggle="modal" href="#copyKnowledgeModal">Copy to</a></li>
               <li class="divider"></li>
-              <li><a tabindex="-1" href="#">Topics</a></li>
+              <li><a tabindex="-1" data-toggle="modal" href="#topicModal">Topics</a></li>
             </ul>
         </div>
 
