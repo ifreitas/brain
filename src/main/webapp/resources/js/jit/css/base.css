@@ -3,7 +3,7 @@ html, body {
     padding:0;
     font-family: "Lucida Grande", Verdana;
     font-size: 0.9em;
-    text-align: center;
+    /* text-align: center; */
     background-color:#F2F2F2;
 }
 
@@ -74,7 +74,7 @@ a {
 #center-container {
     width:600px;
     left:200px;
-    background-color:#1a1a1a;
+    /*background-color:#1a1a1a;*/
     color:#ccc;
 }
 
@@ -99,10 +99,12 @@ a {
 
 #infovis {
     position:relative;
-    width:600px;
+    width:700px;
     height:600px;
     margin:auto;
     overflow:hidden;
+    border:1px solid;
+    border-radius:5px;
 }
 
 /*TOOLTIPS*/

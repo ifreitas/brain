@@ -4,7 +4,7 @@ var Log = {
     if (!this.elem) 
       this.elem = document.getElementById('log');
     this.elem.innerHTML = text;
-    this.elem.style.left = (500 - this.elem.offsetWidth / 2) + 'px';
+    this.elem.style.left = (600 - this.elem.offsetWidth / 2) + 'px';
   }
 };
 
@@ -13,7 +13,7 @@ function jitInit(){
     //init data
     var json = {
         id: "node02",
-        name: "0.2",
+        name: "Inteligencia Artificial",
         data: {},
         children: [{
             id: "node13",
@@ -747,27 +747,49 @@ function jitInit(){
     //init Spacetree
     //Create a new ST instance
     var st = new $jit.ST({
-   		injectInto: 'infovis', 
-        duration: 800,
+   		injectInto: 'infovis',
+   		background:false,
+   		orientation: 'top',
+   	    duration: 800,
         transition: $jit.Trans.Quart.easeInOut,
         levelDistance: 50,
+        
         Navigation: {
-          enable:true//,
-          //panning:true//, //requer ajuste no jit.js. VER: https://groups.google.com/forum/#!searchin/javascript-information-visualization-toolkit/mouse$20position|sort:date/javascript-information-visualization-toolkit/hGyn-Cvsn7g/K2fxD8XRD7kJ
-          //zooming: 50 // requer ajuste no jit.js pois o node propriamente dito(a parte clic‡vel) n‹o cresce nem dimimui junto com o zoom. 
+          enable:true,
+          //panning:true, // TODO requer ajuste no jit.js. VER: https://groups.google.com/forum/#!searchin/javascript-information-visualization-toolkit/mouse$20position|sort:date/javascript-information-visualization-toolkit/hGyn-Cvsn7g/K2fxD8XRD7kJ
+          zooming: 50     // TODO requer ajuste no jit.js pois o node propriamente dito(a parte clic‡vel) n‹o cresce nem dimimui junto com o zoom. 
         },
+        
+//        Tips: {
+//            enable: true,
+//            offsetX: 20,
+//            offsetY: 20,
+//            onShow: function(tip, node, isLeaf, domElement) {
+//              var html = "<div class=\"tip-title\">" + node.name 
+//                + "</div><div class=\"tip-text\">Topics</div><ul><li>Topic One</li><li>Topic Two</li><li>Topic Three</li></ul>";
+////              var data = node.data;
+////              if(data.playcount) {
+////                html += "play count: " + data.playcount;
+////              }
+////              if(data.image) {
+////                html += "<img src=\""+ data.image +"\" class=\"album\" />";
+////              }
+//              tip.innerHTML =  html; 
+//            }  
+//          },
+
         
         Node: {
             height: 20,
-            width: 60,
+            width: 80,
             type: 'rectangle',
-            overridable: false
+            overridable: true
         },
         
         Edge: {
             type: 'arrow',
             color: '#A7B6FF',
-            overridable: false
+            overridable: true
         },
         
         onBeforeCompute: function(node){
@@ -778,33 +800,21 @@ function jitInit(){
             Log.write("done");
         },
         
-        //This method is called on DOM label creation.
-        //Use this method to add event handlers and styles to
-        //your node.
         onCreateLabel: function(label, node){
             label.id = node.id;            
-            label.innerHTML = node.name;
-            label.onclick = function(){ st.onClick(node.id); };
+            label.innerHTML     = node.name;
+            label.onclick       = function(){ st.onClick(node.id); };
             label.oncontextmenu = function(e){
             	window.getSelection().removeAllRanges();
-            	
         		$knowledgeContextMenu.hide();// inicializado no index
-        		$knowledgeContextMenu.css({
-        		      display: "block",
-        		      left:    e.clientX,
-        		      top:     e.clientY
-        		    });
+        		$knowledgeContextMenu.css({ display: "block", left: e.clientX, top: e.clientY});
         		return false;
             };
             
-            //set label styles
             var style         = label.style;
-            style.width       = 60 + 'px';
-            style.height      = 17 + 'px';
-            style.borderColor = '#99BBE8';
-            style.borderStyle = "solid";
-            style.borderWidth = "1px";
-            style.color       = '#15428B';
+            style.width       = 80 + 'px';
+            style.height      = 20 + 'px';
+            style.color       = 'white';//'#15428B';
             style.textAlign   = 'center';
             style.fontWeight  = 'bold';
             style.fontFamily  = 'tahoma,arial,verdana,sans-serif';
@@ -822,7 +832,7 @@ function jitInit(){
             //add some color to the nodes in the path between the
             //root node and the selected node.
             if (node.selected) {
-                node.data.$color = "#ff7";
+                node.data.$color = '#23A4FF';//"#ff7";
             }
             else {
                 delete node.data.$color;
@@ -833,7 +843,7 @@ function jitInit(){
                     node.eachSubnode(function(n) { count++; });
                     //assign a node color based on
                     //how many children it has
-                    node.data.$color = ['#aaa', '#baa', '#caa', '#daa', '#eaa', '#faa'][count];                    
+                    node.data.$color = ['#6D89D5', '#476DD5', '#133CAC', '#2B4281', '#062270', '#090974'][count];                    
                 }
             }
         },
@@ -845,7 +855,7 @@ function jitInit(){
         //override the Edge global style properties.
         onBeforePlotLine: function(adj){
             if (adj.nodeFrom.selected && adj.nodeTo.selected) {
-                adj.data.$color = "#eed";
+                adj.data.$color = '#23A4FF';//"#eed";
                 adj.data.$lineWidth = 3;
             }
             else {
@@ -853,24 +863,6 @@ function jitInit(){
                 delete adj.data.$lineWidth;
             }
         },
-        
-        Events: {  
-            enable: true,
-            onRightClick: function(node, eventInfo, e){
-//            	if(node){
-//            		e.preventDefault();
-//            		$knowledgeContextMenu.hide();
-//            		$knowledgeContextMenu.css({
-//            		      display: "block",
-//            		      left: e.clientX,
-//            		      top: e.clientY
-//            		    });// inicializado no index
-//            		alert(3)
-//            		return false;
-//            	}
-            }
-        
-          },
     });
     //load json data
     st.loadJSON(json);

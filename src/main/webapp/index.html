@@ -9,10 +9,11 @@
 <body class="lift:content_id=main">
     <div id="main" class="lift:surround?with=default;at=content">
         <!-- jit -->
-        <div id="container" class="c">
+        <div id="container" >
             <div id="center-container">
                 <div id="infovis" ></div>
             </div>
+
 
             <div id="right-container">
 
@@ -21,28 +22,23 @@
                     <tr>
                         <td><label for="r-left">Left </label></td>
                         <td><input type="radio" id="r-left"
-                            name="orientation" checked="checked"
-                            value="left" /></td>
+                            name="orientation" value="left" /></td>
                     </tr>
                     <tr>
                         <td><label for="r-top">Top </label></td>
-                        <td><input type="radio" id="r-top"
-                            name="orientation" value="top" /></td>
+                        <td><input type="radio" id="r-top" checked="checked" name="orientation" value="top" /></td>
                     </tr>
                     <tr>
                         <td><label for="r-bottom">Bottom </label></td>
-                        <td><input type="radio" id="r-bottom"
-                            name="orientation" value="bottom" /></td>
+                        <td><input type="radio" id="r-bottom" name="orientation" value="bottom" /></td>
                     </tr>
                     <tr>
                         <td><label for="r-right">Right </label></td>
-                        <td><input type="radio" id="r-right"
-                            name="orientation" value="right" /></td>
+                        <td><input type="radio" id="r-right" name="orientation" value="right" /></td>
                     </tr>
                 </table>
 
             </div>
-
             
 
 
@@ -192,7 +188,7 @@
         </div>
         <!-- /.modal -->
 
-        <div id="knowledgeContextMenu" class="dropdown clearfix">
+        <div id="knowledgeContextMenu" class="dropdown">
             <ul class="dropdown-menu  pull-left" role="menu" aria-labelledby="dropdownMenu" style="display:block;position:static;margin-bottom:5px;">
               <li><a tabindex="-1" data-toggle="modal" href="#addKnowledgeModal">Add Knowledge</a></li>
               <li><a tabindex="-1" data-toggle="modal" href="#renameKnowledgeModal">Rename</a></li>
@@ -207,12 +203,8 @@
 
 <script type="text/javascript">
 var $knowledgeContextMenu = $("#knowledgeContextMenu");
-document.onclick = function(e) { 
-	$knowledgeContextMenu.hide(); 
-};
-document.oncontextmenu = function(e){
-	return false;
-};
+document.onclick       = function(e) { $knowledgeContextMenu.hide(); };
+document.oncontextmenu = function(e){ return false; };
 
 </script>
 
