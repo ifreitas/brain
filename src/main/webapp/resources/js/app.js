@@ -1,15 +1,19 @@
 var Log = {
   elem: false,
   write: function(text){
-    if (!this.elem) 
-      this.elem = document.getElementById('log');
-    this.elem.innerHTML = text;
-    this.elem.style.left = (600 - this.elem.offsetWidth / 2) + 'px';
+    if (!this.elem) this.elem = document.getElementById('log');
+    this.elem.innerHTML       = text;
+    this.elem.style.left      = (550 - this.elem.offsetWidth / 2) + 'px';
   }
 };
 
+const ObjectManager = {
+	lastClicked: null,
+	getLastClicked: function(){ return this.lastClicked; },
+	setLastClicked: function(lastClicked){ this.lastClicked = lastClicked; }
+}
 
-function jitInit(){
+//function jitInit(){
     //init data
     var json = {
         id: "node02",
@@ -743,9 +747,8 @@ function jitInit(){
         }]
     };
     //end
-    
-    //init Spacetree
-    //Create a new ST instance
+ 
+function jitInit(){
     var st = new $jit.ST({
    		injectInto: 'infovis',
    		background:false,
@@ -760,36 +763,46 @@ function jitInit(){
           zooming: 50     // TODO requer ajuste no jit.js pois o node propriamente dito(a parte clicável) não cresce nem dimimui junto com o zoom. 
         },
         
-//        Tips: {
-//            enable: true,
-//            offsetX: 20,
-//            offsetY: 20,
-//            onShow: function(tip, node, isLeaf, domElement) {
-//              var html = "<div class=\"tip-title\">" + node.name 
-//                + "</div><div class=\"tip-text\">Topics</div><ul><li>Topic One</li><li>Topic Two</li><li>Topic Three</li></ul>";
-////              var data = node.data;
-////              if(data.playcount) {
-////                html += "play count: " + data.playcount;
-////              }
-////              if(data.image) {
-////                html += "<img src=\""+ data.image +"\" class=\"album\" />";
-////              }
-//              tip.innerHTML =  html; 
-//            }  
-//          },
+        //Tips: {
+        //    enable: true,
+        //    offsetX: 20,
+        //    offsetY: 20,
+        //    onShow: function(tip, node, isLeaf, domElement) {
+        //      var html = "<div class=\"tip-title\">" + node.name 
+        //       + "</div><div class=\"tip-text\">Topics</div><ul><li>Topic One</li><li>Topic Two</li><li>Topic Three</li></ul>";
+        //        //var data = node.data;
+        //        //if(data.playcount) {
+        //        //  html += "play count: " + data.playcount;
+        //        //}
+        //        //if(data.image) {
+        //        //  html += "<img src=\""+ data.image +"\" class=\"album\" />";
+        //        //}
+        //      tip.innerHTML =  html; 
+        //    }  
+        //  },
 
         
         Node: {
             height: 20,
             width: 80,
             type: 'rectangle',
-            overridable: true
+            overridable: true,
+            CanvasStyles:{
+            	shadowColor: 'black',
+                shadowBlur: 10,
+                shadowOffsetY: 10
+            }
         },
         
         Edge: {
             type: 'arrow',
             color: '#A7B6FF',
-            overridable: true
+            overridable: true,
+            CanvasStyles:{
+            	shadowColor: 'black',
+                shadowBlur: 10,
+                shadowOffsetY: 10
+            }
         },
         
         onBeforeCompute: function(node){
@@ -803,9 +816,10 @@ function jitInit(){
         onCreateLabel: function(label, node){
             label.id = node.id;            
             label.innerHTML     = node.name;
-            label.onclick       = function(){ st.onClick(node.id); };
+            // TODO [bug] Funcionamento intermitente no FF.
             label.oncontextmenu = function(e){
             	window.getSelection().removeAllRanges();
+            	ObjectManager.setLastClicked(node);
         		$knowledgeContextMenu.hide();// inicializado no index
         		$knowledgeContextMenu.css({ display: "block", left: e.clientX, top: e.clientY});
         		return false;
@@ -814,7 +828,7 @@ function jitInit(){
             var style         = label.style;
             style.width       = 80 + 'px';
             style.height      = 20 + 'px';
-            style.color       = 'white';//'#15428B';
+            style.color       = 'white';
             style.textAlign   = 'center';
             style.fontWeight  = 'bold';
             style.fontFamily  = 'tahoma,arial,verdana,sans-serif';
@@ -822,40 +836,49 @@ function jitInit(){
             style.overflow    = "hidden";
             style.cursor      = 'pointer';
         },
+
         
-        //This method is called right before plotting
-        //a node. It's useful for changing an individual node
-        //style properties before plotting it.
-        //The data properties prefixed with a dollar
-        //sign will override the global node style properties.
+        Events: {  
+            enable: true,
+            
+            onClick: function(node, eventInfo, e){
+            	st.onClick(node.id);
+            }
+            
+        	// NOTE: Nunca funciona no FF, pois o evento 'click' é sempre invocado fazendo com que o menu apareça e suma imediatamente. 
+            //onRightClick: function(node, eventInfo, e) {  
+            //	ObjectManager.setLastClicked(node);
+            //	window.getSelection().removeAllRanges();
+        	//	$knowledgeContextMenu.hide();// inicializado no index
+        	//	$knowledgeContextMenu.css({ display: "block", left: e.clientX, top: e.clientY});
+        	//  alert(1)
+        	//	return false;
+            //},
+            
+        },
+        
+           
         onBeforePlotNode: function(node){
             //add some color to the nodes in the path between the
             //root node and the selected node.
             if (node.selected) {
-                node.data.$color = '#23A4FF';//"#ff7";
+                node.data.$color = '#23A4FF';
             }
             else {
                 delete node.data.$color;
                 //if the node belongs to the last plotted level
                 if(!node.anySubnode("exist")) {
-                    //count children number
                     var count = 0;
                     node.eachSubnode(function(n) { count++; });
-                    //assign a node color based on
-                    //how many children it has
+                    //assign a node color based on how many children it has
                     node.data.$color = ['#6D89D5', '#476DD5', '#133CAC', '#2B4281', '#062270', '#090974'][count];                    
                 }
             }
         },
         
-        //This method is called right before plotting
-        //an edge. It's useful for changing an individual edge
-        //style properties before plotting it.
-        //Edge data proprties prefixed with a dollar sign will
-        //override the Edge global style properties.
         onBeforePlotLine: function(adj){
             if (adj.nodeFrom.selected && adj.nodeTo.selected) {
-                adj.data.$color = '#23A4FF';//"#eed";
+                adj.data.$color = '#23A4FF';
                 adj.data.$lineWidth = 3;
             }
             else {
@@ -864,21 +887,17 @@ function jitInit(){
             }
         },
     });
-    //load json data
     st.loadJSON(json);
-    //compute node positions and layout
     st.compute();
     //optional: make a translation of the tree
     st.geom.translate(new $jit.Complex(-200, 0), "current");
-    //emulate a click on the root node.
     st.onClick(st.root);
-    //end
     
     //Add event handlers to switch spacetree orientation.
-    var top = $jit.id('r-top'), 
-        left = $jit.id('r-left'), 
+    var top    = $jit.id('r-top'), 
+        left   = $jit.id('r-left'), 
         bottom = $jit.id('r-bottom'), 
-        right = $jit.id('r-right');
+        right  = $jit.id('r-right');
         
     
     function changeHandler() {
@@ -896,3 +915,4 @@ function jitInit(){
     //end
 
 }
+
