@@ -22,7 +22,7 @@ seq(webSettings :_*)
 scalacOptions ++= Seq("-deprecation", "-unchecked")
 
 libraryDependencies ++= {
-  val liftVersion = "2.5.1"
+  val liftVersion = "2.6-M2"
   Seq(
     "net.liftweb"              %% "lift-webkit"                % liftVersion           % "compile" withSources(),
     "net.liftweb"              %% "lift-mapper"                % liftVersion           % "compile" withSources(),

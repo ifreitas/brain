@@ -14,6 +14,7 @@ import net.liftweb.util.Vendor.valToVender
 import brain.config.Config
 import net.liftweb.util.Props
 import net.liftweb.http.js.extcore.ExtCoreArtifacts
+import net.liftweb.common.Full
 
 // Inspirado em: http://stackoverflow.com/questions/8305586/where-should-my-sessionvar-object-be
 object appSession extends SessionVar[Map[String, Any]](Map()){
@@ -26,7 +27,7 @@ class Boot {
     def boot = {
 
         // Where find snippet and comet
-        LiftRules.addToPackages("bora")
+        LiftRules.addToPackages("brain")
 
         // Full support to Html5
         LiftRules.htmlProperties.default.set((r: Req) => new Html5Properties(r.userAgent))
@@ -41,7 +42,13 @@ class Boot {
         FoBo.InitParam.ToolKit = FoBo.FontAwesome300
         FoBo.init
         
-        // Bora Config Object
+        //Show the spinny image when an Ajax call starts
+        LiftRules.ajaxStart = Full(() => LiftRules.jsArtifacts.show("ajax-loader").cmd)
+
+        // Make the spinny image go away when it ends
+        LiftRules.ajaxEnd = Full(() => LiftRules.jsArtifacts.hide("ajax-loader").cmd)
+        
+        // Brain Config Object
         Config.load
     }
 

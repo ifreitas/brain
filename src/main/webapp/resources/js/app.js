@@ -748,8 +748,9 @@ const ObjectManager = {
     };
     //end
  
+var st = null
 function jitInit(){
-    var st = new $jit.ST({
+    st = new $jit.ST({
    		injectInto: 'infovis',
    		background:false,
    		orientation: 'top',
@@ -842,7 +843,7 @@ function jitInit(){
             enable: true,
             
             onClick: function(node, eventInfo, e){
-            	st.onClick(node.id);
+            	if(node)st.onClick(node.id);
             }
             
         	// NOTE: Nunca funciona no FF, pois o evento 'click' é sempre invocado fazendo com que o menu apareça e suma imediatamente. 
@@ -859,6 +860,7 @@ function jitInit(){
         
            
         onBeforePlotNode: function(node){
+        	//document.onclick= function(){alert(1);return false}
             //add some color to the nodes in the path between the
             //root node and the selected node.
             if (node.selected) {
