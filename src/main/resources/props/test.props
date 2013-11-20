@@ -1,4 +1,6 @@
 # GraphDB
-graphdb.uri=plocal:localhost/brain_test
+graphdb.dir=/tmp/brain/db/
+graphdb.name=test
+graphdb.type=plocal
 graphdb.user=root
-graphdb.password=54573D2F1FABD12711585451F952E0750B953AD9EA98968F1EAF138215D743B7
+graphdb.password=E51D00BCF535C154518F4F669974B1763971EC185A6EC74C56799FCAD5831DD6sdsdsd

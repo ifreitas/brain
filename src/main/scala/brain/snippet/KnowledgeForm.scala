@@ -9,24 +9,51 @@ import JsCmds._
 import JE._
 import S._
 import SHtml._
+import brain.db.GraphDb
+import com.tinkerpop.blueprints.Vertex
+import com.tinkerpop.blueprints.Graph
+import net.liftweb.http.js.jquery.JqJsCmds.ModalDialog
 
 object KnowledgeForm {
 
     def render = {
+        
         val nameFieldId = "addKnowledgeNameInput"
-        var name = "";
+        var name = ""
+        var id = 0
 
-        def process(): JsCmd = {
-            // try to save the name, so...
-            if (name.isEmpty){error("status", "Please fill the name field.");Noop}
+        def save(): JsCmd = {
+            if (name.trim().isEmpty){
+                error("addKnowledgeModalStatus", "Please fill the name field.");Noop
+            }
             else{
-            	SetValById(nameFieldId, "")
-            	new Run("$('#addKnowledgeModal').modal('hide');Log.write(\"Knowledege named '" + name + "' added succefully.\");")
+                doSave(name) match{
+                    case Some(knowledge) => return new Run("afterAddNewKnowledge({id:'" + knowledge.getId + "', name:'"+name+"', data:{}, children:[]})")
+                    case _ => error("addKnowledgeModalStatus", "Invalid knowledge name.");Noop
+                }
             }
         }
+        
+        def doSave(name:String) : Option[Vertex] = {
+   			var db:Graph = null
+        	var knowledge:Vertex =  null
+        	try{
+        	    db = GraphDb.get
+        	    knowledge = db.addVertex("class:Knowledge")
+        	    knowledge.setProperty("name", name)
+        	    db
+        	}
+   			catch {
+			  case t: Throwable=> return None
+			}
+        	finally {
+        		if(db != null) db.shutdown
+        	}
+        	Some(knowledge)
+        }
+        
 
         ("#"+nameFieldId) #> text(name, name = _) &
-        "type=submit" #> ajaxOnSubmit(process)
-//        "type=submit" #> ajaxSubmit("Enviar",()=>process)
+        "type=submit" #> ajaxOnSubmit(save)
     }
 }

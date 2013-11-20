@@ -27,41 +27,37 @@
             <div id="log"></div>
         </div>
         <!-- /jit -->
-        
+
         <!-- Modal -->
-        <div id="addKnowledgeModal" class="modal modal-admin fade" tabindex="-1" role="dialog" aria-labelledby="addKnowledgeModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <form class="lift:form.ajax" role="form">
-                        <div data-lift="knowledgeForm">
+        <form class="lift:form.ajax">
+            <div data-lift="knowledgeForm">
+                <div class="modal fade" style="display: none;" id="addKnowledgeModal" tabindex="-1" role="dialog" aria-labelledby="addKnowledgeModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
                             <div class="modal-header">
-                                <button type="button" class="close" data-dismiss="modal-admin" aria-hidden="true">&times;</button>
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                                 <h4 class="modal-title" id="addKnowledgeModalLabel">Add Knowledge</h4>
                             </div>
                             <div class="modal-body">
-                                    <div class="form-group">
-                                        <label for="addKnowledgeNameInput" class="col-sm-2 control-label">Name</label>
-                                        <input id="addKnowledgeNameInput" type="text" name="name" class="form-control" placeholder="Enter new Knowledge name" />
-                                    </div>
-                            <span id="status" style="color: red"></span>
+                                <div class="form-group">
+                                    <label for="addKnowledgeNameInput">Name</label>
+                                    <input type="text" class="form-control" id="addKnowledgeNameInput" placeholder="Enter new Knowledge name">
+                                </div>
+                                <span id="addKnowledgeModalStatus" style="color: red"></span>
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                                <input type="submit" class="btn btn-primary" value="Submit">
+                                <button type="submit" class="btn btn-primary">Save changes</button>
                             </div>
-                        </div>
-                    </form>
-                </div>
-                
-                
-                <!-- /.modal-content -->
-            </div>
-            <!-- /.modal-dialog -->
-        </div>
-        <!-- /.modal -->
+                        </div><!-- /.modal-content -->
+                    </div><!-- /.modal-dialog -->
+                </div><!-- /.modal -->
+            </div><!-- /.snippet -->
+        </form>
         
+
         <!-- Modal -->
-        <div class="modal fade" id="renameKnowledgeModal" tabindex="-1" role="dialog" aria-labelledby="renameKnowledgeModalLabel" aria-hidden="true">
+        <div class="modal fade" style="display: none;" id="renameKnowledgeModal" tabindex="-1" role="dialog" aria-labelledby="renameKnowledgeModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -74,6 +70,7 @@
                                 <label for="renameKnowledgeNameInput">Name</label>
                                 <input type="text" class="form-control" id="renameKnowledgeNameInput"  placeholder="Enter new Knowledge name">
                             </div>
+                            <span id="renameKnowledgeModalStatus" style="color: red"></span>
                         </form>
                     </div>
                     <div class="modal-footer">
@@ -88,7 +85,7 @@
         <!-- /.modal -->
         
         <!-- Modal -->
-        <div class="modal fade" id="deleteKnowledgeModal" tabindex="-1" role="dialog" aria-labelledby="deleteKnowledgeModalLabel" aria-hidden="true">
+        <div class="modal fade" style="display: none;" id="deleteKnowledgeModal" tabindex="-1" role="dialog" aria-labelledby="deleteKnowledgeModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -97,6 +94,7 @@
                     </div>
                     <div class="modal-body">
                     Confirm to delete?
+                    <span id="deleteKnowledgeModalStatus" style="color: red"></span>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -110,7 +108,7 @@
         <!-- /.modal -->
         
         <!-- Modal -->
-        <div class="modal fade" id="moveKnowledgeModal" tabindex="-1" role="dialog" aria-labelledby="moveKnowledgeModalLabel" aria-hidden="true">
+        <div class="modal fade" style="display: none;" id="moveKnowledgeModal" tabindex="-1" role="dialog" aria-labelledby="moveKnowledgeModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -119,6 +117,7 @@
                     </div>
                     <div class="modal-body">
                     Select the knowledge to move for:
+                    <span id="moveKnowledgeModalStatus" style="color: red"></span>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -132,7 +131,7 @@
         <!-- /.modal -->
         
         <!-- Modal -->
-        <div class="modal fade" id="copyKnowledgeModal" tabindex="-1" role="dialog" aria-labelledby="copyKnowledgeModalLabel" aria-hidden="true">
+        <div class="modal fade" style="display: none;" id="copyKnowledgeModal" tabindex="-1" role="dialog" aria-labelledby="copyKnowledgeModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -141,6 +140,7 @@
                     </div>
                     <div class="modal-body">
                     Select the knowledge to copy for:
+                    <span id="copyKnowledgeModalStatus" style="color: red"></span>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -154,7 +154,7 @@
         <!-- /.modal -->
         
         <!-- Modal -->
-        <div class="modal fade" id="topicModal" tabindex="-1" role="dialog" aria-labelledby="topicModalLabel" aria-hidden="true">
+        <div class="modal fade" style="display: none;" id="topicModal" tabindex="-1" role="dialog" aria-labelledby="topicModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -163,6 +163,7 @@
                     </div>
                     <div class="modal-body">
                     Topics 
+                    <span id="topicModalStatus" style="color: red"></span>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -173,28 +174,6 @@
             <!-- /.modal-dialog -->
         </div>
         <!-- /.modal -->
-        
-
-        <div data-lift="modal?id=minhaModal&title=Modal gerada pelo Snippet 2!">
-          <div data-lift="modalBody">
-          :|
-          </div>
-          <div data-lift="modalFooter">
-          :\
-          </div>
-        </div>
-
-<!--         <div class="lift:BSModal?id=addKnowledgeModal&title=Add Knowledge">
-            <div class="lift:BSModalBody">
-                <form class="form-horizontal" role="form">
-                    <div class="form-group">
-                        <label for="addKnowledgeNameInput" class="col-sm-2 control-label">Name</label>
-                        <input type="text" class="form-control" id="addKnowledgeNameInput" placeholder="Enter new Knowledge name">
-                    </div>
-                </form>
-            </div>
-            <div class="lift:BSModalFooter"></div>
-        </div> -->
 
 
         <div id="knowledgeContextMenu" class="dropdown">
@@ -211,11 +190,84 @@
         </div>
 
     <script type="text/javascript">
+        preparaModal( "#addKnowledgeModal"    );
+        preparaModal( "#renameKnowledgeModal" );
+        preparaModal( "#deleteKnowledgeModal" );
+        preparaModal( "#moveKnowledgeModal"   );
+        preparaModal( "#copyKnowledgeModal"   );
+        preparaModal( "#topicModal"           );
+        
         var $knowledgeContextMenu = $("#knowledgeContextMenu");
         document.onclick       = function(e) { $knowledgeContextMenu.hide(); };
-        document.oncontextmenu = function(e){ return false; };
-        jitInit()
-    </script>
+        document.oncontextmenu = function(e) { return false; };
+        jitInit();
+  
+        function preparaModal(modalId){
+        	$(modalId).
+            on('shown.bs.modal', function() { $(modalId).find('input:text:visible:first', this).focus();} ).
+            on('hide.bs.modal',  function() { resetModal(modalId);} )
+        }
+					  
+				function resetModal(modalId) {
+					input = $(modalId).find('input')
+					if(input.length>0)input[0].form.reset();
+					$(modalId + "Status").html('');
+				}
+
+				function afterAddNewKnowledge(newKnowledge) {
+					$('#addKnowledgeModal').modal('hide');
+
+					Log.write("Knowledege named '" + newKnowledge.name + "' added succefully.");
+					lastClikedNode = ObjectManager.lastClicked;
+					st.addSubtree(
+							{
+								  id : lastClikedNode.id,
+								  children : [ newKnowledge ]
+							}, 
+							'animate', 
+							{
+								  hideLabels : false,
+								  duration : 800,
+								  onComplete : function() {
+									  if (st.clickedNode.id != lastClikedNode.id) {
+										  st.onClick(lastClikedNode.id);
+										}
+									  Log.write('Done');
+									}
+							}
+					  )
+					}
+
+					function deleteSelectedNode() {
+						var lastClickedNode = ObjectManager.lastClicked;
+						var nodeParent = null;
+
+						if (lastClickedNode) {
+							if (lastClickedNode.getParents().length == 0) {
+								Log
+										.write("Não é possível excluir o conhecimento raíz da árvore.");
+								return false;
+							}
+							nodeParent = lastClickedNode.getParents()[0];
+							ObjectManager.setLastClicked(nodeParent);
+							st.onClick(nodeParent.id);
+						}
+
+						st
+								.removeSubtree(
+										lastClickedNode.id,
+										true,
+										'animate',
+										{
+											duration : 500,
+											hideLabels : false,
+											onComplete : function() {
+												Log
+														.write("Conhecimento removido com sucesso.");
+											}
+										})
+					}
+				</script>
 
     </div>
     <!-- /main -->

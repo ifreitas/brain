@@ -36,9 +36,9 @@ libraryDependencies ++= {
     "org.scalatest"            % "scalatest_2.10"              % "2.0.M8"              % "test",
     "org.mockito"              % "mockito-all"                 % "1.9.5"               % "test",
     "org.seleniumhq.selenium"  % "selenium-java"               % "2.35.0"              % "test",
-    "com.orientechnologies"    % "orient-commons"              % "1.6.0-SNAPSHOT",
-    "com.orientechnologies"    % "orientdb-core"               % "1.6.0-SNAPSHOT",
-    "com.orientechnologies"    % "orientdb-client"             % "1.6.0-SNAPSHOT",
+    "com.orientechnologies"    % "orient-commons"              % "1.6",
+    "com.orientechnologies"    % "orientdb-core"               % "1.6",
+    "com.orientechnologies"    % "orientdb-client"             % "1.6",
     "com.tinkerpop.blueprints" % "blueprints-orient-graph"     % "2.5.0-SNAPSHOT" withSources(),
     "com.ansvia.graph"         %% "blueprints-scala"           % "0.1.0"         withSources() 
   )
