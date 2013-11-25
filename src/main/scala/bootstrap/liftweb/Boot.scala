@@ -1,9 +1,15 @@
 package bootstrap.liftweb
 
 import java.util.Locale
+
+import scala.collection.JavaConverters.mapAsJavaMapConverter
+
 import com.orientechnologies.orient.client.remote.OServerAdmin
-import com.tinkerpop.blueprints.impls.orient.OrientGraph
+import com.orientechnologies.orient.core.metadata.schema.OType
+import com.tinkerpop.blueprints.impls.orient.OrientGraphNoTx
+
 import brain.config.Config
+import brain.db.GraphDb
 import net.liftmodules.FoBo
 import net.liftweb.common.Box
 import net.liftweb.common.Full
@@ -13,7 +19,7 @@ import net.liftweb.http.LiftRulesMocker.toLiftRules
 import net.liftweb.http.Req
 import net.liftweb.http.SessionVar
 import net.liftweb.http.provider.HTTPRequest
-import com.orientechnologies.orient.core.metadata.schema.OType
+import net.liftweb.util.Vendor.valToVendor
 
 // Inspirado em: http://stackoverflow.com/questions/8305586/where-should-my-sessionvar-object-be
 object appSession extends SessionVar[Map[String, Any]](Map()) {
@@ -52,31 +58,62 @@ class Boot {
         Config.load
 
         createDbUnlessAlreadyExists
+        
     }
 
     def createDbUnlessAlreadyExists = {
-        var db:OrientGraph = null
         val orientServerAdmin = new OServerAdmin("remote:localhost")
         orientServerAdmin.connect(Config.getGraphDbUser, Config.getGraphDbPassword)
         try {
             if(!orientServerAdmin.listDatabases().keySet().contains(Config.getGraphDbName)){
             	orientServerAdmin.createDatabase(Config.getGraphDbName, "graph", "plocal")
-                db = brain.db.GraphDb.get.asInstanceOf[OrientGraph]
-            	createSchema(db)
+            	createSchema
+                createRootVertexAndConf
             }
         }
         catch{
-            case t :Throwable=> println("Db already exists.")
+            case t :Throwable=> {
+                orientServerAdmin.dropDatabase("plocal")
+                throw new Exception("Was not possible to create the database. Cause: " + t.getCause())
+            }
         }
         finally {
             if(orientServerAdmin.isConnected()) orientServerAdmin.close(false)
-            if(db != null && !db.isClosed()) db.shutdown()
         }
     }
     
-    def createSchema(db:OrientGraph){
-        val knowledgeVertex = db.createVertexType("Knowledge")
-        knowledgeVertex.createProperty("name", OType.STRING).setMandatory(true).setMin("2").setMax("40")
+    def createRootVertexAndConf{
+        val db = GraphDb.get
+        try{
+        	val root = db.addVertex("class:Knowledge", Map[String, Object]("name"->"Root").asJava)
+        	db.commit
+        	db.addVertex("class:Conf", Map[String, Object]("rootId"->root.getId().toString()).asJava)
+   			db.commit
+        }
+        catch {
+		  case t : Throwable => db.rollback; throw new Exception("Was not possible to create the root node. Cause: " + t.getCause())
+		}
+        finally {
+        	if(db != null && !db.isClosed()) db.shutdown()
+        }
+    }
+    
+    def createSchema(){
+        val db:OrientGraphNoTx = GraphDb.getNoTx
+        try {
+        	db.createEdgeType("Include")
+        	db.createVertexType("Conf")
+        	db.createVertexType("Knowledge").createProperty("name", OType.STRING).setMandatory(true).setMin("2").setMax("40")
+        }
+        catch {
+		  case t : Throwable => {
+		       db.drop
+		       throw new Exception("Was not possible to create the databse schema. Cause: " + t.getCause())
+		  }
+		}
+        finally {
+        	if(db != null && !db.isClosed()) db.shutdown()
+        }
     }
 
     def localeCalculator(request: Box[HTTPRequest]): Locale = {
