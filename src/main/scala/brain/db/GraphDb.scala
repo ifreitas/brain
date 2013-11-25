@@ -1,18 +1,12 @@
 package brain.db
 
-import com.tinkerpop.blueprints.Graph
 import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal
-import com.tinkerpop.blueprints.impls.orient.OrientGraph
-import com.orientechnologies.orient.core.db.document.ODatabaseDocumentPool
-import com.orientechnologies.orient.core.db.record.ODatabaseRecordTx
-import com.orientechnologies.orient.core.db.graph.OGraphDatabasePool
-import com.orientechnologies.orient.core.db.graph.OGraphDatabase
-import com.orientechnologies.orient.core.db.document.ODatabaseDocument
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx
-import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTxPooled
+import com.orientechnologies.orient.core.db.graph.OGraphDatabasePool
+import com.orientechnologies.orient.core.db.record.ODatabaseRecordTx
+import com.tinkerpop.blueprints.impls.orient.OrientGraph
 import brain.config.Config
-import com.tinkerpop.blueprints.TransactionalGraph
-import java.io.File
+import com.tinkerpop.blueprints.impls.orient.OrientGraphNoTx
 
 object GraphDb {
     //
@@ -24,7 +18,7 @@ object GraphDb {
     //	ta  sendo  construido  a  partir  do  Ograph-
     //	Database. (Ver: https://groups.google.com/forum/#!topic/orient-database/ozzG-ELEtkQ)
     //    
-    def get: Graph = {
+    def get: OrientGraph = {
         if (ODatabaseRecordThreadLocal.INSTANCE.isDefined())
             // minha original
             //new OrientGraph(new OGraphDatabase(ODatabaseRecordThreadLocal.INSTANCE.get.asInstanceOf[ODatabaseRecordTx]))
@@ -36,5 +30,12 @@ object GraphDb {
             new OrientGraph(OGraphDatabasePool.global().acquire(Config.getGraphDbUri, Config.getGraphDbUser, Config.getGraphDbPassword))
         }
     }
+	def getNoTx: OrientGraphNoTx = {
+	    		if (ODatabaseRecordThreadLocal.INSTANCE.isDefined())
+	    			new OrientGraphNoTx(new ODatabaseDocumentTx(ODatabaseRecordThreadLocal.INSTANCE.get.asInstanceOf[ODatabaseRecordTx]))
+	    		else {
+	    			new OrientGraphNoTx(OGraphDatabasePool.global().acquire(Config.getGraphDbUri, Config.getGraphDbUser, Config.getGraphDbPassword))
+	    		}
+	    }
 
 }
