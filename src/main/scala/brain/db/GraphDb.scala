@@ -19,7 +19,8 @@ object GraphDb {
     //	Database. (Ver: https://groups.google.com/forum/#!topic/orient-database/ozzG-ELEtkQ)
     //    
     def get: OrientGraph = {
-        if (ODatabaseRecordThreadLocal.INSTANCE.isDefined())
+        var instance = ODatabaseRecordThreadLocal.INSTANCE.getIfDefined()
+        if (instance != null && !instance.isClosed())
             // minha original
             //new OrientGraph(new OGraphDatabase(ODatabaseRecordThreadLocal.INSTANCE.get.asInstanceOf[ODatabaseRecordTx]))
 
@@ -31,11 +32,11 @@ object GraphDb {
         }
     }
 	def getNoTx: OrientGraphNoTx = {
-	    		if (ODatabaseRecordThreadLocal.INSTANCE.isDefined())
-	    			new OrientGraphNoTx(new ODatabaseDocumentTx(ODatabaseRecordThreadLocal.INSTANCE.get.asInstanceOf[ODatabaseRecordTx]))
-	    		else {
-	    			new OrientGraphNoTx(OGraphDatabasePool.global().acquire(Config.getGraphDbUri, Config.getGraphDbUser, Config.getGraphDbPassword))
-	    		}
-	    }
+		if (ODatabaseRecordThreadLocal.INSTANCE.isDefined())
+			new OrientGraphNoTx(new ODatabaseDocumentTx(ODatabaseRecordThreadLocal.INSTANCE.get.asInstanceOf[ODatabaseRecordTx]))
+		else {
+			new OrientGraphNoTx(OGraphDatabasePool.global().acquire(Config.getGraphDbUri, Config.getGraphDbUser, Config.getGraphDbPassword))
+		}
+    }
 
 }

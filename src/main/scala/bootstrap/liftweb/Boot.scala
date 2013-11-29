@@ -86,8 +86,8 @@ class Boot {
         val db = GraphDb.get
         try{
         	val root = db.addVertex("class:Knowledge", Map[String, Object]("name"->"Root").asJava)
-        	db.commit
-        	db.addVertex("class:Conf", Map[String, Object]("rootId"->root.getId().toString()).asJava)
+        	db.commit // https://github.com/orientechnologies/orientdb/wiki/Transactions#optimistic-transaction
+        	db.addVertex("class:Conf", Map[String, Object]("rootId"->root.getId().toString(), "defaultDepthTraverse"->new Integer(3)).asJava)
    			db.commit
         }
         catch {

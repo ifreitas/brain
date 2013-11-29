@@ -1,9 +1,14 @@
 var Log = {
   elem: false,
-  write: function(text){
-    if (!this.elem) this.elem = document.getElementById('log');
-    this.elem.innerHTML       = text;
-    this.elem.style.left      = (550 - this.elem.offsetWidth / 2) + 'px';
+  info: function(text){
+	  if (!this.elem) this.elem = document.getElementById('log');
+	  this.elem.innerHTML       = text;
+	  this.elem.style.left      = (550 - this.elem.offsetWidth / 2) + 'px';
+  },
+  error: function(text){
+	  if (!this.elem) this.elem = document.getElementById('log');
+	  this.elem.innerHTML       = text;
+	  this.elem.style.left      = (550 - this.elem.offsetWidth / 2) + 'px';  
   }
 };
 
@@ -15,11 +20,11 @@ const ObjectManager = {
 
 //function jitInit(){
     //init data
-    var json = {
-        id: "node02",
-        name: "Inteligencia Artificial",
-        data: {},
-        children:[]
+//    var json = {
+//        id: "node02",
+//        name: "Inteligencia Artificial",
+//        data: {},
+//        children:[]
 //        children: [{
 //            id: "node13",
 //            name: "1.3",
@@ -746,43 +751,43 @@ const ObjectManager = {
 //                }]
 //            }]
 //        }]
-    };
+//    };
     //end
  
 var st = null
-function jitInit(){
+function initTree(json){
     st = new $jit.ST({
    		injectInto: 'infovis',
    		background:false,
    		orientation: 'top',
    	    duration: 800,
         transition: $jit.Trans.Quart.easeInOut,
-        //levelsToShow: 5,
+        levelsToShow: 5,
         levelDistance: 50,
         
         Navigation: {
           enable:true,
           //panning:true//, // TODO requer ajuste no jit.js. VER: https://groups.google.com/forum/#!searchin/javascript-information-visualization-toolkit/mouse$20position|sort:date/javascript-information-visualization-toolkit/hGyn-Cvsn7g/K2fxD8XRD7kJ
-          zooming: 50     // TODO requer ajuste no jit.js pois o node propriamente dito(a parte clicável) não cresce nem dimimui junto com o zoom. 
+          zooming: 50     // TODO requer ajuste no jit.js pois o node propriamente dito(a parte clicÔøΩvel) nÔøΩo cresce nem dimimui junto com o zoom. 
         },
         
-        //Tips: {
-        //    enable: true,
-        //    offsetX: 20,
-        //    offsetY: 20,
-        //    onShow: function(tip, node, isLeaf, domElement) {
-        //      var html = "<div class=\"tip-title\">" + node.name 
-        //       + "</div><div class=\"tip-text\">Topics</div><ul><li>Topic One</li><li>Topic Two</li><li>Topic Three</li></ul>";
-        //        //var data = node.data;
-        //        //if(data.playcount) {
-        //        //  html += "play count: " + data.playcount;
-        //        //}
-        //        //if(data.image) {
-        //        //  html += "<img src=\""+ data.image +"\" class=\"album\" />";
-        //        //}
-        //      tip.innerHTML =  html; 
-        //    }  
-        //  },
+        Tips: {
+            enable: true,
+            offsetX: 20,
+            offsetY: 20,
+            onShow: function(tip, node, isLeaf, domElement) {
+              var html = "<div class=\"tip-title\">" + node.name 
+               + "</div><div class=\"tip-text\">Topics</div><ul><li>Topic One</li><li>Topic Two</li><li>Topic Three</li></ul>";
+                //var data = node.data;
+                //if(data.playcount) {
+                //  html += "play count: " + data.playcount;
+                //}
+                //if(data.image) {
+                //  html += "<img src=\""+ data.image +"\" class=\"album\" />";
+                //}
+              tip.innerHTML =  html; 
+            }  
+          },
 
         
         Node: {
@@ -809,12 +814,12 @@ function jitInit(){
         },
         
         onBeforeCompute: function(node){
-        	if(node) Log.write("loading " + node.name);
-        	else Log.write("---");
+        	if(node) Log.info("loading " + node.name);
+        	else Log.info("---");
         },
         
         onAfterCompute: function(){
-            Log.write("done");
+            Log.info("done");
         },
         
         onCreateLabel: function(label, node){
@@ -849,12 +854,11 @@ function jitInit(){
             onClick: function(node, eventInfo, e){
             	if(node){
             		ObjectManager.setLastClicked(node);
-            		alert(1)
             		st.onClick(node.id);
             	}
             }
             
-        	// NOTE: Nunca funciona no FF, pois o evento 'click' é sempre invocado fazendo com que o menu apareça e suma imediatamente. 
+        	// NOTE: Nunca funciona no FF, pois o evento 'click' ÔøΩ sempre invocado fazendo com que o menu apareÔøΩa e suma imediatamente. 
             //onRightClick: function(node, eventInfo, e) {  
             //	ObjectManager.setLastClicked(node);
             //	window.getSelection().removeAllRanges();
@@ -897,31 +901,37 @@ function jitInit(){
             }
         },
     });
-    st.loadJSON(json);
-    st.compute();
-    //optional: make a translation of the tree
-    st.geom.translate(new $jit.Complex(-200, 0), "current");
-    st.onClick(st.root);
+    
+    try{
+    	if(json.id == null) throw "Invalid server data."
+    	st.loadJSON(json);
+    	st.compute();
+    	st.geom.translate(new $jit.Complex(0, -300), "current");//optional: make a translation of the tree
+    	st.onClick(st.root);
+    }
+    catch(e){
+    	alert("Was not possible to load the tree. " + e)
+    }
     
     //Add event handlers to switch spacetree orientation.
-    var top    = $jit.id('r-top'), 
-        left   = $jit.id('r-left'), 
-        bottom = $jit.id('r-bottom'), 
-        right  = $jit.id('r-right');
-        
-    
-    function changeHandler() {
-        if(this.checked) {
-            top.disabled = bottom.disabled = right.disabled = left.disabled = true;
-            st.switchPosition(this.value, "animate", {
-                onComplete: function(){
-                    top.disabled = bottom.disabled = right.disabled = left.disabled = false;
-                }
-            });
-        }
-    };
-    
-    top.onchange = left.onchange = bottom.onchange = right.onchange = changeHandler;
+//    var top    = $jit.id('r-top'), 
+//        left   = $jit.id('r-left'), 
+//        bottom = $jit.id('r-bottom'), 
+//        right  = $jit.id('r-right');
+//        
+//    
+//    function changeHandler() {
+//        if(this.checked) {
+//            top.disabled = bottom.disabled = right.disabled = left.disabled = true;
+//            st.switchPosition(this.value, "animate", {
+//                onComplete: function(){
+//                    top.disabled = bottom.disabled = right.disabled = left.disabled = false;
+//                }
+//            });
+//        }
+//    };
+//    
+//    top.onchange = left.onchange = bottom.onchange = right.onchange = changeHandler;
     //end
 
 }
