@@ -776,8 +776,8 @@ function initTree(json){
             offsetX: 20,
             offsetY: 20,
             onShow: function(tip, node, isLeaf, domElement) {
-              var html = "<div class=\"tip-title\">" + node.name 
-               + "</div><div class=\"tip-text\">Topics</div><ul><li>Topic One</li><li>Topic Two</li><li>Topic Three</li></ul>";
+              var html = "<div class=\"tip-title\"><b>" + node.name 
+               + "</b></div><div class=\"tip-text\">Topics</div><ul><li>Topic One</li><li>Topic Two</li><li>Topic Three</li></ul>";
                 //var data = node.data;
                 //if(data.playcount) {
                 //  html += "play count: " + data.playcount;
@@ -815,7 +815,6 @@ function initTree(json){
         
         onBeforeCompute: function(node){
         	if(node) Log.info("loading " + node.name);
-        	else Log.info("---");
         },
         
         onAfterCompute: function(){
@@ -899,7 +898,7 @@ function initTree(json){
                 delete adj.data.$color;
                 delete adj.data.$lineWidth;
             }
-        },
+        }
     });
     
     try{

@@ -9,42 +9,50 @@
 <body class="lift:content_id=main">
     <div id="main" class="lift:surround?with=default;at=content">
     <div class="lift:App.onLoad"></div>
-    
-        <!-- jit -->
-        <div id="container" >
-            <div id="center-container">
-                <div id="infovis" ></div>
+
+        <div class="container">
+            <div class="row">
+                <div class="col-md-2"></div>
+                <div class="col-md-8">
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs">
+                        <li class="active"><a href="#knowledgeBasePane" data-toggle="tab">Knowledge Base</a></li>
+                        <li class="disabled"><a href="#" data-toggle="tab">Bots</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="knowledgeBasePane"><div id="infovis"></div></div>
+                        <div class="tab-pane" id="botsPane">This is the Pane to bots administration</div>
+                    </div>
+                </div>
+                <div class="col-md-2"></div>
             </div>
-            <div id="right-container">
-                <h4>Tree Orientation</h4>
-                <table>
-                    <tr><td><label for="r-left">Left </label></td><td><input type="radio" id="r-left" name="orientation" value="left" /></td></tr>
-                    <tr><td><label for="r-top">Top </label></td><td><input type="radio" id="r-top" checked="checked" name="orientation" value="top" /></td></tr>
-                    <tr><td><label for="r-bottom">Bottom </label></td><td><input type="radio" id="r-bottom" name="orientation" value="bottom" /></td></tr>
-                    <tr><td><label for="r-right">Right </label></td><td><input type="radio" id="r-right" name="orientation" value="right" /></td></tr>
-                </table>
+            <div class="row">
+                <div class="col-md-12">
+                    <div id="log"></div>
+                </div>
             </div>
-            <div id="log"></div>
         </div>
-        <!-- /jit -->
+
 
         <!-- Modal -->
         <form class="lift:form.ajax">
-            <div data-lift="addKnowledgeForm">
-                <div class="modal fade" style="display: none;" id="addKnowledgeModal" tabindex="-1" role="dialog" aria-labelledby="addKnowledgeModalLabel" aria-hidden="true">
+            <div data-lift="createKnowledgeForm">
+                <div class="modal fade" style="display: none;" id="createKnowledgeModal" tabindex="-1" role="dialog" aria-labelledby="createKnowledgeModalLabel" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header">
                                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                                <h4 class="modal-title" id="addKnowledgeModalLabel">Add Knowledge</h4>
+                                <h4 class="modal-title" id="createKnowledgeModalLabel">Add Knowledge</h4>
                             </div>
                             <div class="modal-body">
                                 <div class="form-group">
-                                    <label for="addKnowledgeNameInput">Name</label>
-                                    <input type="text" class="form-control" id="addKnowledgeNameInput" placeholder="Enter new Knowledge name">
+                                    <label for="createKnowledgeNameInput">Name</label>
+                                    <input type="text" class="form-control" id="createKnowledgeNameInput" placeholder="Enter new Knowledge name">
                                     <input type="hidden" name="parentId">
                                 </div>
-                                <span id="addKnowledgeModalStatus" style="color: red"></span>
+                                <span id="createKnowledgeModalStatus" style="color: red"></span>
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -58,21 +66,21 @@
         
         <!-- Modal -->
         <form class="lift:form.ajax">
-            <div data-lift="renameKnowledgeForm">
-                <div class="modal fade" style="display: none;" id="renameKnowledgeModal" tabindex="-1" role="dialog" aria-labelledby="renameKnowledgeModalLabel" aria-hidden="true">
+            <div data-lift="updateKnowledgeForm">
+                <div class="modal fade" style="display: none;" id="updateKnowledgeModal" tabindex="-1" role="dialog" aria-labelledby="updateKnowledgeModalLabel" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header">
                                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                                <h4 class="modal-title" id="renameKnowledgeModalLabel">Rename Knowledge</h4>
+                                <h4 class="modal-title" id="updateKnowledgeModalLabel">Rename Knowledge</h4>
                             </div>
                             <div class="modal-body">
                                 <div class="form-group">
-                                    <label for="renameKnowledgeNameInput">Name</label>
-                                    <input type="text" class="form-control" id="renameKnowledgeNameInput" placeholder="Enter new Knowledge name">
+                                    <label for="updateKnowledgeNameInput">Name</label>
+                                    <input type="text" class="form-control" id="updateKnowledgeNameInput" placeholder="Enter new Knowledge name">
                                     <input type="hidden" name="id">
                                 </div>
-                                <span id="renameKnowledgeModalStatus" style="color: red"></span>
+                                <span id="updateKnowledgeModalStatus" style="color: red"></span>
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -120,8 +128,68 @@
                         <h4 class="modal-title" id="topicModalLabel">Topics of knowledge X</h4>
                     </div>
                     <div class="modal-body">
-                    Topics 
-                    <span id="topicModalStatus" style="color: red"></span>
+                        <table class="table table-hover">
+                            <tr>
+                                <td>Topic One</td>
+                            </tr>
+                            <tr>
+                                <td>Topic Two</td>
+                            </tr>
+                            <tr>
+                                <td>Topic Three</td>
+                            </tr>
+                            <tr>
+                                <td>Topic Four</td>
+                            </tr>
+                        </table>
+                        
+                        <hr />
+
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">Teachings of Topic "<b>Topic Two</b>"</h3>
+                            </div>
+                            
+                            <ul class="nav nav-pills">
+                              <li><a href="#">Add</a></li>
+                              <li><a href="#">Edit</a></li>
+                              <li><a href="#">Delete</a></li>
+                            </ul>
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>When user says</th>
+                                        <th>Responding to</th>
+                                        <th>Say</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Hi</td>
+                                        <td>*</td>
+                                        <td>Hello</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Hi</td>
+                                        <td>*</td>
+                                        <td>Hello</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Hi</td>
+                                        <td>*</td>
+                                        <td>Hello</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Hi</td>
+                                        <td>*</td>
+                                        <td>Hello</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+
+                        <span id="topicModalStatus" style="color: red"></span>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -136,8 +204,8 @@
 
         <div id="knowledgeContextMenu" class="dropdown">
             <ul class="dropdown-menu  pull-left" role="menu" aria-labelledby="dropdownMenu" style="display:block;position:static;margin-bottom:5px;">
-              <li><a tabindex="-1" data-toggle="modal" href="#addKnowledgeModal">Add Knowledge</a></li>
-              <li><a tabindex="-1" data-toggle="modal" href="#renameKnowledgeModal">Rename</a></li>
+              <li><a tabindex="-1" data-toggle="modal" href="#createKnowledgeModal">Add Knowledge</a></li>
+              <li><a tabindex="-1" data-toggle="modal" href="#updateKnowledgeModal">Rename</a></li>
               <li><a tabindex="-1" data-toggle="modal" href="#deleteKnowledgeModal">Delete</a></li>
               <li class="divider"></li>
               <li><a tabindex="-1" data-toggle="modal" href="#topicModal">Topics</a></li>
@@ -150,9 +218,9 @@
         document.oncontextmenu = function(e) { return false; };
         var $knowledgeContextMenu = $("#knowledgeContextMenu");
         
-        preparaModal( "#addKnowledgeModal", "#addKnowledgeNameInput", function(){$("#addKnowledgeModal").find("#into").val(ObjectManager.lastClicked.id)});
-        preparaModal( "#renameKnowledgeModal", "#renameKnowledgeNameInput", function(){
-                                                          $("#renameKnowledgeNameInput").val(ObjectManager.lastClicked.name);
+        preparaModal( "#createKnowledgeModal", "#createKnowledgeNameInput", function(){$("#createKnowledgeModal").find("#into").val(ObjectManager.lastClicked.id)});
+        preparaModal( "#updateKnowledgeModal", "#updateKnowledgeNameInput", function(){
+                                                          $("#updateKnowledgeNameInput").val(ObjectManager.lastClicked.name);
                                                           $("#whatToRename").val(ObjectManager.lastClicked.id);
                                                          });
         preparaModal( "#deleteKnowledgeModal", "#cancelDelete", function(){
@@ -165,7 +233,7 @@
         function preparaModal(modalId, elementIdToFocus, func){
         	var modal = $(modalId) 
         	modal.
-            on('shown.bs.modal', function() { func(); if(elementIdToFocus)$('elementIdToFocus').focus();} ).
+            on('shown.bs.modal', function() { func(); if(elementIdToFocus)$(elementIdToFocus).focus();} ).
             on('hide.bs.modal',  function() { resetModal(modalId);} )
         }
 					  
@@ -175,27 +243,28 @@
 					$(modalId + "Status").html('');
 				}
 				
-				function afterRenameNewKnowledge(knowledge){
-					$('#renameKnowledgeModal').modal('hide');
+				function afterUpdateKnowledge(knowledge){
+					$('#updateKnowledgeModal').modal('hide');
 
 					lastClikedNode = ObjectManager.lastClicked;
-					Log.info("Knowledege '"+lastClikedNode.name+"' renamed to '" + knowledge.name + "' succefully.");
+					Log.info("Knowledege '"+lastClikedNode.name+"' renamed to '" + knowledge.name + "' successfully.");
 					
 					lastClikedNode.name = knowledge.name
 					document.getElementById(knowledge.id).innerHTML=knowledge.name
 				}
 
-				function afterAddNewKnowledge(newKnowledge) {
-					$('#addKnowledgeModal').modal('hide');
+				function afterCreateKnowledge(newKnowledge) {
+					$('#createKnowledgeModal').modal('hide');
 
-					Log.info("Knowledege named '" + newKnowledge.name + "' added succefully.");
+					Log.info("Knowledege named '" + newKnowledge.name + "' added successfully.");
 					lastClikedNode = ObjectManager.lastClicked;
+					
 					st.addSubtree(
 							{
 								  id : lastClikedNode.id,
 								  children : [ newKnowledge ]
 							}, 
-							'animate', 
+							'replot', 
 							{
 								  hideLabels : false,
 								  duration : 800,
@@ -233,13 +302,14 @@
 								duration : 500,
 								hideLabels : false,
 								onComplete : function() {
-									Log.info("Knowledge '"+knowledge.name+"' deleted succefully.");
+									Log.info("Knowledge '"+knowledge.name+"' deleted successfully.");
 								}
 							})
 					}
 				</script>
 
     </div>
+    
     <!-- /main -->
 </body>
 </html>

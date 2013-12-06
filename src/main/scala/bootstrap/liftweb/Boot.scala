@@ -42,12 +42,6 @@ class Boot {
         LiftRules.resourceNames = "i18n/messages" :: LiftRules.resourceNames
         LiftRules.resourceNames = "props" :: LiftRules.resourceNames
 
-        // FoBo Module
-        FoBo.InitParam.JQuery = FoBo.JQuery191
-        FoBo.InitParam.ToolKit = FoBo.Bootstrap231
-        FoBo.InitParam.ToolKit = FoBo.FontAwesome300
-        FoBo.init
-
         //Show the spinny image when an Ajax call starts
         LiftRules.ajaxStart = Full(() => LiftRules.jsArtifacts.show("ajax-loader").cmd)
 
