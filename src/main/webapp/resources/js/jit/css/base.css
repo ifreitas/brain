@@ -95,10 +95,14 @@ a {
 
 #log {
     /* top:10px; */
-    position:absolute;
-    font-size:1.0em;
-    font-weight:bold;
-    color:#23A4FF;
+    /* position:absolute; */
+    /* font-size:1.0em; */
+    /* font-weight:bold;
+    color:#23A4FF; */
+  font-size:1.0em;
+  font-weight:bold;
+  color:#23A4FF;
+  margin:5px;
 }
 
 #infovis {
@@ -107,8 +111,8 @@ a {
     height:600px;
     margin:auto;
     overflow:hidden;
-    border:1px solid;
-    border-radius:5px;
+    /* border:1px solid;
+    border-radius:5px; */
 }
 /* TOOLTIPS */
 .tip {

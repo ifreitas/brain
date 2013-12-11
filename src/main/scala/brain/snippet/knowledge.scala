@@ -7,12 +7,11 @@ import com.tinkerpop.blueprints.Vertex
 import brain.db.GraphDb
 import net.liftweb.http.S.error
 import net.liftweb.http.SHtml.ElemAttr.pairToBasic
-import net.liftweb.http.SHtml.ajaxOnSubmit
-import net.liftweb.http.SHtml.hidden
-import net.liftweb.http.SHtml.text
+import net.liftweb.http.SHtml._
 import net.liftweb.http.js.JsCmd
 import net.liftweb.http.js.JsCmds.Noop
 import net.liftweb.http.js.JsCmds.Run
+import net.liftweb.http.js.JsCmds.Alert
 import net.liftweb.util.Helpers.strToCssBindPromoter
 import net.liftweb.util.Helpers.strToSuperArrowAssoc
 import com.tinkerpop.blueprints.impls.orient.OrientGraph
@@ -23,10 +22,12 @@ import com.orientechnologies.orient.core.command.OCommand
 import com.orientechnologies.orient.core.sql.query.OSQLSynchQuery
 import com.tinkerpop.blueprints.impls.orient.OrientVertex
 import com.tinkerpop.blueprints.Direction
+import net.liftweb.common.Empty
 
 class CreateKnowledgeForm {
 	var name = ""
 	var parentId = ""
+	var teste = ""
 	    
     def render = {
         "#createKnowledgeNameInput" #> text(name, name = _) & 
@@ -36,13 +37,13 @@ class CreateKnowledgeForm {
 	
 	def create(name:String, parentId:String): JsCmd = {
 		if (name==null || name.trim.isEmpty)
-			error("createKnowledgeModalStatus", "Please fill the name field.")
+			error("createKnowledgeWindowStatus", "Please fill the name field.")
 		else if(parentId.trim.isEmpty)
-			error("createKnowledgeModalStatus", "Did was not possible to identify the parent knowledge. Please close this popup and try again.")
+			error("createKnowledgeWindowStatus", "Did was not possible to identify the parent knowledge. Please close this popup and try again.")
 		else{
 			doCreate(name, parentId) match{
 			case Some(knowledge) => return Run(s"afterCreateKnowledge({id:'${knowledge.getId}', name:'$name', data:{}, children:[]})")
-			case _ => error("createKnowledgeModalStatus", "Invalid knowledge name.");//Noop
+			case _ => error("createKnowledgeWindowStatus", "Invalid knowledge name.");//Noop
 			}
 		}
 	}
@@ -77,13 +78,13 @@ class UpdateKnowledgeForm {
 	
 	def update(name:String, id:String): JsCmd = {
 		if (name==null || name.trim.isEmpty)
-			error("updateKnowledgeModalStatus", "Please fill the name field.")
+			error("updateKnowledgeWindowStatus", "Please fill the name field.")
 		else if(id.trim.isEmpty)
-			error("updateKnowledgeModalStatus", "Did was not possible to identify the knowledge to rename. Please close this popup and try again.")
+			error("updateKnowledgeWindowStatus", "Did was not possible to identify the knowledge to rename. Please close this popup and try again.")
 		else{
 			doUpdate(name, id) match{
 			case Some(knowledge) => return Run(s"afterUpdateKnowledge({id:'${knowledge.getId}', name:'$name', data:{}, children:[]})")
-			case _ => error("updateKnowledgeModalStatus", "Invalid knowledge name.");
+			case _ => error("updateKnowledgeWindowStatus", "Invalid knowledge name.");
 			}
 		}
 	}
@@ -115,11 +116,11 @@ class DeleteKnowledgeForm {
 	
 	def delete(id:String): JsCmd = {
 		if(id.trim.isEmpty)
-			error("addKnowledgeModalStatus", "Was not possible to identify the parent knowledge. Please close this popup and try again.")
+			error("deleteKnowledgeWindowStatus", "Was not possible to identify the parent knowledge. Please close this popup and try again.")
 		else{
 			doDelete(id) match{
 			case Some(knowledge) => return Run(raw"afterDeleteKnowledge({id:'${knowledge.getId}', name:'${knowledge.getProperty("name")}', data:{}, children:[]})")
-			case _ => error("addKnowledgeModalStatus", "Invalid knowledge name.");
+			case _ => error("deleteKnowledgeWindowStatus", "Invalid knowledge name.");
 			}
 		}
 	}

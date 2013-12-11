@@ -3,215 +3,114 @@
 <head>
 <meta content="text/html; charset=UTF-8" http-equiv="content-type"></meta>
 <title>Brain</title>
-
 </head>
 
 <body class="lift:content_id=main">
     <div id="main" class="lift:surround?with=default;at=content">
     <div class="lift:App.onLoad"></div>
 
-        <div class="container">
-            <div class="row">
-                <div class="col-md-2"></div>
-                <div class="col-md-8">
-                    <!-- Nav tabs -->
-                    <ul class="nav nav-tabs">
-                        <li class="active"><a href="#knowledgeBasePane" data-toggle="tab">Knowledge Base</a></li>
-                        <li class="disabled"><a href="#" data-toggle="tab">Bots</a></li>
-                    </ul>
-
-                    <!-- Tab panes -->
-                    <div class="tab-content">
-                        <div class="tab-pane active" id="knowledgeBasePane"><div id="infovis"></div></div>
-                        <div class="tab-pane" id="botsPane">This is the Pane to bots administration</div>
-                    </div>
-                </div>
-                <div class="col-md-2"></div>
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <div id="log"></div>
-                </div>
-            </div>
-        </div>
+    <div id="theTree">
+        <div id="infovis" class="infovis"></div>
+    </div>
+    <div id="log"></div>
 
 
         <!-- Modal -->
-        <form class="lift:form.ajax">
-            <div data-lift="createKnowledgeForm">
-                <div class="modal fade" style="display: none;" id="createKnowledgeModal" tabindex="-1" role="dialog" aria-labelledby="createKnowledgeModalLabel" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                                <h4 class="modal-title" id="createKnowledgeModalLabel">Add Knowledge</h4>
-                            </div>
-                            <div class="modal-body">
-                                <div class="form-group">
-                                    <label for="createKnowledgeNameInput">Name</label>
-                                    <input type="text" class="form-control" id="createKnowledgeNameInput" placeholder="Enter new Knowledge name">
-                                    <input type="hidden" name="parentId">
-                                </div>
-                                <span id="createKnowledgeModalStatus" style="color: red"></span>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                                <button type="submit" class="btn btn-primary">Save changes</button>
-                            </div>
-                        </div><!-- /.modal-content -->
-                    </div><!-- /.modal-dialog -->
-                </div><!-- /.modal -->
-            </div><!-- /.snippet -->
-        </form>
+        <div id="createKnowledgeWindow" style="width: 100%; height: 100%;">
+            <form class="lift:form.ajax">
+                <div data-lift="createKnowledgeForm">
+                    <table style="width: 100%; height: 100%;">
+                        <tr>
+                            <td><label for="createKnowledgeNameInput">Name</label></td>
+                            <td><input type="text" id="createKnowledgeNameInput" placeholder="Enter new Knowledge name"></td>
+                        </tr>
+                        <tr><td colspan="2"><span id="createKnowledgeWindowStatus" style="color: red"></span></td></tr>
+                        <tr><td colspan="2"><input type="hidden" name="parentId"><hr></td></tr>
+                        <tr align="right"><td colspan="2"><button type="submit" >Save changes</button><button onclick="createKowledgeWindow.hide();">Cancel</button></td></tr>
+                    </table>
+                </div>
+            </form>
+        </div>
         
         <!-- Modal -->
-        <form class="lift:form.ajax">
-            <div data-lift="updateKnowledgeForm">
-                <div class="modal fade" style="display: none;" id="updateKnowledgeModal" tabindex="-1" role="dialog" aria-labelledby="updateKnowledgeModalLabel" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                                <h4 class="modal-title" id="updateKnowledgeModalLabel">Rename Knowledge</h4>
-                            </div>
-                            <div class="modal-body">
-                                <div class="form-group">
-                                    <label for="updateKnowledgeNameInput">Name</label>
-                                    <input type="text" class="form-control" id="updateKnowledgeNameInput" placeholder="Enter new Knowledge name">
-                                    <input type="hidden" name="id">
-                                </div>
-                                <span id="updateKnowledgeModalStatus" style="color: red"></span>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                                <button type="submit" class="btn btn-primary">Save changes</button>
-                            </div>
-                        </div><!-- /.modal-content -->
-                    </div><!-- /.modal-dialog -->
-                </div><!-- /.modal -->
-            </div><!-- /.snippet -->
-        </form>
-        
-        <!-- Modal -->
-        <form class="lift:form.ajax">
-            <div data-lift="deleteKnowledgeForm">
-                <div class="modal fade" style="display: none;" id="deleteKnowledgeModal" tabindex="-1" role="dialog" aria-labelledby="deleteKnowledgeModalLabel" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                                <h4 class="modal-title" id="deleteKnowledgeModalLabel">Delete Knowledge</h4>
-                            </div>
-                            <div class="modal-body">
-                                <div class="form-group">
-                                  Confirm to delete this knowledge?
-                                    <input type="hidden" name="id">
-                                </div>
-                                <span id="deleteKnowledgeModalStatus" style="color: red"></span>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-primary" data-dismiss="modal" id="cancelDelete">Close</button>
-                                <button type="submit" class="btn btn-default">Delete</button>
-                            </div>
-                        </div><!-- /.modal-content -->
-                    </div><!-- /.modal-dialog -->
-                </div><!-- /.modal -->
-            </div><!-- /.snippet -->
-        </form>
-
-        <!-- Modal -->
-        <div class="modal fade" style="display: none;" id="topicModal" tabindex="-1" role="dialog" aria-labelledby="topicModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                        <h4 class="modal-title" id="topicModalLabel">Topics of knowledge X</h4>
-                    </div>
-                    <div class="modal-body">
-                        <table class="table table-hover">
-                            <tr>
-                                <td>Topic One</td>
-                            </tr>
-                            <tr>
-                                <td>Topic Two</td>
-                            </tr>
-                            <tr>
-                                <td>Topic Three</td>
-                            </tr>
-                            <tr>
-                                <td>Topic Four</td>
-                            </tr>
-                        </table>
-                        
-                        <hr />
-
-                        <div class="panel panel-default">
-                            <div class="panel-heading">
-                                <h3 class="panel-title">Teachings of Topic "<b>Topic Two</b>"</h3>
-                            </div>
-                            
-                            <ul class="nav nav-pills">
-                              <li><a href="#">Add</a></li>
-                              <li><a href="#">Edit</a></li>
-                              <li><a href="#">Delete</a></li>
-                            </ul>
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>When user says</th>
-                                        <th>Responding to</th>
-                                        <th>Say</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>Hi</td>
-                                        <td>*</td>
-                                        <td>Hello</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Hi</td>
-                                        <td>*</td>
-                                        <td>Hello</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Hi</td>
-                                        <td>*</td>
-                                        <td>Hello</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Hi</td>
-                                        <td>*</td>
-                                        <td>Hello</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-
-
-                        <span id="topicModalStatus" style="color: red"></span>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    </div>
+        <div id="updateKnowledgeWindow" style="width: 100%; height: 100%;">
+            <form class="lift:form.ajax">
+                <div data-lift="updateKnowledgeForm">
+                    <table style="width: 100%; height: 100%;">
+                        <tr>
+                            <td><label for="updateKnowledgeNameInput">Name</label></td>
+                            <td><input type="text" id="updateKnowledgeNameInput" placeholder="Enter new Knowledge name"></td>
+                        </tr>
+                        <tr><td colspan="2"><span id="updateKnowledgeWindowStatus" style="color: red"></span></td></tr>
+                        <tr><td colspan="2"><input type="hidden" name="id"><hr></td></tr>
+                        <tr align="right"><td colspan="2"><button type="submit" >Save changes</button><button onclick="updateKowledgeWindow.hide();">Cancel</button></td></tr>
+                    </table>
                 </div>
-                <!-- /.modal-content -->
-            </div>
-            <!-- /.modal-dialog -->
+            </form>
         </div>
-        <!-- /.modal -->
-
-
-        <div id="knowledgeContextMenu" class="dropdown">
-            <ul class="dropdown-menu  pull-left" role="menu" aria-labelledby="dropdownMenu" style="display:block;position:static;margin-bottom:5px;">
-              <li><a tabindex="-1" data-toggle="modal" href="#createKnowledgeModal">Add Knowledge</a></li>
-              <li><a tabindex="-1" data-toggle="modal" href="#updateKnowledgeModal">Rename</a></li>
-              <li><a tabindex="-1" data-toggle="modal" href="#deleteKnowledgeModal">Delete</a></li>
-              <li class="divider"></li>
-              <li><a tabindex="-1" data-toggle="modal" href="#topicModal">Topics</a></li>
-            </ul>
+        
+                                    
+        <!-- Modal -->
+        <!-- Modal -->
+        <div id="deleteKnowledgeWindow" style="width: 100%; height: 100%;">
+            <form class="lift:form.ajax">
+                <div data-lift="deleteKnowledgeForm">
+                    <table style="width: 100%; height: 100%;">
+                        <tr><td>Confirm to delete this knowledge?</td></tr>
+                        <tr><td><span id="deleteKnowledgeWindowStatus" style="color: red"></span></td></tr>
+                        <tr><td><input type="hidden" name="id"><hr></td></tr>
+                        <tr align="right"><td><button type="submit" >Save changes</button><button onclick="deleteKowledgeWindow.hide();">Cancel</button></td></tr>
+                    </table>
+                </div>
+            </form>
+        </div>
+        
+<!--         Modal
+        <div id="informationWindow" style="width: 100%; height: 100%;">
+            <form class="lift:form.ajax">
+                <div data-lift="createKnowledgeForm">
+                    <table style="width: 100%; height: 100%;">
+                        <tr>
+                            <td><label for="createKnowledgeNameInput">Name</label></td>
+                            <td><input type="text" id="createKnowledgeNameInput" placeholder="Enter new Knowledge name"></td>
+                        </tr>
+                        <tr><td colspan="2"><span id="createKnowledgeWindowStatus" style="color: red"></span></td></tr>
+                        <tr><td colspan="2"><input type="hidden" name="parentId"><hr></td></tr>
+                        <tr align="right"><td colspan="2"><button type="submit" >Save changes</button><button onclick="createKowledgeWindow.hide();">Cancel</button></td></tr>
+                    </table>
+                </div>
+            </form>
+        </div> -->
+        
+        <div id="teachingWindow" style="width: 100%; height: 100%;">
+            <form class="lift:form.ajax">
+                <div data-lift="createKnowledgeForm">
+                    <table style="width: 100%; height: 100%;">
+                        <tr>
+                            <td><label for="whenUserSayInput">When the user says</label></td>
+                            <td><textarea id="whenUserSayInput" rows="5" cols="50" placeholder="likely user's sentences (one per line)"></textarea></td>
+                        </tr>
+                        <tr>
+                            <td><label for="respondingToInput">Responding to</label></td>
+                            <td><input type="text" style="width: 410px" id="respondingToInput" placeholder="some bot phrase"></td>
+                        </tr>
+                        <tr>
+                            <td><label for="memorizeInput">Memorize</label></td>
+                            <td><textarea id="memorizeInput" rows="5" cols="50" placeholder="some key=value pair like: name='Israel' (one per line)"></textarea></td>
+                        </tr>
+                        <tr>
+                            <td><label for="thinkInput">Say</label></td>
+                            <td><textarea id="thinkInput" rows="5" cols="50" placeholder="The bot's responses to the user input. Can access memorized variables. Example: Hello, ${name}. (one per line)"></textarea></td>
+                        </tr>
+                        <tr><td colspan="2"><span id="createTeachingWindowStatus" style="color: red"></span></td></tr>
+                        <tr><td colspan="2"><input type="hidden" name="parentId"><hr></td></tr>
+                        <tr align="right"><td colspan="2"><button type="submit" >Save changes</button><button onclick="createKowledgeWindow.hide();">Cancel</button></td></tr>
+                    </table>
+                </div>
+            </form>
         </div>
 
+        
     <script type="text/javascript">
     
         document.onclick       = function(e) { $knowledgeContextMenu.hide(); };

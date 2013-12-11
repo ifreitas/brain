@@ -765,29 +765,29 @@ function initTree(json){
         levelsToShow: 5,
         levelDistance: 50,
         
-        Navigation: {
-          enable:true,
-          //panning:true//, // TODO requer ajuste no jit.js. VER: https://groups.google.com/forum/#!searchin/javascript-information-visualization-toolkit/mouse$20position|sort:date/javascript-information-visualization-toolkit/hGyn-Cvsn7g/K2fxD8XRD7kJ
-          zooming: 50     // TODO requer ajuste no jit.js pois o node propriamente dito(a parte clic�vel) n�o cresce nem dimimui junto com o zoom. 
-        },
+//        Navigation: {
+//          enable:true,
+//          panning:true//, // TODO requer ajuste no jit.js. VER: https://groups.google.com/forum/#!searchin/javascript-information-visualization-toolkit/mouse$20position|sort:date/javascript-information-visualization-toolkit/hGyn-Cvsn7g/K2fxD8XRD7kJ
+//          zooming: 50     // TODO requer ajuste no jit.js pois o node propriamente dito(a parte clic�vel) n�o cresce nem dimimui junto com o zoom. 
+//        },
         
-        Tips: {
-            enable: true,
-            offsetX: 20,
-            offsetY: 20,
-            onShow: function(tip, node, isLeaf, domElement) {
-              var html = "<div class=\"tip-title\"><b>" + node.name 
-               + "</b></div><div class=\"tip-text\">Topics</div><ul><li>Topic One</li><li>Topic Two</li><li>Topic Three</li></ul>";
-                //var data = node.data;
-                //if(data.playcount) {
-                //  html += "play count: " + data.playcount;
-                //}
-                //if(data.image) {
-                //  html += "<img src=\""+ data.image +"\" class=\"album\" />";
-                //}
-              tip.innerHTML =  html; 
-            }  
-          },
+//        Tips: {
+//            enable: true,
+//            offsetX: 20,
+//            offsetY: 20,
+//            onShow: function(tip, node, isLeaf, domElement) {
+//              var html = "<div class=\"tip-title\"><b>" + node.name 
+//               + "</b></div><div class=\"tip-text\">Topics</div><ul><li>Topic One</li><li>Topic Two</li><li>Topic Three</li></ul>";
+//                //var data = node.data;
+//                //if(data.playcount) {
+//                //  html += "play count: " + data.playcount;
+//                //}
+//                //if(data.image) {
+//                //  html += "<img src=\""+ data.image +"\" class=\"album\" />";
+//                //}
+//              tip.innerHTML =  html; 
+//            }  
+//          },
 
         
         Node: {
@@ -822,17 +822,18 @@ function initTree(json){
         },
         
         onCreateLabel: function(label, node){
-            label.id = node.id;            
-            label.innerHTML     = node.name;
-            // TODO [bug] Funcionamento intermitente no FF.
-            label.oncontextmenu = function(e){
-            	e.stopPropagation();
-            	window.getSelection().removeAllRanges();
-            	ObjectManager.setLastClicked(node);
-        		$knowledgeContextMenu.hide();// inicializado no index
-        		$knowledgeContextMenu.css({ display: "block", left: e.clientX, top: e.clientY});
-        		return false;
-            };
+        	
+        	Ext.EventManager.on(label, 'contextmenu', teste);
+        	function teste(e,t){
+        		window.getSelection().removeAllRanges();
+        		ObjectManager.setLastClicked(node);
+        		
+        		e.stopEvent();
+        		contextMenu.showAt(e.getXY());
+        	}
+        	
+            label.id          = node.id;            
+            label.innerHTML   = node.name;
             
             var style         = label.style;
             style.width       = 80 + 'px';
@@ -912,26 +913,221 @@ function initTree(json){
     	alert("Was not possible to load the tree. " + e)
     }
     
-    //Add event handlers to switch spacetree orientation.
-//    var top    = $jit.id('r-top'), 
-//        left   = $jit.id('r-left'), 
-//        bottom = $jit.id('r-bottom'), 
-//        right  = $jit.id('r-right');
-//        
-//    
-//    function changeHandler() {
-//        if(this.checked) {
-//            top.disabled = bottom.disabled = right.disabled = left.disabled = true;
-//            st.switchPosition(this.value, "animate", {
-//                onComplete: function(){
-//                    top.disabled = bottom.disabled = right.disabled = left.disabled = false;
-//                }
-//            });
-//        }
-//    };
-//    
-//    top.onchange = left.onchange = bottom.onchange = right.onchange = changeHandler;
-    //end
-
 }
+
+Ext.application({
+    name: 'Brain',
+    launch: function() {
+        Ext.create('Ext.container.Viewport', {
+            layout: 'border',
+            items: [
+                {
+			        region: 'north',
+			        html: '<h1>Brain</h1>',
+			        border: true,
+			        margins: '5 5 5 5'
+			    }, {
+			        region: 'west',
+			        //collapsible: true,
+			        //split: true,
+			        title: 'Help',
+			        width: 300,
+			        margins: '0 5 0 5'
+			        // could use a TreePanel or AccordionLayout for navigational items
+			    }, {
+			        region: 'south',
+			        contentEl: 'log',
+			        height: 30,
+			        minHeight: 30,
+			        margins: '5 5 5 5'
+			    }, {
+			        region: 'east',
+			        //collapsible: true,
+			        //split: true,
+			        width: 300,
+			        margins: '0 5 0 5',
+			        items:[
+				        Ext.create('Ext.tab.Panel', {
+					    	region: 'center',
+					        items: [
+				                {
+				                	title: 'Properties',
+				                	disabled: true,
+			                		tabConfig: {
+						                tooltip: 'The properties of the selected element.'
+						            }
+						        }, 
+						        {
+						            title: 'Chat',
+						            tabConfig: {
+						                tooltip: 'A chat to test the knowledge base.'
+						            }
+						        },
+						        {
+						            title: 'Utilities',
+						            disabled: true
+						        }
+					        ]
+					    })
+				    ]
+			    },
+			    Ext.create('Ext.tab.Panel', {
+			    	region: 'center',
+			        items: [
+		                {
+		                	title: 'Knowledge Base',
+		                	contentEl: 'theTree'
+				        }, 
+				        {
+				            title: 'Bots',
+				            disabled: true,
+				            tabConfig: {
+				                tooltip: 'AIML Bots configurations set'
+				            }
+				        }
+			        ],
+			        tbar: [
+							{
+								text:'Apply',
+								tooltip:'Apply the new Knowledge Base to the bot.',
+								handler: function(){
+									applyKnowledge();
+								}
+							}
+						]
+			    })
+            ]
+        });
+    }
+});
+
+var createKowledgeWindow = Ext.create('Ext.window.Window', {
+    title:       'Add a Knowledge',
+    closeAction: 'hide',
+    modal:       true,
+    closable:    true,
+    resizable:	 false,
+    height:      200,
+    width:       400,
+    layout:      'fit',
+    items:       {
+    	xtype:     'panel',
+    	border:    false,
+    	contentEl: 'createKnowledgeWindow'
+    }
+});
+var updateKowledgeWindow = Ext.create('Ext.window.Window', {
+	title:       'Rename the Knowledge',
+	closeAction: 'hide',
+	modal:       true,
+	closable:    true,
+	resizable:	 false,
+	height:      200,
+	width:       400,
+	layout:      'fit',
+	items:       {
+		xtype:     'panel',
+		border:    false,
+		contentEl: 'updateKnowledgeWindow'
+	}
+});
+var deleteKowledgeWindow = Ext.create('Ext.window.Window', {
+	title:       'Delete the Knowledge',
+	closeAction: 'hide',
+	modal:       true,
+	closable:    true,
+	resizable:	 false,
+	height:      200,
+	width:       400,
+	layout:      'fit',
+	items:       {
+		xtype:     'panel',
+		border:    false,
+		contentEl: 'deleteKnowledgeWindow'
+	}
+});
+
+var teachingWindow = Ext.create('Ext.window.Window', {
+	title:       'Create the Teaching',
+	closeAction: 'hide',
+	modal:       true,
+	closable:    true,
+	resizable:	 false,
+	height:      400,
+	width:       500,
+	layout:      'fit',
+	items:       {
+		xtype:     'panel',
+		border:    false,
+		contentEl: 'teachingWindow'
+	}
+});
+
+var informationWindow = Ext.create('Ext.window.Window', {
+	title:       'Informations & Teachings',// + ObjectManager.getLastClicked().name,
+	closeAction: 'hide',
+	modal:       true,
+	closable:    true,
+	resizable:	 false,
+	height:      600,
+	width:       900,
+	layout:      'border',
+	items:[
+	       {
+	    	   region: 'north',
+	    	   margins: '5 5 5 5',
+	    	   title: 'Informations',
+	    	   height: 200,
+	    	   tbar: [
+	    	          {
+	    	        	  text: 'Create'
+	    	          },
+	    	          {
+	    	        	  text: 'Update'
+	    	          },
+	    	          {
+	    	        	  text: 'Delete'
+	    	          }
+	    	   ]
+	       },
+	       {
+	    	   region: 'center',
+	    	   margins: '0 5 5 5',
+	    	   title: 'Teachings of the selected Information',
+    		   tbar: [
+	    	          {
+	    	        	  text: 'Create'
+	    	          },
+	    	          {
+	    	        	  text: 'Update'
+	    	          },
+	    	          {
+	    	        	  text: 'Delete'
+	    	          }
+	    	   ]
+	       }
+	]
+});
+
+var contextMenu = Ext.create('Ext.menu.Menu', {
+	items:[
+	       {
+	    	   text : 'Add a Knowledge',
+	    	   handler : function(item){createKowledgeWindow.show();}
+		   }, 
+		   {
+			   text : 'Rename this Knowledge',
+	    	   handler : function(item){updateKowledgeWindow.show();}
+		   }, 
+		   {
+			   text : 'Delete this Knowledge',
+	    	   handler : function(item){deleteKowledgeWindow.show();}
+		   }, 
+		   '-', 
+		   {
+			   text : 'Topics & Teachings',
+	    	   handler : function(item){informationWindow.show();}
+		   }
+   ]
+});
 
