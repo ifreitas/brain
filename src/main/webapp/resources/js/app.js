@@ -857,17 +857,6 @@ function initTree(json){
             		st.onClick(node.id);
             	}
             }
-            
-        	// NOTE: Nunca funciona no FF, pois o evento 'click' � sempre invocado fazendo com que o menu apare�a e suma imediatamente. 
-            //onRightClick: function(node, eventInfo, e) {  
-            //	ObjectManager.setLastClicked(node);
-            //	window.getSelection().removeAllRanges();
-        	//	$knowledgeContextMenu.hide();// inicializado no index
-        	//	$knowledgeContextMenu.css({ display: "block", left: e.clientX, top: e.clientY});
-        	//  alert(1)
-        	//	return false;
-            //},
-            
         },
         
            
@@ -1014,7 +1003,16 @@ var createKowledgeWindow = Ext.create('Ext.window.Window', {
     	xtype:     'panel',
     	border:    false,
     	contentEl: 'createKnowledgeWindow'
-    }
+    },
+	listeners: {
+		'beforehide':function(window){
+			document.getElementById("createKnowledgeNameInput").form.reset();
+			document.getElementById("createKnowledgeWindowStatus").innerHTML='';
+		},
+    	'beforeshow':function(window){
+    		document.getElementById("into").value=ObjectManager.lastClicked.id;
+    	}
+	}
 });
 var updateKowledgeWindow = Ext.create('Ext.window.Window', {
 	title:       'Rename the Knowledge',
@@ -1029,6 +1027,16 @@ var updateKowledgeWindow = Ext.create('Ext.window.Window', {
 		xtype:     'panel',
 		border:    false,
 		contentEl: 'updateKnowledgeWindow'
+	},
+	listeners: {
+		'beforehide':function(window){
+			document.getElementById("updateKnowledgeNameInput").form.reset();
+			document.getElementById("updateKnowledgeWindowStatus").innerHTML='';
+		},
+		'beforeshow':function(window){
+			document.getElementById("updateKnowledgeNameInput").value=ObjectManager.lastClicked.name;
+			document.getElementById("whatToRename").value=ObjectManager.lastClicked.id;
+		}
 	}
 });
 var deleteKowledgeWindow = Ext.create('Ext.window.Window', {
@@ -1044,6 +1052,15 @@ var deleteKowledgeWindow = Ext.create('Ext.window.Window', {
 		xtype:     'panel',
 		border:    false,
 		contentEl: 'deleteKnowledgeWindow'
+	},
+	listeners: {
+		'beforehide':function(window){
+			document.getElementById("whatKnowledgeToDelete").form.reset();
+			document.getElementById("deleteKnowledgeWindowStatus").innerHTML='';
+		},
+		'beforeshow':function(window){
+			document.getElementById("whatKnowledgeToDelete").value=ObjectManager.lastClicked.id;
+		}
 	}
 });
 

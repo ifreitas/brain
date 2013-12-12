@@ -65,23 +65,6 @@
             </form>
         </div>
         
-<!--         Modal
-        <div id="informationWindow" style="width: 100%; height: 100%;">
-            <form class="lift:form.ajax">
-                <div data-lift="createKnowledgeForm">
-                    <table style="width: 100%; height: 100%;">
-                        <tr>
-                            <td><label for="createKnowledgeNameInput">Name</label></td>
-                            <td><input type="text" id="createKnowledgeNameInput" placeholder="Enter new Knowledge name"></td>
-                        </tr>
-                        <tr><td colspan="2"><span id="createKnowledgeWindowStatus" style="color: red"></span></td></tr>
-                        <tr><td colspan="2"><input type="hidden" name="parentId"><hr></td></tr>
-                        <tr align="right"><td colspan="2"><button type="submit" >Save changes</button><button onclick="createKowledgeWindow.hide();">Cancel</button></td></tr>
-                    </table>
-                </div>
-            </form>
-        </div> -->
-        
         <div id="teachingWindow" style="width: 100%; height: 100%;">
             <form class="lift:form.ajax">
                 <div data-lift="createKnowledgeForm">
@@ -113,38 +96,10 @@
         
     <script type="text/javascript">
     
-        document.onclick       = function(e) { $knowledgeContextMenu.hide(); };
         document.oncontextmenu = function(e) { return false; };
-        var $knowledgeContextMenu = $("#knowledgeContextMenu");
         
-        preparaModal( "#createKnowledgeModal", "#createKnowledgeNameInput", function(){$("#createKnowledgeModal").find("#into").val(ObjectManager.lastClicked.id)});
-        preparaModal( "#updateKnowledgeModal", "#updateKnowledgeNameInput", function(){
-                                                          $("#updateKnowledgeNameInput").val(ObjectManager.lastClicked.name);
-                                                          $("#whatToRename").val(ObjectManager.lastClicked.id);
-                                                         });
-        preparaModal( "#deleteKnowledgeModal", "#cancelDelete", function(){
-        	$("#whatKnowledgeToDelete").val(ObjectManager.lastClicked.id);
-        });
-        //preparaModal( "#moveKnowledgeModal", true, function(){});
-        //preparaModal( "#copyKnowledgeModal", true, function(){});
-        preparaModal( "#topicModal", false, function(){});
-  
-        function preparaModal(modalId, elementIdToFocus, func){
-        	var modal = $(modalId) 
-        	modal.
-            on('shown.bs.modal', function() { func(); if(elementIdToFocus)$(elementIdToFocus).focus();} ).
-            on('hide.bs.modal',  function() { resetModal(modalId);} )
-        }
-					  
-				function resetModal(modalId) {
-					input = $(modalId).find('input')
-					if(input.length>0)input[0].form.reset();
-					$(modalId + "Status").html('');
-				}
-				
 				function afterUpdateKnowledge(knowledge){
-					$('#updateKnowledgeModal').modal('hide');
-
+		      updateKowledgeWindow.hide();
 					lastClikedNode = ObjectManager.lastClicked;
 					Log.info("Knowledege '"+lastClikedNode.name+"' renamed to '" + knowledge.name + "' successfully.");
 					
@@ -153,8 +108,8 @@
 				}
 
 				function afterCreateKnowledge(newKnowledge) {
-					$('#createKnowledgeModal').modal('hide');
-
+					createKowledgeWindow.hide();
+					
 					Log.info("Knowledege named '" + newKnowledge.name + "' added successfully.");
 					lastClikedNode = ObjectManager.lastClicked;
 					
@@ -178,8 +133,7 @@
 					}
 
 					function afterDeleteKnowledge(knowledge) {
-						$('#deleteKnowledgeModal').modal('hide');
-						
+						deleteKowledgeWindow.hide();
 						var lastClickedNode = ObjectManager.lastClicked;
 						var nodeParent = null;
 

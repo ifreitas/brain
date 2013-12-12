@@ -23,6 +23,7 @@ import com.orientechnologies.orient.core.sql.query.OSQLSynchQuery
 import com.tinkerpop.blueprints.impls.orient.OrientVertex
 import com.tinkerpop.blueprints.Direction
 import net.liftweb.common.Empty
+import scala.xml.NodeSeq
 
 class CreateKnowledgeForm {
 	var name = ""
@@ -152,3 +153,4 @@ class DeleteKnowledgeForm {
         db.removeVertex(knowledge)
     }
 }
+
