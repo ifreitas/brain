@@ -66,14 +66,10 @@ class InformationSnippet {
 		}
 	}
 	def update(information:Information):JsCmd={
-	    doCreate(information) match{
+	    doUpdate(information) match{
 			case Some(information) => return Run(s"afterUpdateInformation(${information.toJson})")
 			case _ => error("informationFormStatus", "Invalid name.");
 		}
-	}
-	
-	def doCreateOrUpdate(information:Information):Option[Information] = {
-	    if(information.id.trim().isEmpty()) doCreate(information) else doUpdate(information)
 	}
 	
 	def doCreate(information:Information):Option[Information]={
@@ -115,8 +111,8 @@ class DeleteInformationForm {
 	var id = ""
 	    
     def render = {
-        "name=id"      #> hidden(id = _, id, ("id"->"whatInformationToDelete")) &
-        "type=submit"  #> ajaxOnSubmit(()=>delete(id))
+        "#whatInformationToDelete" #> hidden(id = _, id) &
+        "type=submit"    #> ajaxOnSubmit(()=>delete(id))
     }
 	
 	def delete(id:String): JsCmd = {
@@ -136,18 +132,18 @@ class DeleteInformationForm {
             val sqlString = raw"select from (traverse out() from  $id)";
             val vertices:java.lang.Iterable[Vertex] = db.command(new OSQLSynchQuery[Vertex](sqlString)).execute();
             val informationVextex = vertices.head
-            val information = return Some(Information(informationVextex.getId().toString(), informationVextex.getProperty("name"), ""))
-            informationVextex.getVertices(Direction.OUT, "Include").foreach(db.removeVertex)
+            val information = Some(Information(informationVextex.getId().toString(), informationVextex.getProperty("name"), ""))
+            //informationVextex.getVertices(Direction.OUT, "Include").foreach(db.removeVertex)
             db.removeVertex(informationVextex)
             
             db.commit()
-            return Some(information)
+            return information
         }
-        catch {
-            case t: Throwable => db.rollback(); println(t.getMessage()); return None
-        }
+//        catch {
+//            case t: Throwable => db.rollback(); println(t.getMessage()); return None
+//        }
         finally {
-            if (db != null) db.rollback(); db.shutdown
+            if (db != null) db.shutdown
         }
     }
 }

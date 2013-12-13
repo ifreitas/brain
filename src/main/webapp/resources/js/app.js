@@ -338,21 +338,30 @@ var informationForm = Ext.create('Ext.window.Window', {
 	}
 });
 
-
-////Set up a model to use in our Store
-//Ext.define('Information', {
-//    extend: 'Ext.data.Model',
-//    fields: [
-//        {name: 'id', type: 'string'},
-//        {name: 'name',  type: 'string'},
-//        {name: 'knowledgeId',  type: 'string'}
-//    ]
-//});
-//
-//var informationDataStore =  Ext.create('Ext.data.Store', {
-//    model: 'Information',
-//    data : []
-//});
+var deleteInformationForm = Ext.create('Ext.window.Window', {
+	title:       'Delete the Information',
+	closeAction: 'hide',
+	modal:       true,
+	closable:    true,
+	resizable:	 false,
+	height:      200,
+	width:       400,
+	layout:      'fit',
+	items:       {
+		xtype:     'panel',
+		border:    false,
+		contentEl: 'deleteInformationForm'
+	},
+	listeners: {
+		'beforehide':function(window){
+			document.getElementById("whatInformationToDelete").form.reset();
+			document.getElementById("deleteInformationFormStatus").innerHTML='';
+		},
+		'beforeshow':function(window){
+			document.getElementById("whatInformationToDelete").value=informationPanel.getSelectionModel().getLastSelected().data.id;
+		}
+	}
+});
 
 var informationStore = Ext.create('Ext.data.Store', {
     storeId:'informationStore',
@@ -376,7 +385,7 @@ var informationPanel = Ext.create('Ext.grid.Panel', {
 			{
 				  text: 'Update',
 				  handler:function(){
-					  selectedInformation = informationPanel.getSelectionModel().getSelection()[0].data
+					  selectedInformation = informationPanel.getSelectionModel().getLastSelected().data
 					  Ext.getElementById("informationId").value= selectedInformation.id;
 					  Ext.getElementById("informationNameInput").value= selectedInformation.name;
 					  Ext.getElementById("informationKnowledgeId").value=selectedInformation.knowledgeId;
@@ -384,7 +393,12 @@ var informationPanel = Ext.create('Ext.grid.Panel', {
 				  }
 			},
 			{
-				  text: 'Delete'
+				  text: 'Delete',
+				  handler:function(){
+					  selectedInformation = informationPanel.getSelectionModel().getLastSelected().data
+					  Ext.getElementById("whatInformationToDelete").value= selectedInformation.id;
+					  deleteInformationForm.show();
+				  }
 			}
 		],
 	    columns: [
@@ -443,6 +457,8 @@ function afterReceiveInformation(data){
 	informationStore.loadData(eval(data))
 	informationAndTeachingLoadMask.hide();
 }
+
+
 
 var contextMenu = Ext.create('Ext.menu.Menu', {
 	items:[
