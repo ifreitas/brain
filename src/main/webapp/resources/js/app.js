@@ -313,98 +313,123 @@ var teachingForm = Ext.create('Ext.window.Window', {
 	}
 });
 
-var informationForm = Ext.create('Ext.window.Window', {
-	title:       'Create the Information',
-	closeAction: 'hide',
-	modal:       true,
-	closable:    true,
-	resizable:	 false,
-	height:      200,
-	width:       400,
-	layout:      'fit',
-	items:       {
-		xtype:     'panel',
-		border:    false,
-		contentEl: 'informationForm'
-	},
-	listeners: {
-		'beforehide':function(window){
-			document.getElementById("informationNameInput").form.reset();
-			document.getElementById("informationFormStatus").innerHTML='';
+//var deleteInformationForm = Ext.create('Ext.window.Window', {
+//	title:       'Delete the Information',
+//	closeAction: 'hide',
+//	modal:       true,
+//	closable:    true,
+//	resizable:	 false,
+//	height:      200,
+//	width:       400,
+//	layout:      'fit',
+//	items:       {
+//		xtype:     'panel',
+//		border:    false,
+//		contentEl: 'deleteInformationForm'
+//	},
+//	listeners: {
+//		'beforehide':function(window){
+//			document.getElementById("whatInformationToDelete").form.reset();
+//			document.getElementById("deleteInformationFormStatus").innerHTML='';
+//		},
+//		'beforeshow':function(window){
+//			document.getElementById("whatInformationToDelete").value=informationExtWrapper.panel.getSelectionModel().getLastSelected().data.id;
+//		}
+//	}
+//});
+
+
+var informationExtWrapper = {
+	panel: Ext.create('Ext.grid.Panel', {
+		   region: 'north',
+		   margins: '5 5 5 5',
+		   height: 205,
+		   title: 'Informations',
+		   store: Ext.create('Ext.data.Store', {
+			    storeId:'informationStore',
+			    fields:['id', 'name', 'knowledgeId'],
+			    data:[]
+			}),
+		   tbar: [
+				{
+					  text: 'Create',
+					  handler:function(){
+						  informationExtWrapper.formPanel.show();
+					  }
+				},
+				{
+					  text: 'Update',
+					  handler:function(){
+						  selectedInformation = informationExtWrapper.panel.getSelectionModel().getLastSelected().data
+						  Ext.getElementById("informationId").value= selectedInformation.id;
+						  Ext.getElementById("informationNameInput").value= selectedInformation.name;
+						  Ext.getElementById("informationKnowledgeId").value=selectedInformation.knowledgeId;
+						  informationExtWrapper.formPanel.show();
+					  }
+				},
+				{
+					  text: 'Delete',
+					  handler:function(){
+						  selectedInformation = informationExtWrapper.panel.getSelectionModel().getLastSelected().data
+						  Ext.getElementById("whatInformationToDelete").value= selectedInformation.id;
+						  informationExtWrapper.deleteFormPanel.show();
+					  }
+				}
+			],
+		    columns: [{ text: 'Name',  dataIndex: 'name', width:'100%'}]
+	}),
+	
+	formPanel: Ext.create('Ext.window.Window', {
+		title:       'Create the Information',
+		closeAction: 'hide',
+		modal:       true,
+		closable:    true,
+		resizable:	 false,
+		height:      200,
+		width:       400,
+		layout:      'fit',
+		items:       {
+			xtype:     'panel',
+			border:    false,
+			contentEl: 'informationForm'
 		},
-		'beforeshow':function(window){
-			document.getElementById("informationKnowledgeId").value=ObjectManager.lastClicked.id;
-		}
-	}
-});
-
-var deleteInformationForm = Ext.create('Ext.window.Window', {
-	title:       'Delete the Information',
-	closeAction: 'hide',
-	modal:       true,
-	closable:    true,
-	resizable:	 false,
-	height:      200,
-	width:       400,
-	layout:      'fit',
-	items:       {
-		xtype:     'panel',
-		border:    false,
-		contentEl: 'deleteInformationForm'
-	},
-	listeners: {
-		'beforehide':function(window){
-			document.getElementById("whatInformationToDelete").form.reset();
-			document.getElementById("deleteInformationFormStatus").innerHTML='';
-		},
-		'beforeshow':function(window){
-			document.getElementById("whatInformationToDelete").value=informationPanel.getSelectionModel().getLastSelected().data.id;
-		}
-	}
-});
-
-var informationStore = Ext.create('Ext.data.Store', {
-    storeId:'informationStore',
-    fields:['id', 'name', 'knowledgeId'],
-    data:[]
-});
-
-var informationPanel = Ext.create('Ext.grid.Panel', {
-	   region: 'north',
-	   margins: '5 5 5 5',
-	   height: 205,
-	   title: 'Informations',
-	   store: informationStore,
-	   tbar: [
-			{
-				  text: 'Create',
-				  handler:function(){
-					  informationForm.show();
-				  }
+		listeners: {
+			'beforehide':function(window){
+				document.getElementById("informationId").value='';
+				document.getElementById("informationNameInput").value='';
+				document.getElementById("informationFormStatus").innerHTML='';
 			},
-			{
-				  text: 'Update',
-				  handler:function(){
-					  selectedInformation = informationPanel.getSelectionModel().getLastSelected().data
-					  Ext.getElementById("informationId").value= selectedInformation.id;
-					  Ext.getElementById("informationNameInput").value= selectedInformation.name;
-					  Ext.getElementById("informationKnowledgeId").value=selectedInformation.knowledgeId;
-					  informationForm.show();
-				  }
-			},
-			{
-				  text: 'Delete',
-				  handler:function(){
-					  selectedInformation = informationPanel.getSelectionModel().getLastSelected().data
-					  Ext.getElementById("whatInformationToDelete").value= selectedInformation.id;
-					  deleteInformationForm.show();
-				  }
+			'beforeshow':function(window){
+				document.getElementById("informationKnowledgeId").value=ObjectManager.lastClicked.id;
 			}
-		],
-	    columns: [
-	        { text: 'Name',  dataIndex: 'name', width:'100%'}
-	    ]
-});
+		}
+	}),
+	
+	deleteFormPanel: Ext.create('Ext.window.Window', {
+		title:       'Delete the Information',
+		closeAction: 'hide',
+		modal:       true,
+		closable:    true,
+		resizable:	 false,
+		height:      200,
+		width:       400,
+		layout:      'fit',
+		items:       {
+			xtype:     'panel',
+			border:    false,
+			contentEl: 'deleteInformationForm'
+		},
+		listeners: {
+			'beforehide':function(window){
+				document.getElementById("whatInformationToDelete").value='';
+				document.getElementById("deleteInformationFormStatus").innerHTML='';
+			},
+			'beforeshow':function(window){
+				document.getElementById("whatInformationToDelete").value=informationExtWrapper.panel.getSelectionModel().getLastSelected().data.id;
+			}
+		}
+	})
+}
 
 var informationAndTeachingWindow = Ext.create('Ext.window.Window', {
 	title:       'Informations & Teachings',// + ObjectManager.getLastClicked().name,
@@ -415,8 +440,7 @@ var informationAndTeachingWindow = Ext.create('Ext.window.Window', {
 	height:      600,
 	width:       900,
 	layout:      'border',
-	items:[	informationPanel
-	    	   ,
+	items:[	informationExtWrapper.panel,
 	    	   Ext.create('Ext.grid.Panel', {
 	    		   region: 'center',
 	    		   layout: 'fit',
@@ -444,7 +468,7 @@ var informationAndTeachingWindow = Ext.create('Ext.window.Window', {
 	],
 	listeners: {
 		'show':function(window){
-			informationStore.loadData([]);// TODO: search a better way to clear the grid.
+			informationExtWrapper.panel.store.loadData([]);// TODO: search a better way to clear the grid.
 			informationAndTeachingLoadMask.show();
  		    loadInformations();
 		}
@@ -454,31 +478,17 @@ var informationAndTeachingWindow = Ext.create('Ext.window.Window', {
 var informationAndTeachingLoadMask = new Ext.LoadMask(informationAndTeachingWindow, {msg:"Loading Informations. Please wait..."});
 
 function afterReceiveInformation(data){
-	informationStore.loadData(eval(data))
+	informationExtWrapper.panel.store.loadData(eval(data))
 	informationAndTeachingLoadMask.hide();
 }
 
-
-
 var contextMenu = Ext.create('Ext.menu.Menu', {
 	items:[
-	       {
-	    	   text : 'Add a Knowledge',
-	    	   handler : function(item){createKnowledgeForm.show();}
-		   }, 
-		   {
-			   text : 'Rename this Knowledge',
-	    	   handler : function(item){updateKnowledgeForm.show();}
-		   }, 
-		   {
-			   text : 'Delete this Knowledge',
-	    	   handler : function(item){deleteKnowledgeForm.show();}
-		   }, 
+	       { text : 'Add a Knowledge',       handler : function(item){createKnowledgeForm.show();} }, 
+		   { text : 'Rename this Knowledge', handler : function(item){updateKnowledgeForm.show();} }, 
+		   { text : 'Delete this Knowledge', handler : function(item){deleteKnowledgeForm.show();} }, 
 		   '-', 
-		   {
-			   text : 'Topics & Teachings',
-	    	   handler : function(item){informationAndTeachingWindow.show();}
-		   }
+		   { text : 'Topics & Teachings',    handler : function(item){informationAndTeachingWindow.show();}}
    ]
 });
 

@@ -65,7 +65,7 @@
         </div>
         
         <!-- Window -->
-        <div id="teachingWindow" style="width: 100%; height: 100%;">
+        <div id="teachingForm" style="width: 100%; height: 100%;">
             <form class="lift:form.ajax">
                 <div data-lift="createKnowledgeForm">
                     <table style="width: 100%; height: 100%;">
@@ -121,7 +121,6 @@
                 </div>
             </form>
         </div>
-        
         
     </div>
         
@@ -192,21 +191,21 @@
 					}
 					
 					function afterCreateInformation(newInformation){
-						informationForm.hide();
-						informationStore.addSorted(newInformation)
+						informationExtWrapper.formPanel.hide();
+						informationExtWrapper.panel.store.addSorted(eval(newInformation))
 						Log.info("Information named '" + newInformation.name + "' added successfully.");
 					}
 					function afterUpdateInformation(newInformation){
-						informationForm.hide();
-						i = informationPanel.getSelectionModel().getLastSelected()
+						informationExtWrapper.formPanel.hide();
+						i = informationExtWrapper.panel.getSelectionModel().getLastSelected()
 						i.set(newInformation)
 						i.commit()
-						informationStore.sort('name','ASC')
+						informationExtWrapper.panel.store.sort('name','ASC')
 						Log.info("Information renamed successfully.");
 					}
 					function afterDeleteInformation(information){
-						deleteInformationForm.hide();
-						informationStore.remove(informationPanel.getSelectionModel().getLastSelected());
+						informationExtWrapper.deleteFormPanel.hide();
+						informationExtWrapper.panel.store.remove(informationExtWrapper.panel.getSelectionModel().getLastSelected());
 						Log.info("Information deleted successfully.");
 					}
 				</script>
