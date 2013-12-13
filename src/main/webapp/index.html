@@ -8,14 +8,15 @@
 <body class="lift:content_id=main">
     <div id="main" class="lift:surround?with=default;at=content">
     <div class="lift:App.onLoad"></div>
+    <div class="lift:InformationSnippet.loadInformationsMethod"></div>
 
     <div id="theTree">
         <div id="infovis" class="infovis"></div>
     </div>
     <div id="log"></div>
 
-
-        <!-- Modal -->
+      <div style="display: none">
+        <!-- Window : Form : Knowledge -->
         <div id="createKnowledgeWindow" style="width: 100%; height: 100%;">
             <form class="lift:form.ajax">
                 <div data-lift="createKnowledgeForm">
@@ -26,13 +27,13 @@
                         </tr>
                         <tr><td colspan="2"><span id="createKnowledgeWindowStatus" style="color: red"></span></td></tr>
                         <tr><td colspan="2"><input type="hidden" name="parentId"><hr></td></tr>
-                        <tr align="right"><td colspan="2"><button type="submit" >Save changes</button><button onclick="createKowledgeWindow.hide();">Cancel</button></td></tr>
+                        <tr align="right"><td colspan="2"><button type="submit" >Save changes</button><button onclick="createKnowledgeForm.hide();">Cancel</button></td></tr>
                     </table>
                 </div>
             </form>
         </div>
         
-        <!-- Modal -->
+        <!-- Window -->
         <div id="updateKnowledgeWindow" style="width: 100%; height: 100%;">
             <form class="lift:form.ajax">
                 <div data-lift="updateKnowledgeForm">
@@ -43,15 +44,13 @@
                         </tr>
                         <tr><td colspan="2"><span id="updateKnowledgeWindowStatus" style="color: red"></span></td></tr>
                         <tr><td colspan="2"><input type="hidden" name="id"><hr></td></tr>
-                        <tr align="right"><td colspan="2"><button type="submit" >Save changes</button><button onclick="updateKowledgeWindow.hide();">Cancel</button></td></tr>
+                        <tr align="right"><td colspan="2"><button type="submit" >Save changes</button><button onclick="updateKnowledgeForm.hide();">Cancel</button></td></tr>
                     </table>
                 </div>
             </form>
         </div>
-        
                                     
-        <!-- Modal -->
-        <!-- Modal -->
+        <!-- Window -->
         <div id="deleteKnowledgeWindow" style="width: 100%; height: 100%;">
             <form class="lift:form.ajax">
                 <div data-lift="deleteKnowledgeForm">
@@ -59,12 +58,13 @@
                         <tr><td>Confirm to delete this knowledge?</td></tr>
                         <tr><td><span id="deleteKnowledgeWindowStatus" style="color: red"></span></td></tr>
                         <tr><td><input type="hidden" name="id"><hr></td></tr>
-                        <tr align="right"><td><button type="submit" >Save changes</button><button onclick="deleteKowledgeWindow.hide();">Cancel</button></td></tr>
+                        <tr align="right"><td><button type="submit" >Save changes</button><button onclick="deleteKnowledgeForm.hide();">Cancel</button></td></tr>
                     </table>
                 </div>
             </form>
         </div>
         
+        <!-- Window -->
         <div id="teachingWindow" style="width: 100%; height: 100%;">
             <form class="lift:form.ajax">
                 <div data-lift="createKnowledgeForm">
@@ -87,19 +87,35 @@
                         </tr>
                         <tr><td colspan="2"><span id="createTeachingWindowStatus" style="color: red"></span></td></tr>
                         <tr><td colspan="2"><input type="hidden" name="parentId"><hr></td></tr>
-                        <tr align="right"><td colspan="2"><button type="submit" >Save changes</button><button onclick="createKowledgeWindow.hide();">Cancel</button></td></tr>
+                        <tr align="right"><td colspan="2"><button type="submit" >Save</button><button onclick="createKnowledgeForm.hide();">Cancel</button></td></tr>
                     </table>
                 </div>
             </form>
         </div>
-
+        
+        <div id="informationForm" style="width: 100%; height: 100%;">
+            <form class="lift:form.ajax">
+                <div data-lift="informationSnippet">
+                    <table style="width: 100%; height: 100%;">
+                        <tr>
+                            <td><label for="informationNameInput">Name</label></td>
+                            <td><input type="text" id="informationNameInput" placeholder="Enter new Information name"></td>
+                        </tr>
+                        <tr><td colspan="2"><span id="informationFormStatus" style="color: red"></span></td></tr>
+                        <tr><td colspan="2"><input id="informationId" type="hidden" ><input type="hidden" id="informationKnowledgeId"><hr></td></tr>
+                        <tr align="right"><td colspan="2"><button type="submit" >Save changes</button><button onclick="informationForm.hide();">Cancel</button></td></tr>
+                    </table>
+                </div>
+            </form>
+        </div>
+    </div>
         
     <script type="text/javascript">
     
         document.oncontextmenu = function(e) { return false; };
         
 				function afterUpdateKnowledge(knowledge){
-		      updateKowledgeWindow.hide();
+		      updateKnowledgeForm.hide();
 					lastClikedNode = ObjectManager.lastClicked;
 					Log.info("Knowledege '"+lastClikedNode.name+"' renamed to '" + knowledge.name + "' successfully.");
 					
@@ -108,7 +124,7 @@
 				}
 
 				function afterCreateKnowledge(newKnowledge) {
-					createKowledgeWindow.hide();
+					createKnowledgeForm.hide();
 					
 					Log.info("Knowledege named '" + newKnowledge.name + "' added successfully.");
 					lastClikedNode = ObjectManager.lastClicked;
@@ -133,7 +149,7 @@
 					}
 
 					function afterDeleteKnowledge(knowledge) {
-						deleteKowledgeWindow.hide();
+						deleteKnowledgeForm.hide();
 						var lastClickedNode = ObjectManager.lastClicked;
 						var nodeParent = null;
 
@@ -158,6 +174,20 @@
 									Log.info("Knowledge '"+knowledge.name+"' deleted successfully.");
 								}
 							})
+					}
+					
+					function afterCreateInformation(newInformation){
+						informationForm.hide();
+						informationStore.addSorted(newInformation)
+						Log.info("Information named '" + newInformation.name + "' added successfully.");
+					}
+					function afterUpdateInformation(newInformation){
+						informationForm.hide();
+						i = informationPanel.getSelectionModel().getLastSelected()
+						i.set(newInformation)
+						i.commit()
+						informationStore.sort('name','ASC')
+						Log.info("Information renamed successfully.");
 					}
 				</script>
 

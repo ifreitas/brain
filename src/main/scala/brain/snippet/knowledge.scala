@@ -28,7 +28,6 @@ import scala.xml.NodeSeq
 class CreateKnowledgeForm {
 	var name = ""
 	var parentId = ""
-	var teste = ""
 	    
     def render = {
         "#createKnowledgeNameInput" #> text(name, name = _) & 
@@ -38,13 +37,13 @@ class CreateKnowledgeForm {
 	
 	def create(name:String, parentId:String): JsCmd = {
 		if (name==null || name.trim.isEmpty)
-			error("createKnowledgeWindowStatus", "Please fill the name field.")
+			error("createKnowledgeFormStatus", "Please fill the name field.")
 		else if(parentId.trim.isEmpty)
-			error("createKnowledgeWindowStatus", "Did was not possible to identify the parent knowledge. Please close this popup and try again.")
+			error("createKnowledgeFormStatus", "Unable to identify the parent knowledge. Please close this popup and try again.")
 		else{
 			doCreate(name, parentId) match{
 			case Some(knowledge) => return Run(s"afterCreateKnowledge({id:'${knowledge.getId}', name:'$name', data:{}, children:[]})")
-			case _ => error("createKnowledgeWindowStatus", "Invalid knowledge name.");//Noop
+			case _ => error("createKnowledgeFormStatus", "Invalid knowledge name.");//Noop
 			}
 		}
 	}
@@ -62,7 +61,7 @@ class CreateKnowledgeForm {
             case t: Throwable => db.rollback(); println(t.getCause()); return None
         }
         finally {
-            if (db != null) db.rollback(); db.shutdown
+            if (db != null) db.shutdown
         }
     }
 }
@@ -79,13 +78,13 @@ class UpdateKnowledgeForm {
 	
 	def update(name:String, id:String): JsCmd = {
 		if (name==null || name.trim.isEmpty)
-			error("updateKnowledgeWindowStatus", "Please fill the name field.")
+			error("updateKnowledgeFormStatus", "Please fill the name field.")
 		else if(id.trim.isEmpty)
-			error("updateKnowledgeWindowStatus", "Did was not possible to identify the knowledge to rename. Please close this popup and try again.")
+			error("updateKnowledgeFormStatus", "Unable to identify the knowledge to rename. Please close this popup and try again.")
 		else{
 			doUpdate(name, id) match{
 			case Some(knowledge) => return Run(s"afterUpdateKnowledge({id:'${knowledge.getId}', name:'$name', data:{}, children:[]})")
-			case _ => error("updateKnowledgeWindowStatus", "Invalid knowledge name.");
+			case _ => error("updateKnowledgeFormStatus", "Invalid knowledge name.");
 			}
 		}
 	}
@@ -102,7 +101,7 @@ class UpdateKnowledgeForm {
             case t: Throwable => db.rollback(); println(t.getCause()); return None
         }
         finally {
-            if (db != null) db.rollback(); db.shutdown
+            if (db != null) db.shutdown
         }
     }
 }
@@ -117,11 +116,11 @@ class DeleteKnowledgeForm {
 	
 	def delete(id:String): JsCmd = {
 		if(id.trim.isEmpty)
-			error("deleteKnowledgeWindowStatus", "Was not possible to identify the parent knowledge. Please close this popup and try again.")
+			error("deleteKnowledgeFormStatus", "Unable to identify the knowledge to delete. Please close this popup and try again.")
 		else{
 			doDelete(id) match{
 			case Some(knowledge) => return Run(raw"afterDeleteKnowledge({id:'${knowledge.getId}', name:'${knowledge.getProperty("name")}', data:{}, children:[]})")
-			case _ => error("deleteKnowledgeWindowStatus", "Invalid knowledge name.");
+			case _ => error("deleteKnowledgeFormStatus", "Invalid knowledge. Unable to continue.");
 			}
 		}
 	}
@@ -140,13 +139,13 @@ class DeleteKnowledgeForm {
             case t: Throwable => db.rollback(); println(t.getMessage()); return None
         }
         finally {
-            if (db != null) db.rollback(); db.shutdown
+            if (db != null) db.shutdown
         }
     }
     
     def deleteCascade(knowledge:Vertex)(implicit db:OrientGraph):Unit={
         val children = knowledge.getVertices(Direction.OUT, "Include")
-        val topics   = knowledge.getVertices(Direction.OUT, "Divisions")
+        val topics   = knowledge.getVertices(Direction.OUT, "Division")
         
         //topics.foreach(deleteTopic) // TODO
         children.foreach(deleteCascade)
