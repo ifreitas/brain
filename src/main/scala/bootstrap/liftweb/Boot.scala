@@ -1,16 +1,11 @@
 package bootstrap.liftweb
 
 import java.util.Locale
-
 import scala.collection.JavaConverters.mapAsJavaMapConverter
-
 import com.orientechnologies.orient.client.remote.OServerAdmin
-import com.orientechnologies.orient.core.metadata.schema.OType
 import com.tinkerpop.blueprints.impls.orient.OrientGraphNoTx
-
 import brain.config.Config
 import brain.db.GraphDb
-import net.liftmodules.FoBo
 import net.liftweb.common.Box
 import net.liftweb.common.Full
 import net.liftweb.http.Html5Properties
@@ -20,6 +15,8 @@ import net.liftweb.http.Req
 import net.liftweb.http.SessionVar
 import net.liftweb.http.provider.HTTPRequest
 import net.liftweb.util.Vendor.valToVendor
+import com.orientechnologies.orient.core.metadata.schema.OType
+import brain.rest.KnowledgeRest
 
 // Inspirado em: http://stackoverflow.com/questions/8305586/where-should-my-sessionvar-object-be
 object appSession extends SessionVar[Map[String, Any]](Map()) {
@@ -33,6 +30,8 @@ class Boot {
 
         // Where find snippet and comet
         LiftRules.addToPackages("brain")
+        
+        LiftRules.dispatch.append(KnowledgeRest)
 
         // Full support to Html5
         LiftRules.htmlProperties.default.set((r: Req) => new Html5Properties(r.userAgent))
@@ -100,6 +99,11 @@ class Boot {
         	db.createVertexType("Conf")
         	db.createVertexType("Knowledge").createProperty("name", OType.STRING).setMandatory(true).setMin("2").setMax("40")
         	db.createVertexType("Information").createProperty("name", OType.STRING).setMandatory(true).setMin("2").setMax("40")
+        	val teachingVertex = db.createVertexType("Teaching")
+        	teachingVertex.createProperty("whenTheUserSays", OType.STRING).setMandatory(true).setMin("1").setMax("100")
+        	teachingVertex.createProperty("respondingTo", OType.STRING).setMandatory(true).setMin("1").setMax("100")
+        	teachingVertex.createProperty("memorize", OType.STRING).setMandatory(true).setMin("3").setMax("60")
+        	teachingVertex.createProperty("say", OType.STRING).setMandatory(true).setMin("1").setMax("500")
         }
         catch {
 		  case t : Throwable => {

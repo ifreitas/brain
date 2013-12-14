@@ -9,6 +9,7 @@
     <div id="main" class="lift:surround?with=default;at=content">
     <div class="lift:App.onLoad"></div>
     <div class="lift:InformationSnippet.loadInformationsMethod"></div>
+    <div class="lift:TeachingSnippet.loadTeachingsMethod"></div>
 
     <div id="theTree">
         <div id="infovis" class="infovis"></div>
@@ -67,11 +68,11 @@
         <!-- Window -->
         <div id="teachingForm" style="width: 100%; height: 100%;">
             <form class="lift:form.ajax">
-                <div data-lift="createKnowledgeForm">
+                <div data-lift="teachingSnippet">
                     <table style="width: 100%; height: 100%;">
                         <tr>
-                            <td><label for="whenUserSayInput">When the user says</label></td>
-                            <td><textarea id="whenUserSayInput" rows="5" cols="50" placeholder="likely user's sentences (one per line)"></textarea></td>
+                            <td><label for="whenTheUserSaysInput">When the user says</label></td>
+                            <td><textarea id="whenTheUserSaysInput" rows="5" cols="50" placeholder="likely user's sentences (one per line)"></textarea></td>
                         </tr>
                         <tr>
                             <td><label for="respondingToInput">Responding to</label></td>
@@ -82,12 +83,12 @@
                             <td><textarea id="memorizeInput" rows="5" cols="50" placeholder="some key=value pair like: name='Israel' (one per line)"></textarea></td>
                         </tr>
                         <tr>
-                            <td><label for="thinkInput">Say</label></td>
-                            <td><textarea id="thinkInput" rows="5" cols="50" placeholder="The bot's responses to the user input. Can access memorized variables. Example: Hello, ${name}. (one per line)"></textarea></td>
+                            <td><label for="sayInput">Say</label></td>
+                            <td><textarea id="sayInput" rows="5" cols="50" placeholder="The bot's responses to the user input. Can access memorized variables. Example: Hello, ${name}. (one per line)"></textarea></td>
                         </tr>
-                        <tr><td colspan="2"><span id="createTeachingWindowStatus" style="color: red"></span></td></tr>
-                        <tr><td colspan="2"><input type="hidden" name="parentId"><hr></td></tr>
-                        <tr align="right"><td colspan="2"><button type="submit" >Save</button><button onclick="createKnowledgeForm.hide();">Cancel</button></td></tr>
+                        <tr><td colspan="2"><span id="teachingFormStatus" style="color: red"></span></td></tr>
+                        <tr><td colspan="2"><input type="hidden" id="teachingId"><input type="hidden" id="teachingInformationId"><hr></td></tr>
+                        <tr align="right"><td colspan="2"><button type="submit" >Save</button><button onclick="teachingExtWrapper.formPanel.hide();">Cancel</button></td></tr>
                     </table>
                 </div>
             </form>
@@ -103,7 +104,7 @@
                         </tr>
                         <tr><td colspan="2"><span id="informationFormStatus" style="color: red"></span></td></tr>
                         <tr><td colspan="2"><input id="informationId" type="hidden" ><input type="hidden" id="informationKnowledgeId"><hr></td></tr>
-                        <tr align="right"><td colspan="2"><button type="submit" >Save changes</button><button onclick="informationForm.hide();">Cancel</button></td></tr>
+                        <tr align="right"><td colspan="2"><button type="submit" >Save changes</button><button onclick="informationExtWrapper.formPanel.hide();">Cancel</button></td></tr>
                     </table>
                 </div>
             </form>
@@ -116,7 +117,7 @@
                         <tr><td>Confirm to delete this information?</td></tr>
                         <tr><td><span id="deleteInformationFormStatus" style="color: red"></span></td></tr>
                         <tr><td><input type="hidden" id="whatInformationToDelete"><hr></td></tr>
-                        <tr align="right"><td><button type="submit" >yes</button><button onclick="deleteInformationForm.hide();">NO!</button></td></tr>
+                        <tr align="right"><td><button type="submit" >yes</button><button onclick="informationExtWrapper.deleteFormPanel.hide();">NO!</button></td></tr>
                     </table>
                 </div>
             </form>
@@ -192,7 +193,7 @@
 					
 					function afterCreateInformation(newInformation){
 						informationExtWrapper.formPanel.hide();
-						informationExtWrapper.panel.store.addSorted(eval(newInformation))
+						informationExtWrapper.panel.store.add(newInformation)
 						Log.info("Information named '" + newInformation.name + "' added successfully.");
 					}
 					function afterUpdateInformation(newInformation){
@@ -207,6 +208,25 @@
 						informationExtWrapper.deleteFormPanel.hide();
 						informationExtWrapper.panel.store.remove(informationExtWrapper.panel.getSelectionModel().getLastSelected());
 						Log.info("Information deleted successfully.");
+					}
+					
+					function afterCreateTeaching(newTeaching){
+						teachingExtWrapper.formPanel.hide();
+						teachingExtWrapper.panel.store.addSorted(eval(newTeaching))
+						Log.info("Teaching named '" + newTeaching.name + "' added successfully.");
+					}
+					function afterUpdateTeaching(newTeaching){
+						teachingExtWrapper.formPanel.hide();
+						i = teachingExtWrapper.panel.getSelectionModel().getLastSelected()
+						i.set(newTeaching)
+						i.commit()
+						teachingExtWrapper.panel.store.sort('whenTheUserSays','ASC')
+						Log.info("Teaching renamed successfully.");
+					}
+					function afterDeleteTeaching(teaching){
+						teachingExtWrapper.deleteFormPanel.hide();
+						teachingExtWrapper.panel.store.remove(teachingExtWrapper.panel.getSelectionModel().getLastSelected());
+						Log.info("Teaching deleted successfully.");
 					}
 				</script>
 

@@ -59,14 +59,14 @@ class InformationSnippet {
 		}
 	}
 	
-	def create(information:Information):JsCmd={
-	    doCreate(information) match{
+	def create(info:Information):JsCmd={
+	    doCreate(info) match{
 			case Some(information) => return Run(s"afterCreateInformation(${information.toJson})")
 			case _ => error("informationFormStatus", "Invalid name.");
 		}
 	}
-	def update(information:Information):JsCmd={
-	    doUpdate(information) match{
+	def update(info:Information):JsCmd={
+	    doUpdate(info) match{
 			case Some(information) => return Run(s"afterUpdateInformation(${information.toJson})")
 			case _ => error("informationFormStatus", "Invalid name.");
 		}

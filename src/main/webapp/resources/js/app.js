@@ -297,44 +297,19 @@ var deleteKnowledgeForm = Ext.create('Ext.window.Window', {
 	}
 });
 
-var teachingForm = Ext.create('Ext.window.Window', {
-	title:       'Create the Teaching',
-	closeAction: 'hide',
-	modal:       true,
-	closable:    true,
-	resizable:	 false,
-	height:      400,
-	width:       500,
-	layout:      'fit',
-	items:       {
-		xtype:     'panel',
-		border:    false,
-		contentEl: 'teachingForm'
-	}
-});
-
-//var deleteInformationForm = Ext.create('Ext.window.Window', {
-//	title:       'Delete the Information',
+//var teachingForm = Ext.create('Ext.window.Window', {
+//	title:       'Create the Teaching',
 //	closeAction: 'hide',
 //	modal:       true,
 //	closable:    true,
 //	resizable:	 false,
-//	height:      200,
-//	width:       400,
+//	height:      400,
+//	width:       500,
 //	layout:      'fit',
 //	items:       {
 //		xtype:     'panel',
 //		border:    false,
-//		contentEl: 'deleteInformationForm'
-//	},
-//	listeners: {
-//		'beforehide':function(window){
-//			document.getElementById("whatInformationToDelete").form.reset();
-//			document.getElementById("deleteInformationFormStatus").innerHTML='';
-//		},
-//		'beforeshow':function(window){
-//			document.getElementById("whatInformationToDelete").value=informationExtWrapper.panel.getSelectionModel().getLastSelected().data.id;
-//		}
+//		contentEl: 'teachingForm'
 //	}
 //});
 
@@ -346,6 +321,13 @@ var informationExtWrapper = {
 		   height: 205,
 		   title: 'Informations',
 		   store: Ext.create('Ext.data.Store', {
+			   config:{
+				   sortOnLoad:true,
+			   },
+			   sorters: [{
+			         property: 'name',
+			         direction: 'ASC'
+			     }],
 			    storeId:'informationStore',
 			    fields:['id', 'name', 'knowledgeId'],
 			    data:[]
@@ -376,7 +358,19 @@ var informationExtWrapper = {
 					  }
 				}
 			],
-		    columns: [{ text: 'Name',  dataIndex: 'name', width:'100%'}]
+		    columns: [{ text: 'Name',  dataIndex: 'name', width:'100%'}],
+		    listeners:{
+		    	select:function( theGrid, record, index, eOpts ){
+		    		teachingExtWrapper.panel.setDisabled(false)
+		    		teachingExtWrapper.panel.setTitle("Teachings of " + record.data.name)
+		    		teachingExtWrapper.panel.store.loadData([]);// TODO: search a better way to clear the grid.
+					teachingLoadMask.show();
+		 		    loadTeachings();
+		    	},
+				deselect:function( record, index, eOpts ){
+					teachingExtWrapper.panel.setDisabled(true)
+				}
+		    }
 	}),
 	
 	formPanel: Ext.create('Ext.window.Window', {
@@ -431,8 +425,81 @@ var informationExtWrapper = {
 	})
 }
 
+var teachingExtWrapper = {
+	panel: Ext.create('Ext.grid.Panel', {
+		disabled : true,
+		   region: 'center',
+		   layout: 'fit',
+		   margins: '0 5 5 5',
+		   title: 'Teachings',
+		   store: Ext.create('Ext.data.Store', {
+			   config:{
+				   sortOnLoad:true,
+			   },
+			   sorters: [{
+			         property: 'name',
+			         direction: 'ASC'
+			     }],
+			    storeId:'teachingStore',
+			    fields:['id', 'informationId', 'whenTheUserSays', 'respondingTo', 'memorize', 'say'],
+			    data:[]
+			}),
+		   tbar: [
+		          {
+		        	  text: 'Create',
+					  handler:function(){
+						  teachingExtWrapper.formPanel.show();
+					  }
+		          },
+		          {
+		        	  text: 'Update'
+		          },
+		          {
+		        	  text: 'Delete'
+		          }
+		          ],
+		   columns: [
+                    { text: 'When the user says',  dataIndex: 'whenTheUserSays', width:280},
+                    { text: 'Responding to',  dataIndex: 'respondingTo', width:200 },
+                    { text: 'Memorize',  dataIndex: 'memorize', width:100},
+                    { text: 'Say',  dataIndex: 'say', width:280 },
+           ],
+           height: 200
+	   }),
+	   
+	   formPanel: Ext.create('Ext.window.Window', {
+			title:       'Create the Teaching',
+			closeAction: 'hide',
+			modal:       true,
+			closable:    true,
+			resizable:	 false,
+			height:      410,
+			width:       500,
+			layout:      'fit',
+			items:       {
+				xtype:     'panel',
+				border:    false,
+				contentEl: 'teachingForm'
+			},
+			listeners: {
+				'beforehide':function(window){
+					document.getElementById("teachingInformationId").value='';
+					document.getElementById("whenTheUserSaysInput").value='';
+					document.getElementById("whenTheUserSaysInput").value='';
+					document.getElementById("respondingToInput").value='';
+					document.getElementById("memorizeInput").value='';
+					document.getElementById("sayInput").value='';
+					document.getElementById("teachingFormStatus").innerHTML='';
+				},
+				'beforeshow':function(window){
+					document.getElementById("teachingInformationId").value=informationExtWrapper.panel.getSelectionModel().getLastSelected().data.id;
+				}
+			}
+		})
+}
+
 var informationAndTeachingWindow = Ext.create('Ext.window.Window', {
-	title:       'Informations & Teachings',// + ObjectManager.getLastClicked().name,
+	title:       'Informations & Teachings',
 	closeAction: 'hide',
 	modal:       true,
 	closable:    true,
@@ -440,46 +507,26 @@ var informationAndTeachingWindow = Ext.create('Ext.window.Window', {
 	height:      600,
 	width:       900,
 	layout:      'border',
-	items:[	informationExtWrapper.panel,
-	    	   Ext.create('Ext.grid.Panel', {
-	    		   region: 'center',
-	    		   layout: 'fit',
-	    		   margins: '0 5 5 5',
-	    		   title: 'Teachings',
-	    		   tbar: [
-	    		          {
-	    		        	  text: 'Create'
-	    		          },
-	    		          {
-	    		        	  text: 'Update'
-	    		          },
-	    		          {
-	    		        	  text: 'Delete'
-	    		          }
-	    		          ],
-	    		   columns: [
-		                    { text: 'When the user says',  dataIndex: 'whenTheUserSays', width:280},
-		                    { text: 'Responding to',  dataIndex: 'respondigTo', width:200 },
-		                    { text: 'Memorize',  dataIndex: 'memorize', width:100},
-		                    { text: 'Say',  dataIndex: 'say', width:280 },
-		           ],
-		           height: 200
-	    	   })
-	],
+	items:[	informationExtWrapper.panel, teachingExtWrapper.panel],
 	listeners: {
 		'show':function(window){
 			informationExtWrapper.panel.store.loadData([]);// TODO: search a better way to clear the grid.
-			informationAndTeachingLoadMask.show();
+			informationLoadMask.show();
  		    loadInformations();
 		}
 	}
 });
 
-var informationAndTeachingLoadMask = new Ext.LoadMask(informationAndTeachingWindow, {msg:"Loading Informations. Please wait..."});
-
+var informationLoadMask = new Ext.LoadMask(informationExtWrapper.panel, {msg:"Loading Informations. Please wait..."});
 function afterReceiveInformation(data){
 	informationExtWrapper.panel.store.loadData(eval(data))
-	informationAndTeachingLoadMask.hide();
+	informationLoadMask.hide();
+}
+
+var teachingLoadMask = new Ext.LoadMask(teachingExtWrapper.panel, {msg:"Loading Teachings. Please wait..."});
+function afterReceiveTeachings(data){
+	teachingExtWrapper.panel.store.loadData(eval(data))
+	teachingLoadMask.hide();
 }
 
 var contextMenu = Ext.create('Ext.menu.Menu', {

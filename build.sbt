@@ -26,10 +26,6 @@ libraryDependencies ++= {
   Seq(
     "net.liftweb"              %% "lift-webkit"                % liftVersion           % "compile" withSources(),
     "net.liftweb"              %% "lift-mapper"                % liftVersion           % "compile" withSources(),
-    "net.liftmodules"          %% "fobo_2.5"                   % "1.0",
-    "net.liftmodules"          %% "fobo-jquery_2.5"            % "0.9.9-SNAPSHOT",
-    "net.liftmodules"          %% "fobo-twitter-bootstrap_2.5" % "1.0",
-    "net.liftmodules"          %% "fobo-font-awesome_2.5"      % "1.0",
     "org.eclipse.jetty"        % "jetty-webapp"   % "8.1.12.v20130726"    % "container,test",
     "org.eclipse.jetty.orbit"  % "javax.servlet"  % "3.0.0.v201112011016" % "container,test" artifacts Artifact("javax.servlet", "jar", "jar"),
     "ch.qos.logback"           % "logback-classic"             % "1.0.6",
