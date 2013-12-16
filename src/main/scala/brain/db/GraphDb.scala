@@ -38,5 +38,17 @@ object GraphDb {
 			new OrientGraphNoTx(OGraphDatabasePool.global().acquire(Config.getGraphDbUri, Config.getGraphDbUser, Config.getGraphDbPassword))
 		}
     }
+	
+    def transaction[T](func: =>T)(implicit db:OrientGraph):Option[T]={
+        try {
+        	val result = func
+        	db.commit
+        	return Some(result)
+        }
+        catch{
+            case t : Throwable => db.rollback; throw t
+        }
+        finally { if( !db.isClosed ) db.shutdown }
+    }
 
 }

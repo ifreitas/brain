@@ -28,31 +28,52 @@ import com.ansvia.graph.BlueprintsWrapper.DbObject
 import aimltoxml.aiml.Text
 import aimltoxml.aiml.Category
 import aimltoxml.aiml.Srai
+import com.tinkerpop.blueprints.Graph
+import com.tinkerpop.blueprints.Vertex
+import com.tinkerpop.blueprints.impls.orient.OrientGraph
+import brain.db.GraphDb
 
-case class Teaching(whenUserSays: Set[String], respondingTo: String, say: Set[String]) extends DbObject {
-    def toAiml: Set[Category] = { new TeachingToCategoryAdapter(this).toCategory }
+case class Teaching(val id:String, val informationId:String, val whenTheUserSays:String, val respondingTo:String, val memorize:String, val say:String){
+    require(!whenTheUserSays.isEmpty, "Field 'when the user says', can not be empty.")
+    require(!say.isEmpty, "Field 'say', can not be empty.")
+    
+    def toAiml = new TeachingToCategoryAdapter(this).toCategory
+    
+    def toJson:String = raw"{id:'$id', informationId:'$informationId', whenTheUserSays:'$whenTheUserSays', respondingTo:'$respondingTo', memorize:'$memorize',say:'$say'}" 
+}
 
-    def canEqual(other: Any) = other.isInstanceOf[brain.models.Teaching]
-
-    override def equals(other: Any) = {
-        other match {
-            case that: brain.models.Teaching => that.canEqual(Teaching.this) && whenUserSays == that.whenUserSays && respondingTo == that.respondingTo && say == that.say
-            case _                           => false
+object Teaching{
+	def findById(id:String)(implicit db:Graph):Set[Teaching]  = Set.empty[Teaching]
+	def findByInformationId(informationId:String)(implicit db:Graph):Set[Teaching]  = Set.empty[Teaching]
+    def create(teaching:Teaching)(implicit db:OrientGraph):Option[Teaching] = {
+        val vertex = GraphDb.transaction[Vertex]({
+        	val teachingVertex    = db.addVertex("class:Teaching", "whenTheUserSays", teaching.whenTheUserSays, "respondingTo", teaching.respondingTo, "memorize", teaching.memorize, "say", teaching.say)
+            val informationVertex = db.getVertex(teaching.informationId)
+            db.addEdge("class:Include", informationVertex, teachingVertex, "include")
+            teachingVertex
+        })
+        vertex.map(v=>Teaching(v))
+	}
+    def update(teaching:Teaching)(implicit db:OrientGraph):Option[Teaching] = {
+        val result = GraphDb.transaction[Vertex] {
+            var oldTeaching = db.getVertex(teaching.id)
+            oldTeaching.setProperty("whenTheUserSays", teaching.whenTheUserSays)
+            oldTeaching.setProperty("respondingTo", teaching.respondingTo)
+            oldTeaching.setProperty("memorize", teaching.memorize)
+            oldTeaching.setProperty("say", teaching.say)
+            oldTeaching
         }
+        result.map(v=>Teaching(v))
     }
-
-    override def hashCode() = {
-        val prime = 41
-        prime * (prime * (prime + whenUserSays.hashCode) + respondingTo.hashCode) + say.hashCode
-    }
-
+    def delete(teaching:Teaching)(implicit db:OrientGraph):Teaching = teaching
+    
+    def apply(vertex:Vertex):Teaching = Teaching(vertex.getId().toString(), "", vertex.getProperty("whenTheUserSays"), vertex.getProperty("respondingTo"), vertex.getProperty("memorize"), vertex.getProperty("say"))
 }
 
 class TeachingToCategoryAdapter(teaching: Teaching) {
-    require(teaching != null, "The teaching is required to be converted to a Category.")
 
-    val whatWasSaid: Set[String] = teaching.whenUserSays.filter(!_.isEmpty)
-    val whatToSay: Set[String] = teaching.say.filter(!_.isEmpty)
+    val whatWasSaid: Set[String] = teaching.whenTheUserSays.split("\r\n").toSet[String].filter(!_.isEmpty)
+    val whatToSay: Set[String] = teaching.say.split("\r\n").toSet[String].filter(!_.isEmpty)
     val respondingTo = teaching.respondingTo
 
     def selectDefaultPattern(setOfWhatWasSaid: Set[String]) = {
@@ -93,7 +114,7 @@ class TeachingToCategoryAdapter(teaching: Teaching) {
     def createTemplateElements(say: Set[String]): Set[TemplateElement] = say.map { Text(_) }
 
     def toCategory: Set[Category] = {
-        val defaultPattern = selectDefaultPattern(teaching.whenUserSays)
+        val defaultPattern = selectDefaultPattern(whatWasSaid)
         whatWasSaid.map(createCategory(_, defaultPattern, respondingTo, whatToSay))
     }
 }

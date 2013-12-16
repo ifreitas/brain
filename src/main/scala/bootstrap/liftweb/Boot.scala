@@ -16,7 +16,8 @@ import net.liftweb.http.SessionVar
 import net.liftweb.http.provider.HTTPRequest
 import net.liftweb.util.Vendor.valToVendor
 import com.orientechnologies.orient.core.metadata.schema.OType
-import brain.rest.KnowledgeRest
+//import brain.rest.KnowledgeRest
+import brain.rest.TeachingRest
 
 // Inspirado em: http://stackoverflow.com/questions/8305586/where-should-my-sessionvar-object-be
 object appSession extends SessionVar[Map[String, Any]](Map()) {
@@ -31,7 +32,8 @@ class Boot {
         // Where find snippet and comet
         LiftRules.addToPackages("brain")
         
-        LiftRules.dispatch.append(KnowledgeRest)
+        LiftRules.dispatch.append(TeachingRest)
+//        LiftRules.dispatch.append(KnowledgeRest)
 
         // Full support to Html5
         LiftRules.htmlProperties.default.set((r: Req) => new Html5Properties(r.userAgent))

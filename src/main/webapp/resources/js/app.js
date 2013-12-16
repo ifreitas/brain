@@ -297,23 +297,6 @@ var deleteKnowledgeForm = Ext.create('Ext.window.Window', {
 	}
 });
 
-//var teachingForm = Ext.create('Ext.window.Window', {
-//	title:       'Create the Teaching',
-//	closeAction: 'hide',
-//	modal:       true,
-//	closable:    true,
-//	resizable:	 false,
-//	height:      400,
-//	width:       500,
-//	layout:      'fit',
-//	items:       {
-//		xtype:     'panel',
-//		border:    false,
-//		contentEl: 'teachingForm'
-//	}
-//});
-
-
 var informationExtWrapper = {
 	panel: Ext.create('Ext.grid.Panel', {
 		   region: 'north',
@@ -342,18 +325,18 @@ var informationExtWrapper = {
 				{
 					  text: 'Update',
 					  handler:function(){
-						  selectedInformation = informationExtWrapper.panel.getSelectionModel().getLastSelected().data
-						  Ext.getElementById("informationId").value= selectedInformation.id;
-						  Ext.getElementById("informationNameInput").value= selectedInformation.name;
-						  Ext.getElementById("informationKnowledgeId").value=selectedInformation.knowledgeId;
+						  selectedItem = informationExtWrapper.panel.getSelectionModel().getLastSelected().data
+						  Ext.getElementById("informationId").value= selectedItem.id;
+						  Ext.getElementById("informationNameInput").value= selectedItem.name;
+						  Ext.getElementById("informationKnowledgeId").value=selectedItem.knowledgeId;
 						  informationExtWrapper.formPanel.show();
 					  }
 				},
 				{
 					  text: 'Delete',
 					  handler:function(){
-						  selectedInformation = informationExtWrapper.panel.getSelectionModel().getLastSelected().data
-						  Ext.getElementById("whatInformationToDelete").value= selectedInformation.id;
+						  selectedItem = informationExtWrapper.panel.getSelectionModel().getLastSelected().data
+						  Ext.getElementById("whatInformationToDelete").value= selectedItem.id;
 						  informationExtWrapper.deleteFormPanel.show();
 					  }
 				}
@@ -452,10 +435,25 @@ var teachingExtWrapper = {
 					  }
 		          },
 		          {
-		        	  text: 'Update'
+		        	  text: 'Update',
+					  handler:function(){
+						  selectedItem = teachingExtWrapper.panel.getSelectionModel().getLastSelected().data
+						  document.getElementById("teachingId").value=selectedItem.id;
+						  document.getElementById("teachingInformationId").value=selectedItem.teachingInformationId;
+						  document.getElementById("whenTheUserSaysInput").value=selectedItem.whenTheUserSays;
+						  document.getElementById("respondingToInput").value=selectedItem.respondingTo;
+						  document.getElementById("memorizeInput").value=selectedItem.memorize;
+						  document.getElementById("sayInput").value=selectedItem.say;
+						  teachingExtWrapper.formPanel.show();
+					  }
 		          },
 		          {
-		        	  text: 'Delete'
+		        	  text: 'Delete',
+					  handler:function(){
+						  //selectedItem = teachingExtWrapper.panel.getSelectionModel().getLastSelected().data;
+						  //document.getElementById("whatTeachingToDelete").value= selectedItem.id;
+						  teachingExtWrapper.deleteFormPanel.show();
+					  }
 		          }
 		          ],
 		   columns: [
@@ -493,6 +491,31 @@ var teachingExtWrapper = {
 				},
 				'beforeshow':function(window){
 					document.getElementById("teachingInformationId").value=informationExtWrapper.panel.getSelectionModel().getLastSelected().data.id;
+				}
+			}
+		}),
+		
+		deleteFormPanel: Ext.create('Ext.window.Window', {
+			title:       'Delete the Teaching',
+			closeAction: 'hide',
+			modal:       true,
+			closable:    true,
+			resizable:	 false,
+			height:      200,
+			width:       400,
+			layout:      'fit',
+			items:       {
+				xtype:     'panel',
+				border:    false,
+				contentEl: 'deleteTeachingForm'
+			},
+			listeners: {
+				'beforehide':function(window){
+					document.getElementById("whatTeachingToDelete").value='';
+					document.getElementById("deleteTeachingFormStatus").innerHTML='';
+				},
+				'beforeshow':function(window){
+					document.getElementById("whatTeachingToDelete").value=teachingExtWrapper.panel.getSelectionModel().getLastSelected().data.id;
 				}
 			}
 		})
