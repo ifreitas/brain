@@ -20,12 +20,23 @@ import scala.collection.mutable.StringBuilder
 
 object App {
     def onLoad(): NodeSeq = {
-        <head>
+        
+        var knowledges = ""
+        try{
+            <head>
     		<script>
     			var knowledgeJsonTree = {getKnowledges};
     			jQuery(document).ready(function() {{initTree(knowledgeJsonTree);}});
     		</script>
         </head>
+        }
+        catch{
+            case t : Throwable => <head>
+    		<script>
+    			Log.error("Unable to load the Knowledge Base Tree. Sorry.")
+    		</script>
+        </head>
+        }
     }
 
     private def getKnowledges(): String = {

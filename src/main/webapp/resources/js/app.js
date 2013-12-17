@@ -335,8 +335,6 @@ var informationExtWrapper = {
 				{
 					  text: 'Delete',
 					  handler:function(){
-						  selectedItem = informationExtWrapper.panel.getSelectionModel().getLastSelected().data
-						  Ext.getElementById("whatInformationToDelete").value= selectedItem.id;
 						  informationExtWrapper.deleteFormPanel.show();
 					  }
 				}
@@ -344,6 +342,7 @@ var informationExtWrapper = {
 		    columns: [{ text: 'Name',  dataIndex: 'name', width:'100%'}],
 		    listeners:{
 		    	select:function( theGrid, record, index, eOpts ){
+		    		teachingExtWrapper.panel.getSelectionModel().clearSelections();
 		    		teachingExtWrapper.panel.setDisabled(false)
 		    		teachingExtWrapper.panel.setTitle("Teachings of " + record.data.name)
 		    		teachingExtWrapper.panel.store.loadData([]);// TODO: search a better way to clear the grid.
@@ -431,28 +430,25 @@ var teachingExtWrapper = {
 		          {
 		        	  text: 'Create',
 					  handler:function(){
+						  teachingExtWrapper.resetFormPanel();
 						  teachingExtWrapper.formPanel.show();
 					  }
 		          },
 		          {
 		        	  text: 'Update',
 					  handler:function(){
-						  selectedItem = teachingExtWrapper.panel.getSelectionModel().getLastSelected().data
-						  document.getElementById("teachingId").value=selectedItem.id;
-						  document.getElementById("teachingInformationId").value=selectedItem.teachingInformationId;
-						  document.getElementById("whenTheUserSaysInput").value=selectedItem.whenTheUserSays;
-						  document.getElementById("respondingToInput").value=selectedItem.respondingTo;
-						  document.getElementById("memorizeInput").value=selectedItem.memorize;
-						  document.getElementById("sayInput").value=selectedItem.say;
-						  teachingExtWrapper.formPanel.show();
+						  if(teachingExtWrapper.panel.getSelectionModel().getLastSelected() != null){
+							  teachingExtWrapper.prepareUpdateFormPanel();
+							  teachingExtWrapper.formPanel.show();
+						  }
 					  }
 		          },
 		          {
 		        	  text: 'Delete',
 					  handler:function(){
-						  //selectedItem = teachingExtWrapper.panel.getSelectionModel().getLastSelected().data;
-						  //document.getElementById("whatTeachingToDelete").value= selectedItem.id;
-						  teachingExtWrapper.deleteFormPanel.show();
+						  if(teachingExtWrapper.panel.getSelectionModel().getLastSelected() != null){
+							  teachingExtWrapper.deleteFormPanel.show();
+						  }
 					  }
 		          }
 		          ],
@@ -462,6 +458,16 @@ var teachingExtWrapper = {
                     { text: 'Memorize',  dataIndex: 'memorize', width:100},
                     { text: 'Say',  dataIndex: 'say', width:280 },
            ],
+           listeners:{
+        	   select:function( theGrid, record, index, eOpts ){
+        	   },
+        	   deselect:function( record, index, eOpts ){
+        	   },
+        	   itemdblclick:function( record, index, eOpts ){
+        		   teachingExtWrapper.prepareUpdateFormPanel();
+        		   teachingExtWrapper.formPanel.show();
+        	   }
+           },
            height: 200
 	   }),
 	   
@@ -481,19 +487,35 @@ var teachingExtWrapper = {
 			},
 			listeners: {
 				'beforehide':function(window){
-					document.getElementById("teachingInformationId").value='';
-					document.getElementById("whenTheUserSaysInput").value='';
-					document.getElementById("whenTheUserSaysInput").value='';
-					document.getElementById("respondingToInput").value='';
-					document.getElementById("memorizeInput").value='';
-					document.getElementById("sayInput").value='';
-					document.getElementById("teachingFormStatus").innerHTML='';
+					teachingExtWrapper.resetFormPanel();
 				},
 				'beforeshow':function(window){
 					document.getElementById("teachingInformationId").value=informationExtWrapper.panel.getSelectionModel().getLastSelected().data.id;
 				}
 			}
 		}),
+		
+		resetFormPanel : function(){
+		   document.getElementById("teachingId").value='';
+		   document.getElementById("teachingInformationId").value='';
+		   document.getElementById("whenTheUserSaysInput").value='';
+		   document.getElementById("whenTheUserSaysInput").value='';
+		   document.getElementById("respondingToInput").value='';
+		   document.getElementById("memorizeInput").value='';
+		   document.getElementById("sayInput").value='';
+		   document.getElementById("teachingFormStatus").innerHTML='';
+	   },
+	   
+	   prepareUpdateFormPanel :  function(){
+		   selectedItem = teachingExtWrapper.panel.getSelectionModel().getLastSelected().data
+		   document.getElementById("teachingId").value            = selectedItem.id;
+		   document.getElementById("teachingInformationId").value = selectedItem.teachingInformationId;
+		   document.getElementById("whenTheUserSaysInput").value  = selectedItem.whenTheUserSays;
+		   document.getElementById("respondingToInput").value     = selectedItem.respondingTo;
+		   document.getElementById("memorizeInput").value         = selectedItem.memorize;
+		   document.getElementById("sayInput").value              = selectedItem.say;
+		   document.getElementById("teachingFormStatus").innerHTML='';
+	   },
 		
 		deleteFormPanel: Ext.create('Ext.window.Window', {
 			title:       'Delete the Teaching',

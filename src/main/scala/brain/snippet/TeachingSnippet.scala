@@ -1,3 +1,26 @@
+/**
+   * The MIT License (MIT)
+   * 
+   * Copyright (c) 2013 Israel Freitas -- ( gmail => israel.araujo.freitas)
+   * 
+   * Permission is hereby granted, free of charge, to any person obtaining a copy of
+   * this software and associated documentation files (the "Software"), to deal in
+   * the Software without restriction, including without limitation the rights to
+   * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+   * the Software, and to permit persons to whom the Software is furnished to do so,
+   * subject to the following conditions:
+   * 
+   * The above copyright notice and this permission notice shall be included in all
+   * copies or substantial portions of the Software.
+   * 
+   * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+   * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+   * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+   * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+   * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+   * 
+   */
 package brain.snippet
 
 import scala.collection.JavaConversions.iterableAsScalaIterable
@@ -49,7 +72,7 @@ class TeachingSnippet {
 	        if(teaching.id.trim().isEmpty()) create(teaching) else update(teaching)
 	    }
 	    catch{
-	        case t : Throwable => error("teachingFormStatus", t.toString())
+	        case t : Throwable => t.printStackTrace(); error("teachingFormStatus", t.toString())
 	    }
 	}
 	
@@ -77,64 +100,18 @@ class DeleteTeachingForm {
     }
 	
 	def delete(id:String): JsCmd = {
-        try {
-            if (id.trim.isEmpty)
-                error("deleteTeachingFormStatus", "Unable to identify the teaching to delete. Please close this popup and try again.")
-            else {
-                doDelete(id) match {
-                    case Some(teaching) => return Run(raw"afterDeleteTeaching(${teaching.toJson})")
-                    case _              => error("deleteTeachingFormStatus", "Invalid teaching. Unable to continue.");
-                }
-            }
-        }
-        catch {
-            case t: Throwable => error("deleteTeachingFormStatus", t.toString())
-        }
-		
+	    try{
+	        Run(s"afterDeleteTeaching(${doDelete(id).get.toJson})")
+	    }
+	    catch{
+	        case t : Throwable => t.printStackTrace(); error("deleteTeachingFormStatus", t.toString())
+	    }
 	}
 
-//    def doDelete(id: String): Option[Teaching] = {
-//        implicit val db: OrientGraph = GraphDb.get
-//        try {
-//            val sqlString = raw"select from $id";
-//            println(sqlString)
-//            val vertices:java.lang.Iterable[Vertex] = db.command(new OSQLSynchQuery[Vertex](sqlString)).execute();
-//            println(vertices.size)
-//            val teachingVertex = vertices.head
-//            println(teachingVertex)
-//            db.removeVertex(teachingVertex)
-//            
-//            val teaching = Some(Teaching(teachingVertex))
-//            
-//            db.commit()
-//            return teaching
-//        }
-//        catch {
-//            case t: Throwable => db.rollback(); t.printStackTrace(); throw t
-//        }
-//        finally {
-//            if (db != null) db.shutdown
-//        }
-//    }
 	def doDelete(id: String): Option[Teaching] = {
-        implicit val db: OrientGraph = GraphDb.get
-        try {
-            val sqlString = raw"select from (traverse out() from  $id)";
-            val vertices:java.lang.Iterable[Vertex] = db.command(new OSQLSynchQuery[Vertex](sqlString)).execute();
-            val informationVextex = vertices.head
-            val information = Some(Teaching(informationVextex))
-            //informationVextex.getVertices(Direction.OUT, "Include").foreach(db.removeVertex)
-            db.removeVertex(informationVextex)
-            
-            db.commit()
-            return information
-        }
-//        catch {
-//            case t: Throwable => db.rollback(); println(t.getMessage()); return None
-//        }
-        finally {
-            if (db != null) db.shutdown
-        }
+	    implicit val db: OrientGraph = GraphDb.get
+	    try     { Teaching.delete(id)         }
+        finally { if (db != null) db.shutdown }
     }
 }
 
@@ -143,16 +120,13 @@ object TeachingSnippet{
         def getTeachings(informationId:String):JsCmd = {
         	val db: OrientGraph = GraphDb.get;
         	try {
-	            val sqlString = raw"select from Teaching where in_include = $informationId";
+	            val sqlString = raw"select from Teaching where in_include = $informationId order by whenTheUserSays";
 	            val vertices:java.lang.Iterable[Vertex] = db.command(new OSQLSynchQuery[Vertex](sqlString)).execute();
 	            val teachingsJson = vertices.map(vertex=> {var t = Teaching(vertex.getId().toString(), "", vertex.getProperty("whenTheUserSays"), vertex.getProperty("respondingTo"), vertex.getProperty("memorize"), vertex.getProperty("say")); t.toJson})
 	            return new JsCmd {
 	            	def toJsCmd = raw"[${teachingsJson.mkString(",")}]"
 	            }
 	        }
-	        //catch {
-	        //    case t: Throwable => db.rollback(); println(t.getMessage());
-	        //}
 	        finally {
 	            if (db != null) db.shutdown
 	        }

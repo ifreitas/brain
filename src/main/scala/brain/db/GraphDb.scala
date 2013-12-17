@@ -39,7 +39,7 @@ object GraphDb {
 		}
     }
 	
-    def transaction[T](func: =>T)(implicit db:OrientGraph):Option[T]={
+    def transaction[T](func: => T)(implicit db:OrientGraph):Option[T]={
         try {
         	val result = func
         	db.commit

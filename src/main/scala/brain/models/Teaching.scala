@@ -23,6 +23,7 @@
  */
 package brain.models
 
+import scala.collection.JavaConversions.iterableAsScalaIterable
 import aimltoxml.aiml.TemplateElement
 import com.ansvia.graph.BlueprintsWrapper.DbObject
 import aimltoxml.aiml.Text
@@ -32,6 +33,7 @@ import com.tinkerpop.blueprints.Graph
 import com.tinkerpop.blueprints.Vertex
 import com.tinkerpop.blueprints.impls.orient.OrientGraph
 import brain.db.GraphDb
+import com.orientechnologies.orient.core.sql.query.OSQLSynchQuery
 
 case class Teaching(val id:String, val informationId:String, val whenTheUserSays:String, val respondingTo:String, val memorize:String, val say:String){
     require(!whenTheUserSays.isEmpty, "Field 'when the user says', can not be empty.")
@@ -46,28 +48,39 @@ object Teaching{
 	def findById(id:String)(implicit db:Graph):Set[Teaching]  = Set.empty[Teaching]
 	def findByInformationId(informationId:String)(implicit db:Graph):Set[Teaching]  = Set.empty[Teaching]
     def create(teaching:Teaching)(implicit db:OrientGraph):Option[Teaching] = {
-        val vertex = GraphDb.transaction[Vertex]({
+        val result = GraphDb.transaction[Vertex]({
         	val teachingVertex    = db.addVertex("class:Teaching", "whenTheUserSays", teaching.whenTheUserSays, "respondingTo", teaching.respondingTo, "memorize", teaching.memorize, "say", teaching.say)
             val informationVertex = db.getVertex(teaching.informationId)
             db.addEdge("class:Include", informationVertex, teachingVertex, "include")
             teachingVertex
-        })
-        vertex.map(v=>Teaching(v))
+        }).get
+        //result.map(v=>Teaching(v)) // TODO: a orient inconsistent behavior (sometimes the vertex came without all properties) force me to adopt other ways to construct the returning Teaching.
+        Some(Teaching(result.getId().toString(), teaching.informationId, teaching.whenTheUserSays, teaching.respondingTo, teaching.memorize, teaching.say))
 	}
     def update(teaching:Teaching)(implicit db:OrientGraph):Option[Teaching] = {
-        val result = GraphDb.transaction[Vertex] {
-            var oldTeaching = db.getVertex(teaching.id)
-            oldTeaching.setProperty("whenTheUserSays", teaching.whenTheUserSays)
-            oldTeaching.setProperty("respondingTo", teaching.respondingTo)
-            oldTeaching.setProperty("memorize", teaching.memorize)
-            oldTeaching.setProperty("say", teaching.say)
-            oldTeaching
-        }
-        result.map(v=>Teaching(v))
+        val result = GraphDb.transaction[Vertex]({
+            var teachingVertex = db.getVertex(teaching.id)
+            teachingVertex.setProperty("whenTheUserSays", teaching.whenTheUserSays)
+            teachingVertex.setProperty("respondingTo", teaching.respondingTo)
+            teachingVertex.setProperty("memorize", teaching.memorize)
+            teachingVertex.setProperty("say", teaching.say)
+            teachingVertex
+        }).get
+        //result.map(v=>Teaching(v)) // TODO: a orient inconsistent behavior (sometimes the vertex came without all properties) force me to adopt other ways to construct the returning Teaching.
+        Some(Teaching(result.getId().toString(), teaching.informationId, teaching.whenTheUserSays, teaching.respondingTo, teaching.memorize, teaching.say))
     }
-    def delete(teaching:Teaching)(implicit db:OrientGraph):Teaching = teaching
+    def delete(id:String)(implicit db:OrientGraph):Option[Teaching] = {
+        GraphDb.transaction[Teaching]({
+	        val sqlString = raw"select from (traverse out() from  $id)";
+	        val vertices:java.lang.Iterable[Vertex] = db.command(new OSQLSynchQuery[Vertex](sqlString)).execute();
+	        val teachingVertex = vertices.head
+	        val teaching = Teaching(teachingVertex)// after the commit, the teachingVertex last all your properties.
+	        db.removeVertex(teachingVertex)
+	        teaching
+        })
+    }
     
-    def apply(vertex:Vertex):Teaching = Teaching(vertex.getId().toString(), "", vertex.getProperty("whenTheUserSays"), vertex.getProperty("respondingTo"), vertex.getProperty("memorize"), vertex.getProperty("say"))
+    def apply(vertex:Vertex):Teaching = Teaching(vertex.getId().toString(), "", vertex.getProperty("whenTheUserSays"), vertex.getProperty("respondingTo"), vertex.getProperty("memorize"), vertex.getProperty("say")) 
 }
 
 class TeachingToCategoryAdapter(teaching: Teaching) {
@@ -77,9 +90,9 @@ class TeachingToCategoryAdapter(teaching: Teaching) {
     val respondingTo = teaching.respondingTo
 
     def selectDefaultPattern(setOfWhatWasSaid: Set[String]) = {
-        var defaultPattern = ""
+        var defaultPattern         = ""
         var lowerPatternComplexity = 100.0
-        var patternComplexity = 100.0
+        var patternComplexity      = 100.0
 
         setOfWhatWasSaid.foreach { whatWasSaid =>
             patternComplexity = calculateThePatternComplexity(whatWasSaid)
