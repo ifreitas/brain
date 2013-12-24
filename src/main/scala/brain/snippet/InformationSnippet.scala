@@ -35,6 +35,7 @@ import net.liftweb.json.JField
 import net.liftweb.json.JString
 import brain.models.Information
 import net.liftweb.common.Full
+import com.tinkerpop.blueprints.Graph
 
 
 class InformationSnippet {
@@ -75,10 +76,11 @@ class InformationSnippet {
 	def doCreate(information:Information):Option[Information]={
         val db: OrientGraph = GraphDb.get
         try {
-        	val newInformation = db.addVertex("class:Information", "name", information.name)
+//        	val newInformation = db.addVertex("class:Information", "name", information.name)
+			val newInformation = db.addVertex(None, "name", information.name)
             val knowledge      = db.getVertex(information.knowledgeId)
             
-            db.addEdge("class:Division", knowledge, newInformation, "division")
+            db.addEdge(None, knowledge, newInformation, "division")
             db.commit()
             return Some(Information(newInformation.getId().toString(), information.name, information.knowledgeId))
         }
@@ -129,6 +131,7 @@ class DeleteInformationForm {
     def doDelete(id: String): Option[Information] = {
         implicit val db: OrientGraph = GraphDb.get
         try {
+            
             val sqlString = raw"select from (traverse out() from  $id)";
             val vertices:java.lang.Iterable[Vertex] = db.command(new OSQLSynchQuery[Vertex](sqlString)).execute();
             val informationVextex = vertices.head
@@ -139,9 +142,9 @@ class DeleteInformationForm {
             db.commit()
             return information
         }
-//        catch {
-//            case t: Throwable => db.rollback(); println(t.getMessage()); return None
-//        }
+        catch {
+            case t: Throwable => db.rollback(); println(t.getMessage()); return None
+        }
         finally {
             if (db != null) db.shutdown
         }
@@ -151,10 +154,9 @@ class DeleteInformationForm {
 object InformationSnippet{
     def loadInformationsMethod:NodeSeq = {
         def getInformations(knowledgeId:String):JsCmd = {
-        	val db: OrientGraph = GraphDb.get;
+        	val db: Graph = GraphDb.get;
         	try {
-	            val sqlString = raw"select from Information where in_division = '$knowledgeId'";
-	            val vertices:java.lang.Iterable[Vertex] = db.command(new OSQLSynchQuery[Vertex](sqlString)).execute();
+        	    val vertices:java.lang.Iterable[Vertex] = db.query().has("_class_", Information.persistentName).has("in_division", knowledgeId).vertices()
 	            val informationsJson = vertices.map(v=>Information(v.getId().toString(), v.getProperty("name"), knowledgeId).toJson)
 	            return new JsCmd {
 	            	def toJsCmd = raw"[${informationsJson.mkString(",")}]"

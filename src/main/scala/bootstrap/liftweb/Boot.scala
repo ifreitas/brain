@@ -16,8 +16,10 @@ import net.liftweb.http.SessionVar
 import net.liftweb.http.provider.HTTPRequest
 import net.liftweb.util.Vendor.valToVendor
 import com.orientechnologies.orient.core.metadata.schema.OType
-//import brain.rest.KnowledgeRest
 import brain.rest.TeachingRest
+import brain.models.Knowledge
+import brain.models.Configuration
+import brain.rest.BrainRest
 
 // Inspirado em: http://stackoverflow.com/questions/8305586/where-should-my-sessionvar-object-be
 object appSession extends SessionVar[Map[String, Any]](Map()) {
@@ -32,7 +34,8 @@ class Boot {
         // Where find snippet and comet
         LiftRules.addToPackages("brain")
         
-        LiftRules.dispatch.append(TeachingRest)
+//        LiftRules.dispatch.append(TeachingRest)
+        LiftRules.dispatch.append(BrainRest)
 //        LiftRules.dispatch.append(KnowledgeRest)
 
         // Full support to Html5
@@ -42,12 +45,6 @@ class Boot {
         LiftRules.localeCalculator = localeCalculator _
         LiftRules.resourceNames = "i18n/messages" :: LiftRules.resourceNames
         LiftRules.resourceNames = "props" :: LiftRules.resourceNames
-
-        //Show the spinny image when an Ajax call starts
-        LiftRules.ajaxStart = Full(() => LiftRules.jsArtifacts.show("ajax-loader").cmd)
-
-        // Make the spinny image go away when it ends
-        LiftRules.ajaxEnd = Full(() => LiftRules.jsArtifacts.hide("ajax-loader").cmd)
 
         // Brain Config Object
         Config.load
@@ -60,14 +57,18 @@ class Boot {
         val orientServerAdmin = new OServerAdmin("remote:localhost")
         orientServerAdmin.connect(Config.getGraphDbUser, Config.getGraphDbPassword)
         try {
+        	println("antes de criar o schema")
+        	println(orientServerAdmin.listDatabases().keySet())
             if(!orientServerAdmin.listDatabases().keySet().contains(Config.getGraphDbName)){
+                println("criando schema...")
             	orientServerAdmin.createDatabase(Config.getGraphDbName, "graph", "plocal")
-            	createSchema
+            	//createSchema
                 createRootVertexAndConf
             }
         }
         catch{
             case t :Throwable=> {
+                println(t.getStackTraceString)
                 orientServerAdmin.dropDatabase("plocal")
                 throw new Exception("Was not possible to create the database. Cause: " + t.getCause())
             }
@@ -78,19 +79,35 @@ class Boot {
     }
     
     def createRootVertexAndConf{
-        val db = GraphDb.get
-        try{
-        	val root = db.addVertex("class:Knowledge", Map[String, Object]("name"->"Root").asJava)
-        	db.commit // https://github.com/orientechnologies/orientdb/wiki/Transactions#optimistic-transaction
-        	db.addVertex("class:Conf", Map[String, Object]("rootId"->root.getId().toString(), "defaultDepthTraverse"->new Integer(3)).asJava)
-   			db.commit
+    	println("creating the root...")
+        implicit val db = GraphDb.get
+        try {
+            val knowledge = Knowledge("Root").save
+            db.commit // https://github.com/orientechnologies/orientdb/wiki/Transactions#optimistic-transaction
+            Configuration(knowledge.getId().toString(), 3).save
+            db.commit // https://github.com/orientechnologies/orientdb/wiki/Transactions#optimistic-transaction
+            println("done")
         }
         catch {
-		  case t : Throwable => db.rollback; throw new Exception("Was not possible to create the root node. Cause: " + t.getCause())
+        	
+		  case t : Throwable => db.rollback; println(t.getMessage()); throw new Exception("Was not possible to create the root node. Cause: " + t.getStackTrace())
 		}
-        finally {
-        	if(db != null && !db.isClosed()) db.shutdown()
+        finally{
+            if(db != null && !db.isClosed()) db.shutdown()
         }
+//        val db = GraphDb.get
+//        try{
+//        	val root = db.addVertex("class:Knowledge", Map[String, Object]("name"->"Root").asJava)
+//        	db.commit // https://github.com/orientechnologies/orientdb/wiki/Transactions#optimistic-transaction
+//        	db.addVertex("class:Conf", Map[String, Object]("rootId"->root.getId().toString(), "defaultDepthTraverse"->new Integer(3)).asJava)
+//   			db.commit
+//        }
+//        catch {
+//		  case t : Throwable => db.rollback; throw new Exception("Was not possible to create the root node. Cause: " + t.getCause())
+//		}
+//        finally {
+//        	if(db != null && !db.isClosed()) db.shutdown()
+//        }
     }
     
     def createSchema(){

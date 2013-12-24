@@ -42,8 +42,8 @@ class TeachingToCategoryAdapterTest extends FunSpec with Matchers with BeforeAnd
 
     before {
         validTeaching = mock(classOf[Teaching])
-        when(validTeaching.whenUserSays).thenReturn(Set("hi", "hello", "hello there"))
-        when(validTeaching.say).thenReturn(Set("hi"))
+        //when(validTeaching.whenUserSays).thenReturn(Set("hi", "hello", "hello there"))
+        //when(validTeaching.say).thenReturn(Set("hi"))
     }
 
     describe("#TeachingToCategoryAdapter") {

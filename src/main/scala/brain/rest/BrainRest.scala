@@ -15,52 +15,73 @@ import com.tinkerpop.blueprints.Graph
 import com.tinkerpop.blueprints.Vertex
 import brain.db.GraphDb
 import com.tinkerpop.blueprints.impls.orient.OrientGraph
-
-
-case class Knowledge(id:String)
-object Knowledge{
-	def findAll()(implicit db:Graph):Set[Knowledge]  = Set.empty[Knowledge]
-	def findById(id:String)(implicit db:Graph):Set[Knowledge]  = Set.empty[Knowledge]
-    def create(Knowledge:Knowledge)(implicit db:Graph):Knowledge = Knowledge
-    def update(Knowledge:Knowledge)(implicit db:Graph):Knowledge = Knowledge
-    def delete(Knowledge:Knowledge)(implicit db:Graph):Knowledge = Knowledge
-    
-    
-    private implicit val formats = net.liftweb.json.DefaultFormats
-    def apply(vertex:Vertex):Knowledge = Knowledge("")
-    def apply(in:JValue):Box[Knowledge] = Helpers.tryo{in.extract[Knowledge]}
-    def unapply(in:JValue):Option[Knowledge] = Some(Knowledge(""))
-}
+import brain.models.Knowledge
+import com.ansvia.graph.BlueprintsWrapper._
 
 object BrainRest extends RestHelper {
-    implicit private def knowledgeToJValue(knowledge:Knowledge):JValue=decompose(knowledge)
-    implicit private def knowledgeSetToJValue(knowledges:Set[Knowledge]):JValue=decompose(knowledges)
     
     serve("rest"/"knowledges" prefix{
         case Nil JsonGet _ => {
             implicit val db = GraphDb.get
-            transaction{
+            try{
                 Knowledge.findAll : JValue
+            }
+            catch{
+        	    case t: Throwable => t.printStackTrace; throw t
+        	}
+            finally{
+                db.shutdown()
             }
         }
         
-        case Nil JsonPut Knowledge(knowledge) -> _ => {
-            implicit val db = GraphDb.get
-            transaction{
-            	Knowledge.create(knowledge)
-            }
+        case id:: Nil JsonGet _ => {
+        	implicit val db = GraphDb.get
+			try{
+				Knowledge.findAll : JValue
+			}
+        	catch{
+        	    case t: Throwable => t.printStackTrace; throw t
+        	}
+        	finally{
+        		db.shutdown()
+        	}
         }
+        
+        // update
+        case Nil JsonPut Knowledge(knowledge) -> _ => {
+        	implicit val db = GraphDb.get
+        	try{
+        		val vertex = db.getVertex(knowledge.id.get)
+        		vertex.setProperty("name", knowledge.name)
+        		db.commit
+        		knowledge : JValue
+        	}
+        	catch{
+        	    case t: Throwable => t.printStackTrace; throw t
+        	}
+        	finally{
+        		db.shutdown()
+        	}
+        }
+        
+        // create
+        case Nil JsonPost Knowledge(knowledge) -> _ => { 
+        	implicit val db = GraphDb.get
+			try{
+			    val vertex = knowledge.save
+        		db.commit
+        		knowledge.id = Some(vertex.getId().toString())
+        		
+        		knowledge : JValue
+			}
+        	catch{
+        	    case t: Throwable => t.printStackTrace; throw t
+        	}
+        	finally{
+        		db.shutdown()
+        	}
+        }
+        
     })
     
-    private implicit def transaction(func: =>JValue)(implicit db:OrientGraph):JValue={
-        try {
-        	val result = func
-        	db.commit()
-        	return result
-        }
-        //catch{
-        //	db.rollback(); retornar o correto status 500 com a correta mensagem de erro.
-        //}
-        finally { if( !db.isClosed() ) db.shutdown() }
-    }
 }

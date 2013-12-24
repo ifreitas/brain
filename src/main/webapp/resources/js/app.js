@@ -1,3 +1,26 @@
+/**
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2013 Israel Freitas -- ( gmail => israel.araujo.freitas)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ */
 var Log = {
   elem: false,
   info: function(text){
@@ -17,6 +40,7 @@ const ObjectManager = {
 	getLastClicked: function(){ return this.lastClicked; },
 	setLastClicked: function(lastClicked){ this.lastClicked = lastClicked; }
 }
+
 
 var st = null
 function initTree(json){
@@ -127,6 +151,33 @@ function initTree(json){
         }
     });
     
+    st.add = function(newKnowledge){
+    	lastClikedNode = ObjectManager.lastClicked;
+		st.addSubtree(
+				{ id : lastClikedNode.id, children : [ newKnowledge ] }, 
+				'replot',
+				{ hideLabels : false, duration : 700 }
+		);
+		if (st.clickedNode.id != lastClikedNode.id) {
+			st.onClick(lastClikedNode.id, { duration : 800 });
+		}
+		Log.info("Knowledege named '" + newKnowledge.name + "' added successfully.")
+    };
+    
+//    st.remove = function(knowledge){
+//    	st.removeSubtree(
+//				lastClickedNode.id,
+//				true,
+//				'animate',
+//				{
+//					duration : 500,
+//					hideLabels : false,
+//					onComplete : function() {
+//						Log.info("Knowledge '"+knowledge.name+"' deleted successfully.");
+//					}
+//				})
+//    }
+    
     try{
     	if(json.id == null) throw "Invalid server data."
     	st.loadJSON(json);
@@ -223,79 +274,140 @@ Ext.application({
     }
 });
 
-var createKnowledgeForm = Ext.create('Ext.window.Window', {
-    title:       'Add a Knowledge',
-    closeAction: 'hide',
-    modal:       true,
-    closable:    true,
-    resizable:	 false,
-    height:      200,
-    width:       400,
-    layout:      'fit',
-    items:       {
-    	xtype:     'panel',
-    	border:    false,
-    	contentEl: 'createKnowledgeWindow'
-    },
-	listeners: {
-		'beforehide':function(window){
-			document.getElementById("createKnowledgeNameInput").form.reset();
-			document.getElementById("createKnowledgeWindowStatus").innerHTML='';
-		},
-    	'beforeshow':function(window){
-    		document.getElementById("into").value=ObjectManager.lastClicked.id;
-    	}
-	}
-});
-var updateKnowledgeForm = Ext.create('Ext.window.Window', {
-	title:       'Rename the Knowledge',
-	closeAction: 'hide',
-	modal:       true,
-	closable:    true,
-	resizable:	 false,
-	height:      200,
-	width:       400,
-	layout:      'fit',
-	items:       {
-		xtype:     'panel',
-		border:    false,
-		contentEl: 'updateKnowledgeWindow'
-	},
-	listeners: {
-		'beforehide':function(window){
-			document.getElementById("updateKnowledgeNameInput").form.reset();
-			document.getElementById("updateKnowledgeWindowStatus").innerHTML='';
-		},
-		'beforeshow':function(window){
-			document.getElementById("updateKnowledgeNameInput").value=ObjectManager.lastClicked.name;
-			document.getElementById("whatToRename").value=ObjectManager.lastClicked.id;
+
+/**
+ * Usage: Ext.create("Brain.form.textfield", {record: panel.getForm().getRecord()})
+ */
+Ext.define('Brain.form.textfield', {
+	extend : 'Ext.form.field.Text',
+	alias : "recordField",
+	listeners : {
+		'blur' : function(e, eOpts) {
+			this.record.set(this.name, this.value)
 		}
 	}
 });
-var deleteKnowledgeForm = Ext.create('Ext.window.Window', {
-	title:       'Delete the Knowledge',
-	closeAction: 'hide',
-	modal:       true,
-	closable:    true,
-	resizable:	 false,
-	height:      200,
-	width:       400,
-	layout:      'fit',
-	items:       {
-		xtype:     'panel',
-		border:    false,
-		contentEl: 'deleteKnowledgeWindow'
+
+//model.init()
+//model.prepareCreate()// exibe o form
+//model.afterCreate()// oculta o form
+//model.prepareUpdate()// exibe o form
+//model.afterUpdate()// oculta o form
+//model.prepareDelete()// exibe o form
+//model.afterDelete()// oculta o form
+
+var knowledgeExtWrapper = {
+	/****** API ******/
+	init: function(){
+		this.defineModel();
+		return this;
 	},
-	listeners: {
-		'beforehide':function(window){
-			document.getElementById("whatKnowledgeToDelete").form.reset();
-			document.getElementById("deleteKnowledgeWindowStatus").innerHTML='';
-		},
-		'beforeshow':function(window){
-			document.getElementById("whatKnowledgeToDelete").value=ObjectManager.lastClicked.id;
-		}
+	
+	create  : function(){
+		var form = this.createUpdateFormFactory({
+			success: function(rec, op){ 
+				panel.close();
+				st.add({id:rec.data.id, name:rec.data.name, data:{}, children:[]});
+			},
+			failure: function(rec, op){ panel.close(); alert("failure"); alert(op); alert(rec.name) }
+		});
+		form.getForm().loadRecord(Ext.create('Brain.model.Knowledge', {name:'', parentId:ObjectManager.getLastClicked().id}));
+		var panel = Ext.create('Ext.window.Window', {
+			title:       'Create a Knowledge',
+			closeAction: 'hide',
+			modal:       true,
+			closable:    true,
+			resizable:	 false,
+			height:      200,
+			width:       400,
+			layout:      'fit',
+			items:       [ form ],
+			listerners:{
+				'beforeshow':function(window){
+					form.items.items[0].focus()
+				}
+			}
+		});
+		panel.show();
+		return panel;
+	},
+	update  : function(){},
+	destroy : function(){},
+	
+	
+	/****** Internal *******/
+	createUpdateFormFactory:function(myCallbacks){
+		var theForm = Ext.create('Ext.form.Panel', {
+			border:false,
+			layout:'form',
+			bodyPadding: 5,
+			model: 'Brain.model.Knowledge',
+			items:[
+			       {
+			    	   xtype:      'textfield',         
+			    	   fieldLabel: 'Name',
+			    	   name:       'name',
+			    	   allowBlank: false,
+			    	   minLength:  2,
+			    	   maxLength:  40,
+			    	   listeners:{
+			    		   'blur' : function( e, eOpts ){
+			    			   theForm.getForm().getRecord().set(this.name, this.value)
+			    		   }
+			    	   }
+			       }
+		       ],
+		       bbar: [
+		              {
+					   xtype: 'button',
+					   text: 'Save',
+					   formBind : true,
+					   handler: function(){theForm.getForm().getRecord().save({
+						    success: function(rec, op) {
+						    	if (myCallbacks != null){
+						    		myCallbacks.success(rec, op);
+						    	}
+						    },
+						    failure: function(rec, op) {
+						    	if (myCallbacks != null){
+						    		myCallbacks.failure(rec, op);
+						    	}
+						    }
+						});},
+					   scope: this
+					},
+					{
+					   xtype: 'button',
+					   text: 'Cancel',
+					   handler: function(){theForm.close();},
+					   scope: this
+					}
+				]
+		});
+		return theForm;
+	},	
+	
+	defineModel:function(){
+		Ext.define('Brain.model.Knowledge', {
+		    extend: 'Ext.data.Model',
+		    fields:['id', 'name', 'parentId'],
+		    proxy: {
+		        type:     'rest',
+		        url :     'rest/knowledges',
+		        model:    'Brain.model.Knowledge',
+		        format:   'json',
+		        appendId: false
+		    }
+		});
 	}
-});
+}.init();
+
+
+
+//theForm.getForm().loadRecord(
+//	Ext.create('Brain.model.Knowledge')
+//);
+
 
 var informationExtWrapper = {
 	panel: Ext.create('Ext.grid.Panel', {
@@ -576,7 +688,7 @@ function afterReceiveTeachings(data){
 
 var contextMenu = Ext.create('Ext.menu.Menu', {
 	items:[
-	       { text : 'Add a Knowledge',       handler : function(item){createKnowledgeForm.show();} }, 
+	       { text : 'Add a Knowledge',       handler : function(item){knowledgeExtWrapper.create();} }, 
 		   { text : 'Rename this Knowledge', handler : function(item){updateKnowledgeForm.show();} }, 
 		   { text : 'Delete this Knowledge', handler : function(item){deleteKnowledgeForm.show();} }, 
 		   '-', 

@@ -25,7 +25,7 @@ package brain.models
 
 import scala.collection.JavaConversions.iterableAsScalaIterable
 import aimltoxml.aiml.TemplateElement
-import com.ansvia.graph.BlueprintsWrapper.DbObject
+import com.ansvia.graph.BlueprintsWrapper._
 import aimltoxml.aiml.Text
 import aimltoxml.aiml.Category
 import aimltoxml.aiml.Srai
@@ -34,53 +34,79 @@ import com.tinkerpop.blueprints.Vertex
 import com.tinkerpop.blueprints.impls.orient.OrientGraph
 import brain.db.GraphDb
 import com.orientechnologies.orient.core.sql.query.OSQLSynchQuery
+import com.tinkerpop.blueprints.GraphQuery
 
-case class Teaching(val id:String, val informationId:String, val whenTheUserSays:String, val respondingTo:String, val memorize:String, val say:String){
+case class Teaching(id:String, whenTheUserSays:String, respondingTo:String, memorize:String, say:String) extends DbObject{
     require(!whenTheUserSays.isEmpty, "Field 'when the user says', can not be empty.")
     require(!say.isEmpty, "Field 'say', can not be empty.")
     
     def toAiml = new TeachingToCategoryAdapter(this).toCategory
     
-    def toJson:String = raw"{id:'$id', informationId:'$informationId', whenTheUserSays:'$whenTheUserSays', respondingTo:'$respondingTo', memorize:'$memorize',say:'$say'}" 
+    def toJson:String = raw"{id:'$id', whenTheUserSays:'$whenTheUserSays', respondingTo:'$respondingTo', memorize:'$memorize',say:'$say'}" 
 }
 
-object Teaching{
-	def findById(id:String)(implicit db:Graph):Set[Teaching]  = Set.empty[Teaching]
-	def findByInformationId(informationId:String)(implicit db:Graph):Set[Teaching]  = Set.empty[Teaching]
-    def create(teaching:Teaching)(implicit db:OrientGraph):Option[Teaching] = {
-        val result = GraphDb.transaction[Vertex]({
-        	val teachingVertex    = db.addVertex("class:Teaching", "whenTheUserSays", teaching.whenTheUserSays, "respondingTo", teaching.respondingTo, "memorize", teaching.memorize, "say", teaching.say)
-            val informationVertex = db.getVertex(teaching.informationId)
-            db.addEdge("class:Include", informationVertex, teachingVertex, "include")
-            teachingVertex
-        }).get
-        //result.map(v=>Teaching(v)) // TODO: a orient inconsistent behavior (sometimes the vertex came without all properties) force me to adopt other ways to construct the returning Teaching.
-        Some(Teaching(result.getId().toString(), teaching.informationId, teaching.whenTheUserSays, teaching.respondingTo, teaching.memorize, teaching.say))
-	}
-    def update(teaching:Teaching)(implicit db:OrientGraph):Option[Teaching] = {
-        val result = GraphDb.transaction[Vertex]({
-            var teachingVertex = db.getVertex(teaching.id)
-            teachingVertex.setProperty("whenTheUserSays", teaching.whenTheUserSays)
-            teachingVertex.setProperty("respondingTo", teaching.respondingTo)
-            teachingVertex.setProperty("memorize", teaching.memorize)
-            teachingVertex.setProperty("say", teaching.say)
-            teachingVertex
-        }).get
-        //result.map(v=>Teaching(v)) // TODO: a orient inconsistent behavior (sometimes the vertex came without all properties) force me to adopt other ways to construct the returning Teaching.
-        Some(Teaching(result.getId().toString(), teaching.informationId, teaching.whenTheUserSays, teaching.respondingTo, teaching.memorize, teaching.say))
-    }
-    def delete(id:String)(implicit db:OrientGraph):Option[Teaching] = {
-        GraphDb.transaction[Teaching]({
-	        val sqlString = raw"select from (traverse out() from  $id)";
-	        val vertices:java.lang.Iterable[Vertex] = db.command(new OSQLSynchQuery[Vertex](sqlString)).execute();
-	        val teachingVertex = vertices.head
-	        val teaching = Teaching(teachingVertex)// after the commit, the teachingVertex last all your properties.
-	        db.removeVertex(teachingVertex)
-	        teaching
-        })
-    }
+object Teaching extends PersistentName {
     
-    def apply(vertex:Vertex):Teaching = Teaching(vertex.getId().toString(), "", vertex.getProperty("whenTheUserSays"), vertex.getProperty("respondingTo"), vertex.getProperty("memorize"), vertex.getProperty("say")) 
+    def vertexToTeaching(vertex:Vertex):Teaching=Teaching(vertex)
+    
+	def findById(id:String)(implicit db:Graph):Option[Teaching]  = {
+	    Some(Teaching(query().has("id", id).vertices().head))
+	}
+	def findByInformationId(informationId:Any)(implicit db:Graph):Set[Teaching]  = {
+	     query().has("in_", informationId).vertices().toSet[Vertex].map(v=>Teaching(v))
+	}
+//    def create(teaching:Teaching)(implicit db:OrientGraph):Option[Teaching] = {
+//    	teaching.save.toCC[Teaching]
+////        val result = GraphDb.transaction[Vertex]({
+////        	val teachingVertex    = db.addVertex("class:Teaching", "whenTheUserSays", teaching.whenTheUserSays, "respondingTo", teaching.respondingTo, "memorize", teaching.memorize, "say", teaching.say)
+////            val informationVertex = db.getVertex(teaching.informationId)
+////            db.addEdge("class:Include", informationVertex, teachingVertex, "include")
+////            teachingVertex
+////        }).get
+////        //result.map(v=>Teaching(v)) // TODO: a orient inconsistent behavior (sometimes the vertex came without all properties) force me to adopt other ways to construct the returning Teaching.
+////        Some(Teaching(result.getId().toString(), teaching.informationId, teaching.whenTheUserSays, teaching.respondingTo, teaching.memorize, teaching.say))
+//	}
+//    def update(teaching:Teaching)(implicit db:OrientGraph):Option[Teaching] = {
+//        transact{
+//            var teachingVertex = db.getVertex(teaching.id)
+//            teachingVertex.setProperty("whenTheUserSays", teaching.whenTheUserSays)
+//            teachingVertex.setProperty("respondingTo", teaching.respondingTo)
+//            teachingVertex.setProperty("memorize", teaching.memorize)
+//            teachingVertex.setProperty("say", teaching.say)
+//            teachingVertex.toCC[Teaching]
+//        }
+//        
+////        val result = GraphDb.transaction[Vertex]({
+////            var teachingVertex = db.getVertex(teaching.id)
+////            teachingVertex.setProperty("whenTheUserSays", teaching.whenTheUserSays)
+////            teachingVertex.setProperty("respondingTo", teaching.respondingTo)
+////            teachingVertex.setProperty("memorize", teaching.memorize)
+////            teachingVertex.setProperty("say", teaching.say)
+////            teachingVertex
+////        }).get
+////        //result.map(v=>Teaching(v)) // TODO: a orient inconsistent behavior (sometimes the vertex came without all properties) force me to adopt other ways to construct the returning Teaching.
+////        Some(Teaching(result.getId().toString(), teaching.informationId, teaching.whenTheUserSays, teaching.respondingTo, teaching.memorize, teaching.say))
+//    }
+//    def delete(id:String)(implicit db:OrientGraph):Option[Teaching] = {
+//        transact{
+//            val sqlString = raw"select from (traverse out() from  $id)";
+//	        val vertices:java.lang.Iterable[Vertex] = db.command(new OSQLSynchQuery[Vertex](sqlString)).execute();
+//	        val teachingVertex = vertices.head
+//	        val teaching = Teaching(teachingVertex)// after the commit, the teachingVertex last all your properties.
+//	        db.removeVertex(teachingVertex)
+//	        Some(teaching)
+//        }
+////        GraphDb.transaction[Teaching]({
+////	        val sqlString = raw"select from (traverse out() from  $id)";
+////	        val vertices:java.lang.Iterable[Vertex] = db.command(new OSQLSynchQuery[Vertex](sqlString)).execute();
+////	        val teachingVertex = vertices.head
+////	        val teaching = Teaching(teachingVertex)// after the commit, the teachingVertex last all your properties.
+////	        db.removeVertex(teachingVertex)
+////	        teaching
+////        })
+//    }
+    
+    def apply(vertex:Vertex):Teaching = Teaching(vertex.getId().toString(), vertex.getProperty("whenTheUserSays"), vertex.getProperty("respondingTo"), vertex.getProperty("memorize"), vertex.getProperty("say")) 
 }
 
 class TeachingToCategoryAdapter(teaching: Teaching) {
@@ -131,3 +157,6 @@ class TeachingToCategoryAdapter(teaching: Teaching) {
         whatWasSaid.map(createCategory(_, defaultPattern, respondingTo, whatToSay))
     }
 }
+
+
+
