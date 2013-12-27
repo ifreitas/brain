@@ -54,6 +54,9 @@ import net.liftweb.json.JArray
 import net.liftweb.json.JValue
 import net.liftweb.json.JObject
 import net.liftweb.json.JField
+import net.liftweb.json.JNothing
+import net.liftweb.http.Req
+import brain.db.GraphDb
 
 case class Knowledge(val name: String) extends DbObject {
 	require(!name.isEmpty(), "Name is required.")
@@ -61,22 +64,32 @@ case class Knowledge(val name: String) extends DbObject {
 	var id:Option[String] = None
 	var parentId:Option[String] = None
 	    
-	override def toString():String  = "knowledge: "+name
+	override def toString():String  = s"Knowledge: $name ($id)"
 	
-	def save()(implicit db:TransactionalGraph)={
-	    transact{
-	        val that = super.save()
-	        parentId map { pId => db.getVertex(pId) --> "include" --> that }
-	        that
-	    }
-	}
+	def save()(implicit db:TransactionalGraph) = transact{
+        val that = super.save()
+        parentId map { pId => db.getVertex(pId) --> "include" --> that }
+        that
+    }
+	
+	def isRoot(implicit db:TransactionalGraph) = Knowledge.root.id == this.id
+	
+	def destroy()(implicit db:TransactionalGraph):Unit = transact{
+	    if(this.isRoot) throw new IllegalArgumentException("Unable to delete the root knowledge.")
+	    getInformations foreach (_ destroy)
+        getNestedKnowledges foreach (_ destroy)
+        db removeVertex getVertex
+    }
+	
+	def getInformations()(implicit db:TransactionalGraph):Set[Information] = Information.findByKnowledge(this.id.get)
+	def getNestedKnowledges(implicit db:TransactionalGraph):Set[Knowledge] = Knowledge.getNestedKnowledges(this)
 }
 
 object Knowledge extends PersistentName {
     private implicit val formats = net.liftweb.json.DefaultFormats
 
     implicit def toJson(knowledge: Knowledge): JValue = JObject(
-		JField("id", JString(knowledge.id.get)) 	 ::
+		JField("id", JString(knowledge.id.get.replace("#", ""))) 	 ::
         JField("name", JString(knowledge.name))		 ::
         JField("data", JObject(List.empty[JField]))  :: 
     	JField("chidren", JArray(List.empty[JValue])):: 
@@ -86,6 +99,14 @@ object Knowledge extends PersistentName {
     implicit def knowledgeSetToJValue(knowledges: Set[Knowledge]): JValue = JArray(knowledges.map(toJson).toList)
     
     def findAll()(implicit db:Graph):Set[Knowledge] = query().vertices().toSet[Vertex].map(v=>Knowledge(v))
+    
+    def findById(id:String)(implicit db:Graph):Knowledge = Knowledge(db.getVertex(id))
+    
+    def root()(implicit db:Graph):Knowledge=Knowledge(Knowledge.query.vertices.head)
+    
+    def getNestedKnowledges(knowledge:Knowledge)(implicit db:Graph):Set[Knowledge] = {
+        knowledge.getVertex.pipe.out("include").iterator.toSet[Vertex].map(v=>Knowledge(v))
+    }
     
     def apply(in: JValue):Box[Knowledge] = Helpers.tryo{
         try {
@@ -105,10 +126,32 @@ object Knowledge extends PersistentName {
         }
     }
     def unapply(in:JValue):Option[Knowledge] = apply(in)
+    
+    def unapply(in:Any):Option[(Option[String], String, Option[String])] = {
+        in match {
+            case i : Knowledge => {
+               return Some((i.id, i.name, i.parentId))
+            }
+            case i : String => {
+            	implicit val db = GraphDb.get
+				try{
+	        		val k = Knowledge.findById(i)
+	        		Some(k.id, k.name, k.parentId)
+				}
+	        	catch{
+	        	    case t: Throwable => None
+	        	}
+	        	finally{
+	        		db.shutdown()
+	        	}
+            }
+            case _ => None
+        }
+    }
+    
     def apply(vertex:Vertex):Knowledge = {
-        val knowledge = new Knowledge(vertex.getProperty("name"))
+        val knowledge = vertex.toCC[Knowledge].get
         knowledge.id = Some(vertex.getId.toString)
-        println("(vertex)"+knowledge)
         knowledge
     }
 }

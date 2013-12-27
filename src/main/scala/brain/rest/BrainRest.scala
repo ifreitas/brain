@@ -1,22 +1,13 @@
 package brain.rest
 
-import net.liftweb.http.rest.RestHelper
-import net.liftweb._
-import util._
-import Helpers._
-import common._
-import json._
-import Extraction._
-import scala.xml.Node
-import net.liftweb.common.Empty
-import net.liftweb.http.S
-import net.liftweb.http.NotFoundResponse
-import com.tinkerpop.blueprints.Graph
-import com.tinkerpop.blueprints.Vertex
-import brain.db.GraphDb
-import com.tinkerpop.blueprints.impls.orient.OrientGraph
-import brain.models.Knowledge
 import com.ansvia.graph.BlueprintsWrapper._
+import brain.db.GraphDb
+import brain.models.Knowledge
+import brain.models.Knowledge.knowledgeSetToJValue
+import brain.models.Knowledge.toJson
+import net.liftweb.http.OkResponse
+import net.liftweb.http.rest.RestHelper
+import net.liftweb.json.JValue
 
 object BrainRest extends RestHelper {
     
@@ -34,10 +25,11 @@ object BrainRest extends RestHelper {
             }
         }
         
-        case id:: Nil JsonGet _ => {
+        case id :: Nil JsonGet _ => {
+            println("ID: "+id)
         	implicit val db = GraphDb.get
 			try{
-				Knowledge.findAll : JValue
+        		Knowledge.findById(id) : JValue
 			}
         	catch{
         	    case t: Throwable => t.printStackTrace; throw t
@@ -48,7 +40,7 @@ object BrainRest extends RestHelper {
         }
         
         // update
-        case Nil JsonPut Knowledge(knowledge) -> _ => {
+        case id :: Nil JsonPut Knowledge(knowledge) -> _ => {
         	implicit val db = GraphDb.get
         	try{
         		val vertex = db.getVertex(knowledge.id.get)
@@ -63,7 +55,7 @@ object BrainRest extends RestHelper {
         		db.shutdown()
         	}
         }
-        
+
         // create
         case Nil JsonPost Knowledge(knowledge) -> _ => { 
         	implicit val db = GraphDb.get
@@ -71,7 +63,6 @@ object BrainRest extends RestHelper {
 			    val vertex = knowledge.save
         		db.commit
         		knowledge.id = Some(vertex.getId().toString())
-        		
         		knowledge : JValue
 			}
         	catch{
@@ -82,6 +73,21 @@ object BrainRest extends RestHelper {
         	}
         }
         
+        //requires the id url param
+        case id :: Nil JsonDelete _ => {
+        	implicit val db = GraphDb.get
+        	try{
+        	    Knowledge(db.getVertex(id)).destroy
+        		db.commit
+        		new OkResponse
+        	}
+        	catch{
+        		case t: Throwable => t.printStackTrace; throw t
+        	}
+        	finally{
+        		db.shutdown()
+        	}
+        }
     })
     
 }

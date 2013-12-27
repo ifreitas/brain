@@ -164,19 +164,31 @@ function initTree(json){
 		Log.info("Knowledege named '" + newKnowledge.name + "' added successfully.")
     };
     
-//    st.remove = function(knowledge){
-//    	st.removeSubtree(
-//				lastClickedNode.id,
-//				true,
-//				'animate',
-//				{
-//					duration : 500,
-//					hideLabels : false,
-//					onComplete : function() {
-//						Log.info("Knowledge '"+knowledge.name+"' deleted successfully.");
-//					}
-//				})
-//    }
+    st.remove = function(knowledge){
+    	lastClickedNode = ObjectManager.lastClicked;
+    	st.removeSubtree(
+				lastClickedNode.id,
+				true,
+				'animate',
+				{
+					duration : 500,
+					hideLabels : false,
+					onComplete : function() {
+						Log.info("Knowledge '"+knowledge.name+"' deleted successfully.");
+					}
+				})
+    };
+    
+    st.rename = function(knowledge, newName){
+    	try{
+    		ObjectManager.lastClicked.name = newName;
+    		document.getElementById(knowledge.id).innerHTML = newName;
+    		Log.info("Knowledege '"+knowledge.name+"' renamed to '" + newName + "' successfully.");
+    	}
+    	catch(e){
+    		Log.error("Unable to rename Knowledege '"+knowledge.name+"'. Cause: "+e);
+    	}
+    }
     
     try{
     	if(json.id == null) throw "Invalid server data."
@@ -186,7 +198,7 @@ function initTree(json){
     	st.onClick(st.root);
     }
     catch(e){
-    	alert("Was not possible to load the tree. " + e)
+    	alert("Unable to load the tree. Cause: " + e)
     }
     
 }
@@ -276,6 +288,7 @@ Ext.application({
 
 
 /**
+ * TODO: Usar este recordField
  * Usage: Ext.create("Brain.form.textfield", {record: panel.getForm().getRecord()})
  */
 Ext.define('Brain.form.textfield', {
@@ -288,68 +301,66 @@ Ext.define('Brain.form.textfield', {
 	}
 });
 
-//model.init()
-//model.prepareCreate()// exibe o form
-//model.afterCreate()// oculta o form
-//model.prepareUpdate()// exibe o form
-//model.afterUpdate()// oculta o form
-//model.prepareDelete()// exibe o form
-//model.afterDelete()// oculta o form
-
-var knowledgeExtWrapper = {
-	/****** API ******/
-	init: function(){
-		this.defineModel();
-		return this;
-	},
+function KnowledgeExtWrapper(){
 	
-	create  : function(){
-		var form = this.createUpdateFormFactory({
-			success: function(rec, op){ 
-				panel.close();
+	var store = null;
+	defineProxy();
+	defineModel();
+	defineStore();
+	
+	this.create = function(){
+		var record = Ext.create('Brain.model.Knowledge', {name:'', parentId:ObjectManager.getLastClicked().id})
+		var form = prepareForm(record, {
+			success: function(rec, op){
+				store.add(rec.data);
 				st.add({id:rec.data.id, name:rec.data.name, data:{}, children:[]});
 			},
-			failure: function(rec, op){ panel.close(); alert("failure"); alert(op); alert(rec.name) }
+			failure: function(rec, op) { alert(op.getError()); }
 		});
-		form.getForm().loadRecord(Ext.create('Brain.model.Knowledge', {name:'', parentId:ObjectManager.getLastClicked().id}));
-		var panel = Ext.create('Ext.window.Window', {
-			title:       'Create a Knowledge',
-			closeAction: 'hide',
-			modal:       true,
-			closable:    true,
-			resizable:	 false,
-			height:      200,
-			width:       400,
-			layout:      'fit',
-			items:       [ form ],
-			listerners:{
-				'beforeshow':function(window){
-					form.items.items[0].focus()
-				}
-			}
-		});
+		var panel = basicWindow('Create a Knowledge', [ form ])
 		panel.show();
 		return panel;
-	},
-	update  : function(){},
-	destroy : function(){},
+	}
 	
+	this.update  = function(){
+		var record = store.findRecord('id',ObjectManager.lastClicked.id)
+		var form = prepareForm(record, {
+			success: function(rec, op) { st.rename(ObjectManager.lastClicked, rec.data.name); },
+			failure: function(rec, op) { alert(op.getError()); }
+		});
+		var panel = basicWindow('Update the Knowledge', [ form ])
+		panel.show();
+		return panel;
+	}
 	
-	/****** Internal *******/
-	createUpdateFormFactory:function(myCallbacks){
+	this.destroy = function(){
+		if(ObjectManager.lastClicked.getParents().length == 0){
+			Ext.MessageBox.alert("","Unable to delete the tree's root knowledge")
+		}
+		else{
+			Ext.MessageBox.confirm('Confirm to delete the knowledge?', 'If yes, all its informations and nested knowledges will be removed too. Are you sure?', function(answer){
+				if(answer == 'yes'){
+					var record = store.findRecord('id',ObjectManager.lastClicked.id)
+					record.destroy({
+						success: function(rec, op){
+							st.remove(ObjectManager.lastClicked)
+							ObjectManager.setLastClicked(null)
+						},
+						failure: function(rec, op){ alert(op.getError()); }
+					});
+				}
+			});
+		};
+	}
+	
+	function prepareForm(record, callbacks){
 		var theForm = Ext.create('Ext.form.Panel', {
-			border:false,
-			layout:'form',
-			bodyPadding: 5,
+			border:false, layout:'form', bodyPadding: 5,
 			model: 'Brain.model.Knowledge',
 			items:[
 			       {
-			    	   xtype:      'textfield',         
-			    	   fieldLabel: 'Name',
-			    	   name:       'name',
-			    	   allowBlank: false,
-			    	   minLength:  2,
-			    	   maxLength:  40,
+			    	   xtype: 'textfield', fieldLabel: 'Name', name: 'name',
+			    	   allowBlank: false, minLength: 2, maxLength: 40,
 			    	   listeners:{
 			    		   'blur' : function( e, eOpts ){
 			    			   theForm.getForm().getRecord().set(this.name, this.value)
@@ -359,55 +370,76 @@ var knowledgeExtWrapper = {
 		       ],
 		       bbar: [
 		              {
-					   xtype: 'button',
-					   text: 'Save',
+					   xtype: 'button', text: 'Save', 
 					   formBind : true,
 					   handler: function(){theForm.getForm().getRecord().save({
-						    success: function(rec, op) {
-						    	if (myCallbacks != null){
-						    		myCallbacks.success(rec, op);
-						    	}
+						    success: function(rec, op) { 
+						    	theForm.up().close(); 
+						    	if (callbacks != null) callbacks.success(rec, op); 
 						    },
-						    failure: function(rec, op) {
-						    	if (myCallbacks != null){
-						    		myCallbacks.failure(rec, op);
-						    	}
-						    }
+						    failure: function(rec, op) { if (callbacks != null) callbacks.failure(rec, op); }
 						});},
 					   scope: this
 					},
 					{
-					   xtype: 'button',
-					   text: 'Cancel',
-					   handler: function(){theForm.close();},
+					   xtype: 'button', text: 'Cancel',
+					   handler: function() { up.close(); },
 					   scope: this
 					}
 				]
 		});
+		theForm.getForm().loadRecord(record);
 		return theForm;
-	},	
+	}
 	
-	defineModel:function(){
-		Ext.define('Brain.model.Knowledge', {
-		    extend: 'Ext.data.Model',
-		    fields:['id', 'name', 'parentId'],
-		    proxy: {
-		        type:     'rest',
-		        url :     'rest/knowledges',
-		        model:    'Brain.model.Knowledge',
-		        format:   'json',
-		        appendId: false
-		    }
+	function basicWindow(title, items){
+		return Ext.create('Ext.window.Window', {
+			title:       title,
+			modal:       true,
+			closable:    true,
+			resizable:	 false,
+			height:      200,
+			width:       400,
+			layout:      'fit',
+			items:       items,
+			listeners:{
+				'show':function(window){
+					window.items.first().getForm().getFields().first().focus();
+				}
+			}
 		});
 	}
-}.init();
+	
+	function defineProxy(){
+		this.proxy = {
+	        type:     'rest',
+	        url :     'rest/knowledges',
+	        model:    'Brain.model.Knowledge',
+	        format:   'json',
+	        appendId: true
+	    };
+	}
+	
+	function defineModel(){
+		Ext.define('Brain.model.Knowledge', {
+		    extend: 'Ext.data.Model',
+		    idProperty: 'id',
+		    fields:['id', 'name', 'parentId'],
+		    proxy: this.proxy
+		});
+	}
+		
+	function defineStore(){
+		store = Ext.create('Ext.data.Store', {
+		     model: 'Brain.model.Knowledge',
+		     proxy: this.proxy,
+		     autoLoad: true,
+		     autoSync: false 
+		 });
+	}
+}
 
-
-
-//theForm.getForm().loadRecord(
-//	Ext.create('Brain.model.Knowledge')
-//);
-
+var knowledgeExtWrapper = new KnowledgeExtWrapper();
 
 var informationExtWrapper = {
 	panel: Ext.create('Ext.grid.Panel', {
@@ -689,8 +721,8 @@ function afterReceiveTeachings(data){
 var contextMenu = Ext.create('Ext.menu.Menu', {
 	items:[
 	       { text : 'Add a Knowledge',       handler : function(item){knowledgeExtWrapper.create();} }, 
-		   { text : 'Rename this Knowledge', handler : function(item){updateKnowledgeForm.show();} }, 
-		   { text : 'Delete this Knowledge', handler : function(item){deleteKnowledgeForm.show();} }, 
+		   { text : 'Rename this Knowledge', handler : function(item){knowledgeExtWrapper.update();} }, 
+		   { text : 'Delete this Knowledge', handler : function(item){knowledgeExtWrapper.destroy();} }, 
 		   '-', 
 		   { text : 'Topics & Teachings',    handler : function(item){informationAndTeachingWindow.show();}}
    ]

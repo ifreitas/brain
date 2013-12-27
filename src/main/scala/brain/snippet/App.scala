@@ -65,7 +65,7 @@ object App {
 
     private def getKnowledges(): String = {
 		def toJsonString(sb:StringBuilder, vertex:Vertex):String={
-		    sb.append(s"{id: '${vertex.getId}', name: '${vertex.getProperty("name")}', data: {topics:[${vertex.getVertices(Direction.OUT, "divisions").map(t=>s"{id:${t.getId}, name:${t.getProperty("name")}}").mkString(",")}]}, children: [")
+		    sb.append(s"{id: '${vertex.getId.toString().replace("#", "")}', name: '${vertex.getProperty("name")}', data: {topics:[${vertex.getVertices(Direction.OUT, "divisions").map(t=>s"{id:${t.getId}, name:${t.getProperty("name")}}").mkString(",")}]}, children: [")
 			sb.append(vertex.getVertices(Direction.OUT, "include").map(v=>toJsonString(new StringBuilder, v)).mkString(","))
 			sb.append("]}")
 			sb.toString

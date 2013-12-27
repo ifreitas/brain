@@ -17,53 +17,6 @@
     <div id="log"></div>
     
       <div style="display: none">
-        <!-- Window : Form : Knowledge -->
-        <div id="createKnowledgeWindow" style="width: 100%; height: 100%;">
-            <form class="lift:form.ajax">
-                <div data-lift="createKnowledgeForm">
-                    <table style="width: 100%; height: 100%;">
-                        <tr>
-                            <td><label for="createKnowledgeNameInput">Name</label></td>
-                            <td><input type="text" id="createKnowledgeNameInput" placeholder="Enter new Knowledge name"></td>
-                        </tr>
-                        <tr><td colspan="2"><span id="createKnowledgeWindowStatus" style="color: red"></span></td></tr>
-                        <tr><td colspan="2"><input type="hidden" name="parentId"><hr></td></tr>
-                        <tr align="right"><td colspan="2"><button type="submit" >Save changes</button><button onclick="createKnowledgeForm.hide();">Cancel</button></td></tr>
-                    </table>
-                </div>
-            </form>
-        </div>
-        
-        <!-- Window -->
-        <div id="updateKnowledgeWindow" style="width: 100%; height: 100%;">
-            <form class="lift:form.ajax">
-                <div data-lift="updateKnowledgeForm">
-                    <table style="width: 100%; height: 100%;">
-                        <tr>
-                            <td><label for="updateKnowledgeNameInput">Name</label></td>
-                            <td><input type="text" id="updateKnowledgeNameInput" placeholder="Enter new Knowledge name"></td>
-                        </tr>
-                        <tr><td colspan="2"><span id="updateKnowledgeWindowStatus" style="color: red"></span></td></tr>
-                        <tr><td colspan="2"><input type="hidden" name="id"><hr></td></tr>
-                        <tr align="right"><td colspan="2"><button type="submit" >Save changes</button><button onclick="updateKnowledgeForm.hide();">Cancel</button></td></tr>
-                    </table>
-                </div>
-            </form>
-        </div>
-                                    
-        <!-- Window -->
-        <div id="deleteKnowledgeWindow" style="width: 100%; height: 100%;">
-            <form class="lift:form.ajax">
-                <div data-lift="deleteKnowledgeForm">
-                    <table style="width: 100%; height: 100%;">
-                        <tr><td>Confirm to delete this knowledge?</td></tr>
-                        <tr><td><span id="deleteKnowledgeWindowStatus" style="color: red"></span></td></tr>
-                        <tr><td><input type="hidden" name="id"><hr></td></tr>
-                        <tr align="right"><td><button type="submit" >yes</button><button onclick="deleteKnowledgeForm.hide();">NO!</button></td></tr>
-                    </table>
-                </div>
-            </form>
-        </div>
         
         <!-- Teaching -->
         <div id="teachingForm" style="width: 100%; height: 100%;">
@@ -143,68 +96,6 @@
     
         document.oncontextmenu = function(e) { return false; };
         
-				function afterUpdateKnowledge(knowledge){
-		      updateKnowledgeForm.hide();
-					lastClikedNode = ObjectManager.lastClicked;
-					Log.info("Knowledege '"+lastClikedNode.name+"' renamed to '" + knowledge.name + "' successfully.");
-					
-					lastClikedNode.name = knowledge.name
-					document.getElementById(knowledge.id).innerHTML=knowledge.name
-				}
-
-				function afterCreateKnowledge(newKnowledge) {
-					//createKnowledgeForm.hide();
-					
-					Log.info("Knowledege named '" + newKnowledge.name + "' added successfully.");
-					lastClikedNode = ObjectManager.lastClicked;
-					
-					st.addSubtree(
-							{
-								  id : lastClikedNode.id,
-								  children : [ newKnowledge ]
-							}, 
-							'replot', 
-							{
-								  hideLabels : false,
-								  duration : 800,
-								  onComplete : function() {
-									  if (st.clickedNode.id != lastClikedNode.id) {
-										  st.onClick(lastClikedNode.id);
-										}
-									  Log.info('Done');
-									}
-							}
-					  )
-					}
-
-					function afterDeleteKnowledge(knowledge) {
-						deleteKnowledgeForm.hide();
-						var lastClickedNode = ObjectManager.lastClicked;
-						var nodeParent = null;
-
-						if (lastClickedNode) {
-							if (lastClickedNode.getParents().length == 0) {
-								Log.info("Is not possible to delete the tree's root knowledge.");
-								return false;
-							}
-							nodeParent = lastClickedNode.getParents()[0];
-							ObjectManager.setLastClicked(nodeParent);
-							st.onClick(nodeParent.id);
-						}
-
-						st.removeSubtree(
-							lastClickedNode.id,
-							true,
-							'animate',
-							{
-								duration : 500,
-								hideLabels : false,
-								onComplete : function() {
-									Log.info("Knowledge '"+knowledge.name+"' deleted successfully.");
-								}
-							})
-					}
-					
 					function afterCreateInformation(newInformation){
 						informationExtWrapper.formPanel.hide();
 						informationExtWrapper.panel.store.add(newInformation)
