@@ -29,6 +29,8 @@ case class Information(val id:String, val name:String, val knowledgeId:String) e
     def toJson:String={
         raw"{id:'$id', name:'$name', knowledgeId:'$knowledgeId'}"
     }
+    
+    def destroy()={/*TODO*/}
 }
 
 object Information extends PersistentName{

@@ -4,13 +4,7 @@ import com.tinkerpop.blueprints.GraphQuery
 import com.tinkerpop.blueprints.Graph
 
 class PersistentName {
-	final def persistentName={
-	    val r = s"${this.getClass().getName().replaceAll("\\$", "")}"
-	    println(r)
-	    r
-	}
+	final def persistentName = s"${this.getClass().getName().replaceAll("\\$", "")}"
 	
-	def query()(implicit db:Graph):GraphQuery = {
-	    db.query().has("_class_", persistentName)
-	}
+	def query()(implicit db:Graph):GraphQuery = db.query().has("_class_", persistentName)
 }
