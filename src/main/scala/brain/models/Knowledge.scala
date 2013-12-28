@@ -36,25 +36,12 @@ import com.tinkerpop.blueprints.impls.orient.OrientGraph
 import aimltoxml.aiml.Aiml
 import com.tinkerpop.blueprints.Graph
 import net.liftweb.common.Box
-import net.liftweb.json.JValue
 import net.liftweb.util.Helpers
 import net.liftweb.json.Extraction
 import scala.xml.Node
-import net.liftweb.json.Xml
-import net.liftweb.json.JObject
-import net.liftweb.json.JObject
-import net.liftweb.json.JObject
+import net.liftweb.json._
 import com.tinkerpop.blueprints.TransactionalGraph
 import com.ansvia.graph.annotation.Persistent
-import net.liftweb.json.JField
-import net.liftweb.json.JString
-import net.liftweb.json.JObject
-import net.liftweb.json.JField
-import net.liftweb.json.JArray
-import net.liftweb.json.JValue
-import net.liftweb.json.JObject
-import net.liftweb.json.JField
-import net.liftweb.json.JNothing
 import net.liftweb.http.Req
 import brain.db.GraphDb
 
@@ -81,7 +68,7 @@ case class Knowledge(val name: String) extends DbObject {
         db removeVertex getVertex
     }
 	
-	def getInformations()(implicit db:TransactionalGraph):Set[Information] = Information.findByKnowledge(this.id.get)
+	def getInformations()(implicit db:TransactionalGraph):Set[Information] = Information.findByKnowledge(this)
 	def getNestedKnowledges(implicit db:TransactionalGraph):Set[Knowledge] = Knowledge.getNestedKnowledges(this)
 }
 

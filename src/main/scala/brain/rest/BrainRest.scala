@@ -8,10 +8,15 @@ import brain.models.Knowledge.toJson
 import net.liftweb.http.OkResponse
 import net.liftweb.http.rest.RestHelper
 import net.liftweb.json.JValue
+import brain.models.Information
 
 object BrainRest extends RestHelper {
     
     serve("rest"/"knowledges" prefix{
+        
+        /*
+         * KNOWLEDGE
+         */
         case Nil JsonGet _ => {
             implicit val db = GraphDb.get
             try{
@@ -78,6 +83,75 @@ object BrainRest extends RestHelper {
         	implicit val db = GraphDb.get
         	try{
         	    Knowledge(db.getVertex(id)).destroy
+        		db.commit
+        		new OkResponse
+        	}
+        	catch{
+        		case t: Throwable => t.printStackTrace; throw t
+        	}
+        	finally{
+        		db.shutdown()
+        	}
+        }
+        
+        /*
+         * INFORMATIONS
+         */
+        case knowledgeId :: "informations" :: Nil JsonGet _ => {
+            implicit val db = GraphDb.get
+            try{
+                Information.findByKnowledge(Knowledge.findById(knowledgeId)) : JValue
+            }
+            catch{
+        	    case t: Throwable => t.printStackTrace; throw t
+        	}
+            finally{
+                db.shutdown()
+            }
+        }
+        
+              // update
+        case knowledgeId :: "informations" :: id :: Nil JsonPut Information(information) -> _ => {
+        	implicit val db = GraphDb.get
+        	try{
+        	    //TODO: retornar 404 caso este knowlege nao tenha esta information
+        		val vertex = db.getVertex(id)
+        		vertex.setProperty("name", information.name)
+        		db.commit
+        		information : JValue
+        	}
+        	catch{
+        	    case t: Throwable => t.printStackTrace; throw t
+        	}
+        	finally{
+        		db.shutdown()
+        	}
+        }
+
+        // create
+        case knowledgeId :: "informations" :: Nil JsonPost Information(information) -> _ => { 
+        	implicit val db = GraphDb.get
+			try{
+			    //TODO: retornar 404 caso este knowlege nao tenha esta information
+			    val vertex = information.save
+        		db.commit
+        		information.id = Some(vertex.getId().toString())
+        		information : JValue
+			}
+        	catch{
+        	    case t: Throwable => t.printStackTrace; throw t
+        	}
+        	finally{
+        		db.shutdown()
+        	}
+        }
+        
+        //requires the id url param
+        case knowledgeId :: "informations" :: id :: Nil JsonDelete _ => {
+        	implicit val db = GraphDb.get
+        	try{
+        	    // TODO: retornar 404 caso este knowlege nao tenha esta information
+        	    Information(db.getVertex(id)).destroy
         		db.commit
         		new OkResponse
         	}

@@ -23,17 +23,100 @@
  */
 package brain.models
 
+import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import com.ansvia.graph.BlueprintsWrapper._
+import net.liftweb.json._
+import net.liftweb.common.Box
+import net.liftweb.util.Helpers
+import com.tinkerpop.blueprints.Graph
+import com.tinkerpop.blueprints.Vertex
+import brain.db.GraphDb
+import com.tinkerpop.blueprints.TransactionalGraph
 
-case class Information(val id:String, val name:String, val knowledgeId:String) extends DbObject{
-    def toJson:String={
-        raw"{id:'$id', name:'$name', knowledgeId:'$knowledgeId'}"
+case class Information(val name:String) extends DbObject{
+    
+    var id:Option[String] = None
+	var knowledgeId:Option[String] = None
+    
+	def save()(implicit db:TransactionalGraph) = transact{
+        val that = super.save()
+        db.getVertex(knowledgeId.get) --> "informations" --> that
+        //knowledgeId map { kId => db.getVertex(kId) --> "informations" --> that }
+        that
     }
     
-    def destroy()={/*TODO*/}
+    def destroy() (implicit db:TransactionalGraph) = transact{
+	    getTeachings foreach (_ destroy)
+        db removeVertex getVertex
+    }
+    
+    def getTeachings():Set[Teaching] = Set.empty
 }
 
-object Information extends PersistentName{
-    def findById(id:Any):Option[Information]=None
-    def findByKnowledge(knowledgeId:Any):Set[Information]=Set.empty[Information]
+object Information extends PersistentName {
+    private implicit val formats = net.liftweb.json.DefaultFormats
+
+    implicit def toJson(information: Information): JValue = JObject(
+		JField("id", JString(information.id.get.replace("#", ""))) 	 ::
+        JField("name", JString(information.name))		 ::
+        JField("knowledgeId", JString(information.knowledgeId.get.replace("#", "")))  :: 
+        Nil
+    )
+    
+    implicit def informationSetToJValue(informations: Set[Information]): JValue = JArray(informations.map(toJson).toList)
+    
+    def findAll()(implicit db:Graph):Set[Knowledge] = query().vertices().toSet[Vertex].map(v=>Knowledge(v))
+    
+    def findById(id:String)(implicit db:Graph):Information = Information(db.getVertex(id))
+    
+    def findByKnowledge(knowledge:Knowledge)(implicit db:Graph):Set[Information] = knowledge.getVertex.pipe.out("informations").iterator.toSet[Vertex].map(v=>Information(v))
+    
+    def apply(in: JValue):Box[Information] = Helpers.tryo{
+        try {
+        	val information:Information = new Information((in \ "name").values.toString)
+	        (in \ "id") match {
+        	    case id: JString => information.id = Some(id.values)
+        	    case _ => information.id = None
+        	}
+	        (in \ "knowledgeId") match {
+        	    case knowledgeId: JString => information.knowledgeId = Some(knowledgeId.values)
+        	    case _ => information.knowledgeId = None
+        	}
+	        information
+		}
+        catch{
+            case t:Throwable => t.printStackTrace(); throw t
+        }
+    }
+    def unapply(in:JValue):Option[Information] = apply(in)
+    
+    def unapply(in:Any):Option[(Option[String], String, Option[String])] = {
+        in match {
+            case i : Information => {
+               return Some((i.id, i.name, i.knowledgeId))
+            }
+            case i : String => {
+            	implicit val db = GraphDb.get
+				try{
+	        		val information = Information.findById(i)
+	        		Some(information.id, information.name, information.knowledgeId)
+				}
+	        	catch{
+	        	    case t: Throwable => None
+	        	}
+	        	finally{
+	        		db.shutdown()
+	        	}
+            }
+            case _ => None
+        }
+    }
+    
+    def apply(vertex:Vertex)(implicit db:Graph):Information = {
+        val information = vertex.toCC[Information].get
+        information.id = Some(vertex.getId.toString)
+        information.knowledgeId = Some(vertex.pipe.in("informations").iterator.next().getId().toString())
+        information
+    }
 }

@@ -42,7 +42,9 @@ case class Teaching(id:String, whenTheUserSays:String, respondingTo:String, memo
     
     def toAiml = new TeachingToCategoryAdapter(this).toCategory
     
-    def toJson:String = raw"{id:'$id', whenTheUserSays:'$whenTheUserSays', respondingTo:'$respondingTo', memorize:'$memorize',say:'$say'}" 
+    def toJson:String = raw"{id:'$id', whenTheUserSays:'$whenTheUserSays', respondingTo:'$respondingTo', memorize:'$memorize',say:'$say'}"
+    
+    def destroy = {}
 }
 
 object Teaching extends PersistentName {
