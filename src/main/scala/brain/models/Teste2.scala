@@ -21,7 +21,8 @@ object Teste2 {
 //            val k = Knowledge(db.getVertex("9:0"))
 //            k.getVertex.pipe.out("include").iterator.toSet[Vertex].foreach(v => println(Knowledge(v))) //toList().foreach(v => println(Knowledge(v)))
             
-            println(Knowledge(Knowledge.query.vertices.head))
+            //println(Information(db.getVertex("9:5")).getVertex.pipe.out("include").toList.map(v=>Teaching(v)).size)
+            println(Information(db.getVertex("9:5")).getVertex.pipe.out("include").iterator.next())
             
         }
         finally{

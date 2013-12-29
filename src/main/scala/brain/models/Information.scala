@@ -42,7 +42,6 @@ case class Information(val name:String) extends DbObject{
 	def save()(implicit db:TransactionalGraph) = transact{
         val that = super.save()
         db.getVertex(knowledgeId.get) --> "informations" --> that
-        //knowledgeId map { kId => db.getVertex(kId) --> "informations" --> that }
         that
     }
     
@@ -51,7 +50,9 @@ case class Information(val name:String) extends DbObject{
         db removeVertex getVertex
     }
     
-    def getTeachings():Set[Teaching] = Set.empty
+    def getTeachings()(implicit db:Graph):Set[Teaching] = Teaching.findByInformation(this)
+    
+    	override def toString():String  = s"Information: $name ($id)"
 }
 
 object Information extends PersistentName {

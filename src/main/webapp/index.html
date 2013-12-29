@@ -1,70 +1,15 @@
 <!DOCTYPE html>
 <html>
-<head>
-<meta content="text/html; charset=UTF-8" http-equiv="content-type"></meta>
-<title>Brain</title>
-</head>
+    <head>
+        <meta content="text/html; charset=UTF-8" http-equiv="content-type"></meta>
+        <title>Brain</title>
+    </head>
 
-<body class="lift:content_id=main">
-    <div id="main" class="lift:surround?with=default;at=content">
-    <div class="lift:App.onLoad"></div>
-
-    <div id="theTree">
-        <div id="infovis" class="infovis"></div>
-    </div>
-    <div id="log"></div>
-    
-      <div style="display: none">
-        
-        <!-- Teaching -->
-        <div id="teachingForm" style="width: 100%; height: 100%;">
-            <form class="lift:form.ajax">
-                <div data-lift="teachingSnippet">
-                    <table style="width: 100%; height: 100%;">
-                        <tr>
-                            <td><label for="whenTheUserSaysInput">When the user says</label></td>
-                            <td><textarea id="whenTheUserSaysInput" rows="5" cols="50" placeholder="likely user's sentences (one per line)"></textarea></td>
-                        </tr>
-                        <tr>
-                            <td><label for="respondingToInput">Responding to</label></td>
-                            <td><input type="text" style="width: 410px" id="respondingToInput" placeholder="some bot phrase"></td>
-                        </tr>
-                        <tr>
-                            <td><label for="memorizeInput">Memorize</label></td>
-                            <td><textarea id="memorizeInput" rows="5" cols="50" placeholder="some key=value pair like: name='Israel' (one per line)"></textarea></td>
-                        </tr>
-                        <tr>
-                            <td><label for="sayInput">Say</label></td>
-                            <td><textarea id="sayInput" rows="5" cols="50" placeholder="The bot's responses to the user input. Can access memorized variables. Example: Hello, ${name}. (one per line)"></textarea></td>
-                        </tr>
-                        <tr><td colspan="2"><span id="teachingFormStatus" style="color: red"></span></td></tr>
-                        <tr><td colspan="2"><input type="hidden" id="teachingId"><input type="hidden" id="teachingInformationId"><hr></td></tr>
-                        <tr align="right"><td colspan="2"><button type="submit" >Save</button><button onclick="teachingExtWrapper.formPanel.hide();">Cancel</button></td></tr>
-                    </table>
-                </div>
-            </form>
-        </div>
-        <div id="deleteTeachingForm" style="width: 100%; height: 100%;">
-            <form class="lift:form.ajax">
-                <div data-lift="deleteTeachingForm">
-                    <table style="width: 100%; height: 100%;">
-                        <tr><td>Confirm to delete this teaching?</td></tr>
-                        <tr><td><span id="deleteTeachingFormStatus" style="color: red"></span></td></tr>
-                        <tr><td><input type="hidden" id="whatTeachingToDelete"><hr></td></tr>
-                        <tr align="right"><td><button type="submit" >yes</button><button onclick="teachingExtWrapper.deleteFormPanel.hide();">NO!</button></td></tr>
-                    </table>
-                </div>
-            </form>
-        </div>
-        
-    </div>
-        
-    <script type="text/javascript">
-        document.oncontextmenu = function(e) { return false; };
-		</script>
-
-    </div>
-    
-    <!-- /main -->
-</body>
+    <body class="lift:content_id=main">
+        <div id="main" class="lift:surround?with=default;at=content">
+            <div class="lift:App.onLoad"></div>
+            <div id="theTree"><div id="infovis" class="infovis"></div></div>
+            <div id="log"></div>
+        </div><!-- /main -->
+    </body>
 </html>
