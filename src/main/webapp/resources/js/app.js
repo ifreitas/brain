@@ -287,6 +287,132 @@ Ext.application({
 });
 
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+//Ext.require(['Ext.data.*', 'Ext.grid.*']);
+//
+//Ext.define('Information', {
+//    extend: 'Ext.data.Model',
+//    fields: [{
+//        name: 'id',
+//        type: 'string',
+//        useNull: true
+//    }, 'name', 'knowledgeId'],
+//    validations: [{
+//        type: 'length',
+//        field: 'name',
+//        min: 1
+//    }]
+//});
+//
+//Ext.onReady(function(){
+//
+//    var store = Ext.create('Ext.data.Store', {
+//        autoLoad: true,
+//        autoSync: false,
+//        model: 'Information',
+//        proxy: {
+//            type: 'rest',
+//            url: 'rest/knowledges/9:0/informations',
+//            reader: {
+//                type: 'json',
+//                root: 'data'
+//            },
+//            writer: {
+//                type: 'json'
+//            }
+//        },
+//        listeners: {
+//            write: function(store, operation){
+//                var record = operation.getRecords()[0],
+//                    name = Ext.String.capitalize(operation.action),
+//                    verb;
+//                    
+//                    
+//                if (name == 'Destroy') {
+//                    record = operation.records[0];
+//                    verb = 'Destroyed';
+//                } else {
+//                    verb = name + 'd';
+//                }
+//                //Ext.example.msg(name, Ext.String.format("{0} user: {1}", verb, record.getId()));
+//                
+//            }
+//        }
+//    });
+//    
+//    var rowEditing = Ext.create('Ext.grid.plugin.RowEditing');
+//    
+//    var grid = Ext.create('Ext.grid.Panel', {
+//        renderTo: document.body,
+//        plugins: [rowEditing],
+//        width: 400,
+//        height: 300,
+//        frame: true,
+//        title: 'Informations',
+//        store: store,
+//        iconCls: 'icon-user',
+//        columns: [{
+//            text: 'ID',
+//            width: 40,
+//            sortable: true,
+//            dataIndex: 'id'
+//        }, {
+//            text: 'Name',
+//            flex: 1,
+//            sortable: true,
+//            dataIndex: 'name',
+//            field: {
+//                xtype: 'textfield'
+//            }
+//        }, {
+//            header: 'knowledgeid',
+//            width: 80,
+//            sortable: true,
+//            dataIndex: 'knowledgeId',
+//            field: {
+//                xtype: 'textfield'
+//            }
+//        }, ],
+//        dockedItems: [{
+//            xtype: 'toolbar',
+//            items: [{
+//                text: 'Add',
+//                iconCls: 'icon-add',
+//                handler: function(){
+//                    // empty record
+//                    store.insert(0, new Person());
+//                    rowEditing.startEdit(0, 0);
+//                }
+//            }, '-', {
+//                itemId: 'delete',
+//                text: 'Delete',
+//                iconCls: 'icon-delete',
+//                disabled: true,
+//                handler: function(){
+//                    var selection = grid.getView().getSelectionModel().getSelection()[0];
+//                    if (selection) {
+//                        store.remove(selection);
+//                        store.sync();
+//                    }
+//                }
+//            }]
+//        }]
+//    });
+//    grid.getSelectionModel().on('selectionchange', function(selModel, selections){
+//        grid.down('#delete').setDisabled(selections.length === 0);
+//    });
+//});
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
 /**
  * TODO: Usar este recordField
  * Usage: Ext.create("Brain.form.textfield", {record: panel.getForm().getRecord()})
@@ -383,7 +509,7 @@ function KnowledgeExtWrapper(){
 						    failure: function(rec, op) { if (callbacks != null) callbacks.failure(rec, op); }
 						});},
 					   scope: this
-					},
+					}, '-',
 					{
 					   xtype: 'button', text: 'Cancel',
 					   handler: function() { theForm.up().close(); },
@@ -447,33 +573,32 @@ var knowledgeExtWrapper = new KnowledgeExtWrapper();
 
 
 function InformationExtWrapper(){
-	
-	initProxy();
+	var store = null;
 	defineModel();
-	var store = initStore();
-	var grid = this.grid = initGrid(); //temp implementation
-	var teachingExtWrapper = this.teachingExtWrapper = new TeachingExtWrapper();
+	initStore();
+	this.grid = initGrid(); //temp implementation
+	this.teachingExtWrapper = new TeachingExtWrapper();
+	var me = this
 	
 	function create(){
 		var record = Ext.create('Brain.model.Information', {name:'', knowledgeId:ObjectManager.getLastClicked().id})
 		var form = prepareForm(record, {
 			success: function(rec, op){
 				store.add(rec.data)
-				record.commit();
 				Log.info("Information named '" + rec.data.name + "' created successfully.");
 			},
 			failure: function(rec, op) { alert(op.getError()); }
 		});
-		var p = basicWindow('Create a Information', [ form ])
+		var p = basicWindow('Create a Information', [ form ]);
 		p.show();
 		return p;
 	}
 	
 	function update(){
 		
-		if(grid.getSelectionModel().getLastSelected() == null) return false;
+		if(me.grid.getSelectionModel().getLastSelected() == null) return false;
 		
-		var selectedItem = grid.getSelectionModel().getLastSelected().data
+		var selectedItem = me.grid.getSelectionModel().getLastSelected().data
 		var record = store.findRecord('id', selectedItem.id)
 		var form = prepareForm(record, {
 			success: function(rec, op) {
@@ -488,18 +613,12 @@ function InformationExtWrapper(){
 	}
 	
 	function destroy(){
-		if(grid.getSelectionModel().getLastSelected() == null) return false;
-		
+		var selectedItem = me.grid.getView().getSelectionModel().getSelection()[0];
+		if(selectedItem == null) return false;
 		Ext.MessageBox.confirm('Confirm to delete the Information?', 'If yes, all its teachings will be removed too. Are you sure?', function(answer){
 			if(answer == 'yes'){
-				var selectedItem = grid.getSelectionModel().getLastSelected().data
-				var record = store.findRecord('id', selectedItem.id)
-				record.destroy({
-					success: function(rec, op){
-						Log.info("Information '"+selectedItem.name+"' deleted successfully.");
-					},
-					failure: function(rec, op){ alert(op.getError()); }
-				});
+				store.remove(selectedItem);
+				store.sync();
 			}
 		});
 	}
@@ -532,7 +651,7 @@ function InformationExtWrapper(){
 						    failure: function(rec, op) { if (callbacks != null) callbacks.failure(rec, op); }
 						});},
 					   scope: this
-					},
+					}, '-',
 					{
 					   xtype: 'button', text: 'Cancel',
 					   handler: function() { theForm.up().close(); },
@@ -555,11 +674,11 @@ function InformationExtWrapper(){
 				{
 					  text: 'Create',
 					  handler:function(){ create(); }
-				},
+				}, '-',
 				{
 					  text: 'Update',
 					  handler:function(){ update(); }
-				},
+				}, '-',
 				{
 					  text: 'Delete',
 					  handler:function(){ destroy(); }
@@ -568,13 +687,13 @@ function InformationExtWrapper(){
 		    columns: [{ text: 'Name',  dataIndex: 'name', width:'100%'}],
 		    listeners:{
 		    	select:function( theGrid, record, index, eOpts ){
-		    		teachingExtWrapper.setInformation(record.data)
+		    		me.teachingExtWrapper.setInformation(record.data)
 		    	},
 				deselect:function( record, index, eOpts ){
-					teachingExtWrapper.setInformation(null)
+					me.teachingExtWrapper.setInformation(null)
 				},
 				itemdblclick: function( record, item, index, e, eOpts ){
-					update();
+					me.update();
 				}
 		    }
 		});
@@ -598,34 +717,29 @@ function InformationExtWrapper(){
 		});
 	}
 	
-	function initProxy(){
-		this.proxy = {
-	        type:     'rest',
-	        url :     'rest/knowledges/'+ObjectManager.lastClicked.id+'/informations',
-	        model:    'Brain.model.Information',
-	        format:   'json',
-	        appendId: true
-	    };
-	}
-	
 	function defineModel(){
-		Ext.define('Brain.model.Information', {
+		Ext.define( 'Brain.model.Information', {
 		    extend: 'Ext.data.Model',
 		    fields:['id', 'name', 'knowledgeId'],
-		    proxy: this.proxy
+		    proxy: {
+				type: 'rest',
+				url : 'rest/knowledges/'+ObjectManager.lastClicked.id+'/informations',
+				appendId: true
+		    }
 		});
 	}
 		
 	function initStore(){
-		return Ext.create('Ext.data.Store', {
-		     model: 'Brain.model.Information',
-		     proxy: this.proxy,
-		     autoLoad: true,
-		     autoSync: false, 
-		     sorters: [{
-		    	 property: 'name',
-		    	 direction: 'ASC'
-		     }]
+		store = Ext.create('Ext.data.Store', {
+			model: 'Brain.model.Information',
+			autoLoad: true,
+			autoSync: false,
+			listeners:{
+				'remove':function(store, record, index, isMove, eOpts){
+					me.teachingExtWrapper.setInformation(null)
+					Log.info("Information '"+record.data.name+"' deleted successfully.");
+				}
+			}
 		 });
 	}
 }
@@ -698,45 +812,15 @@ function TeachingExtWrapper(){
 		return panel;
 	}
 	
-//	function destroy(){
-//		if(grid.getSelectionModel().getLastSelected() == null) return false;
-//		
-//		Ext.MessageBox.confirm('Confirm to delete the Teaching?', 'Are you sure?', function(answer){
-//			if(answer == 'yes'){
-//				var selectedItem = grid.getSelectionModel().getLastSelected().data
-//				var record = store.findRecord('id',selectedItem.id)
-//				record.destroy({
-//					success: function(rec, op){
-//						record.commit();
-//						Log.info("Teaching deleted successfully.");
-//					},
-//					failure: function(rec, op){ alert(op.getError()); }
-//				});
-//			}
-//		});
-//	}
-	
 	function destroy(){
-		if(grid.getSelectionModel().getLastSelected() == null){
-			return false;
-		}
-		else{
-			Ext.MessageBox.confirm('Confirm to delete the theaching?', 'Are you sure?', function(answer){
-				if(answer == 'yes'){
-					var selectedItem = grid.getSelectionModel().getLastSelected().data
-					var record = store.findRecord('id',selectedItem.id)
-					record.destroy();
-//					record.commit();
-//					record.destroy({
-//						success: function(rec, op){
-////							record.commit();
-//							Log.info("Teaching deleted successfully.");
-//						},
-//						failure: function(rec, op){ alert(op.getError()); }
-//					});
-				}
-			});
-		};
+		var selectedItem = grid.getView().getSelectionModel().getSelection()[0];
+		if(selectedItem == null) return false;
+		Ext.MessageBox.confirm('Confirm to delete the theaching?', 'Are you sure?', function(answer){
+			if(answer == 'yes'){
+				store.remove(selectedItem);
+				store.sync();
+			}
+		});
 	}
 	
 	function initGrid(){
@@ -751,11 +835,11 @@ function TeachingExtWrapper(){
 		          {
 		        	  text: 'Create',
 					  handler:function(){ create(); }
-		          },
+		          }, '-',
 		          {
 		        	  text: 'Update',
 					  handler:function(){ update(); }
-		          },
+		          }, '-',
 		          {
 		        	  text: 'Delete',
 					  handler:function(){ destroy(); }
@@ -832,7 +916,7 @@ function TeachingExtWrapper(){
 						   });
 					   },
 					   scope: this
-					},
+					}, '-',
 					{
 					   xtype: 'button', text: 'Cancel',
 					   handler: function() { theForm.up().close(); },
@@ -885,178 +969,16 @@ function TeachingExtWrapper(){
 		     model: 'Brain.model.Teaching',
 		     proxy: this.proxy,
 		     autoLoad: false,
-		     autoSync: false
+		     autoSync: false,
+			listeners:{
+				'remove':function(store, record, index, isMove, eOpts){
+					Log.info("Teaching deleted successfully.")
+				}
+			}
 		 });
 	}
 }
 
-
-//var teachingExtWrapper = {
-//	panel: Ext.create('Ext.grid.Panel', {
-//		disabled : true,
-//		   region: 'center',
-//		   layout: 'fit',
-//		   margins: '0 5 5 5',
-//		   title: 'Teachings',
-//		   store: Ext.create('Ext.data.Store', {
-//			   config:{
-//				   sortOnLoad:true,
-//			   },
-//			   sorters: [{
-//			         property: 'name',
-//			         direction: 'ASC'
-//			     }],
-//			    storeId:'teachingStore',
-//			    fields:['id', 'informationId', 'whenTheUserSays', 'respondingTo', 'memorize', 'say'],
-//			    data:[]
-//			}),
-//		   tbar: [
-//		          {
-//		        	  text: 'Create',
-//					  handler:function(){
-//						  teachingExtWrapper.resetFormPanel();
-//						  teachingExtWrapper.formPanel.show();
-//					  }
-//		          },
-//		          {
-//		        	  text: 'Update',
-//					  handler:function(){
-//						  if(teachingExtWrapper.panel.getSelectionModel().getLastSelected() != null){
-//							  teachingExtWrapper.prepareUpdateFormPanel();
-//							  teachingExtWrapper.formPanel.show();
-//						  }
-//					  }
-//		          },
-//		          {
-//		        	  text: 'Delete',
-//					  handler:function(){
-//						  if(teachingExtWrapper.panel.getSelectionModel().getLastSelected() != null){
-//							  teachingExtWrapper.deleteFormPanel.show();
-//						  }
-//					  }
-//		          }
-//		          ],
-//		   columns: [
-//                    { text: 'When the user says',  dataIndex: 'whenTheUserSays', width:280},
-//                    { text: 'Responding to',  dataIndex: 'respondingTo', width:200 },
-//                    { text: 'Memorize',  dataIndex: 'memorize', width:100},
-//                    { text: 'Say',  dataIndex: 'say', width:280 },
-//           ],
-//           listeners:{
-//        	   select:function( theGrid, record, index, eOpts ){
-//        	   },
-//        	   deselect:function( record, index, eOpts ){
-//        	   },
-//        	   itemdblclick:function( record, index, eOpts ){
-//        		   teachingExtWrapper.prepareUpdateFormPanel();
-//        		   teachingExtWrapper.formPanel.show();
-//        	   }
-//           },
-//           height: 200
-//	   }),
-//	   
-//	   formPanel: Ext.create('Ext.window.Window', {
-//			title:       'Create the Teaching',
-//			closeAction: 'hide',
-//			modal:       true,
-//			closable:    true,
-//			resizable:	 false,
-//			height:      410,
-//			width:       500,
-//			layout:      'fit',
-//			items:       {
-//				xtype:     'panel',
-//				border:    false,
-//				contentEl: 'teachingForm'
-//			},
-//			listeners: {
-//				'beforehide':function(window){
-//					teachingExtWrapper.resetFormPanel();
-//				},
-//				'beforeshow':function(window){
-//					document.getElementById("teachingInformationId").value=informationExtWrapper.panel.getSelectionModel().getLastSelected().data.id;
-//				}
-//			}
-//		}),
-//		
-//		resetFormPanel : function(){
-//		   document.getElementById("teachingId").value='';
-//		   document.getElementById("teachingInformationId").value='';
-//		   document.getElementById("whenTheUserSaysInput").value='';
-//		   document.getElementById("whenTheUserSaysInput").value='';
-//		   document.getElementById("respondingToInput").value='';
-//		   document.getElementById("memorizeInput").value='';
-//		   document.getElementById("sayInput").value='';
-//		   document.getElementById("teachingFormStatus").innerHTML='';
-//	   },
-//	   
-//	   prepareUpdateFormPanel :  function(){
-//		   selectedItem = teachingExtWrapper.panel.getSelectionModel().getLastSelected().data
-//		   document.getElementById("teachingId").value            = selectedItem.id;
-//		   document.getElementById("teachingInformationId").value = selectedItem.teachingInformationId;
-//		   document.getElementById("whenTheUserSaysInput").value  = selectedItem.whenTheUserSays;
-//		   document.getElementById("respondingToInput").value     = selectedItem.respondingTo;
-//		   document.getElementById("memorizeInput").value         = selectedItem.memorize;
-//		   document.getElementById("sayInput").value              = selectedItem.say;
-//		   document.getElementById("teachingFormStatus").innerHTML='';
-//	   },
-//		
-//		deleteFormPanel: Ext.create('Ext.window.Window', {
-//			title:       'Delete the Teaching',
-//			closeAction: 'hide',
-//			modal:       true,
-//			closable:    true,
-//			resizable:	 false,
-//			height:      200,
-//			width:       400,
-//			layout:      'fit',
-//			items:       {
-//				xtype:     'panel',
-//				border:    false,
-//				contentEl: 'deleteTeachingForm'
-//			},
-//			listeners: {
-//				'beforehide':function(window){
-//					document.getElementById("whatTeachingToDelete").value='';
-//					document.getElementById("deleteTeachingFormStatus").innerHTML='';
-//				},
-//				'beforeshow':function(window){
-//					document.getElementById("whatTeachingToDelete").value=teachingExtWrapper.panel.getSelectionModel().getLastSelected().data.id;
-//				}
-//			}
-//		})
-//}
-//
-//var informationAndTeachingWindow = Ext.create('Ext.window.Window', {
-//	title:       'Informations & Teachings',
-//	closeAction: 'hide',
-//	modal:       true,
-//	closable:    true,
-//	resizable:	 false,
-//	height:      600,
-//	width:       900,
-//	layout:      'border',
-//	items:[	informationExtWrapper.panel, teachingExtWrapper.panel],
-//	listeners: {
-//		'show':function(window){
-//			informationExtWrapper.panel.store.loadData([]);// TODO: search a better way to clear the grid.
-//			informationLoadMask.show();
-// 		    loadInformations();
-//		}
-//	}
-//});
-//
-//var informationLoadMask = new Ext.LoadMask(informationExtWrapper.panel, {msg:"Loading Informations. Please wait..."});
-//function afterReceiveInformation(data){
-//	informationExtWrapper.panel.store.loadData(eval(data))
-//	informationLoadMask.hide();
-//}
-//
-//var teachingLoadMask = new Ext.LoadMask(teachingExtWrapper.panel, {msg:"Loading Teachings. Please wait..."});
-//function afterReceiveTeachings(data){
-//	teachingExtWrapper.panel.store.loadData(eval(data))
-//	teachingLoadMask.hide();
-//}
 
 function InformationAndTeachingWindow() {
 	var informationExtWrapper = new InformationExtWrapper();
