@@ -287,146 +287,6 @@ Ext.application({
 });
 
 
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-//Ext.require(['Ext.data.*', 'Ext.grid.*']);
-//
-//Ext.define('Information', {
-//    extend: 'Ext.data.Model',
-//    fields: [{
-//        name: 'id',
-//        type: 'string',
-//        useNull: true
-//    }, 'name', 'knowledgeId'],
-//    validations: [{
-//        type: 'length',
-//        field: 'name',
-//        min: 1
-//    }]
-//});
-//
-//Ext.onReady(function(){
-//
-//    var store = Ext.create('Ext.data.Store', {
-//        autoLoad: true,
-//        autoSync: false,
-//        model: 'Information',
-//        proxy: {
-//            type: 'rest',
-//            url: 'rest/knowledges/9:0/informations',
-//            reader: {
-//                type: 'json',
-//                root: 'data'
-//            },
-//            writer: {
-//                type: 'json'
-//            }
-//        },
-//        listeners: {
-//            write: function(store, operation){
-//                var record = operation.getRecords()[0],
-//                    name = Ext.String.capitalize(operation.action),
-//                    verb;
-//                    
-//                    
-//                if (name == 'Destroy') {
-//                    record = operation.records[0];
-//                    verb = 'Destroyed';
-//                } else {
-//                    verb = name + 'd';
-//                }
-//                //Ext.example.msg(name, Ext.String.format("{0} user: {1}", verb, record.getId()));
-//                
-//            }
-//        }
-//    });
-//    
-//    var rowEditing = Ext.create('Ext.grid.plugin.RowEditing');
-//    
-//    var grid = Ext.create('Ext.grid.Panel', {
-//        renderTo: document.body,
-//        plugins: [rowEditing],
-//        width: 400,
-//        height: 300,
-//        frame: true,
-//        title: 'Informations',
-//        store: store,
-//        iconCls: 'icon-user',
-//        columns: [{
-//            text: 'ID',
-//            width: 40,
-//            sortable: true,
-//            dataIndex: 'id'
-//        }, {
-//            text: 'Name',
-//            flex: 1,
-//            sortable: true,
-//            dataIndex: 'name',
-//            field: {
-//                xtype: 'textfield'
-//            }
-//        }, {
-//            header: 'knowledgeid',
-//            width: 80,
-//            sortable: true,
-//            dataIndex: 'knowledgeId',
-//            field: {
-//                xtype: 'textfield'
-//            }
-//        }, ],
-//        dockedItems: [{
-//            xtype: 'toolbar',
-//            items: [{
-//                text: 'Add',
-//                iconCls: 'icon-add',
-//                handler: function(){
-//                    // empty record
-//                    store.insert(0, new Person());
-//                    rowEditing.startEdit(0, 0);
-//                }
-//            }, '-', {
-//                itemId: 'delete',
-//                text: 'Delete',
-//                iconCls: 'icon-delete',
-//                disabled: true,
-//                handler: function(){
-//                    var selection = grid.getView().getSelectionModel().getSelection()[0];
-//                    if (selection) {
-//                        store.remove(selection);
-//                        store.sync();
-//                    }
-//                }
-//            }]
-//        }]
-//    });
-//    grid.getSelectionModel().on('selectionchange', function(selModel, selections){
-//        grid.down('#delete').setDisabled(selections.length === 0);
-//    });
-//});
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-
-
-
-
-/**
- * TODO: Usar este recordField
- * Usage: Ext.create("Brain.form.textfield", {record: panel.getForm().getRecord()})
- */
-Ext.define('Brain.form.textfield', {
-	extend : 'Ext.form.field.Text',
-	alias : "recordField",
-	listeners : {
-		'blur' : function(e, eOpts) {
-			this.record.set(this.name, this.value)
-		}
-	}
-});
-
 function KnowledgeExtWrapper(){
 	
 	var store = null;
@@ -470,13 +330,8 @@ function KnowledgeExtWrapper(){
 			Ext.MessageBox.confirm('Confirm to delete the knowledge?', 'If yes, all its informations and nested knowledges will be removed too. Are you sure?', function(answer){
 				if(answer == 'yes'){
 					var record = store.findRecord('id',ObjectManager.lastClicked.id)
-					record.destroy({
-						success: function(rec, op){
-							st.remove(ObjectManager.lastClicked)
-							ObjectManager.setLastClicked(null)
-						},
-						failure: function(rec, op){ alert(op.getError()); }
-					});
+					store.remove(record)
+					store.sync();
 				}
 			});
 		};
@@ -552,7 +407,6 @@ function KnowledgeExtWrapper(){
 	function defineModel(){
 		Ext.define('Brain.model.Knowledge', {
 		    extend: 'Ext.data.Model',
-		    idProperty: 'id',
 		    fields:['id', 'name', 'parentId'],
 		    proxy: this.proxy
 		});
@@ -561,9 +415,14 @@ function KnowledgeExtWrapper(){
 	function defineStore(){
 		store = Ext.create('Ext.data.Store', {
 		     model: 'Brain.model.Knowledge',
-		     proxy: this.proxy,
 		     autoLoad: true,
-		     autoSync: false 
+		     autoSync: false,
+		     listeners:{
+		    	 'remove':function(store, record, index, isMove, eOpts){
+		    		 st.remove(ObjectManager.lastClicked)
+		    		 ObjectManager.setLastClicked(null)
+		    	 }
+		     }
 		 });
 	}
 }
@@ -622,7 +481,6 @@ function InformationExtWrapper(){
 			}
 		});
 	}
-	
 	
 	function prepareForm(record, callbacks){
 		var theForm = Ext.create('Ext.form.Panel', {
@@ -867,39 +725,19 @@ function TeachingExtWrapper(){
 			items:[
 			       {
 			    	   xtype: 'textareafield', fieldLabel: 'When the user says', name: 'whenTheUserSays',
-			    	   allowBlank: false, minLength: 1, maxLength: 200,
-			    	   listeners:{
-			    		   'blur' : function( e, eOpts ){
-			    			   theForm.getForm().getRecord().set(this.name, this.value)
-			    		   }
-			    	   }
+			    	   allowBlank: false, minLength: 1, maxLength: 200
 			       },
 			       {
 			    	   xtype: 'textfield', fieldLabel: 'Responding to', name: 'respondingTo',
-			    	   allowBlank: true, minLength: 1, maxLength: 40,
-			    	   listeners:{
-			    		   'blur' : function( e, eOpts ){
-			    			   theForm.getForm().getRecord().set(this.name, this.value)
-			    		   }
-			    	   }
+			    	   allowBlank: true, minLength: 1, maxLength: 40
 			       },
 			       {
 			    	   xtype: 'textareafield', fieldLabel: 'Memorize', name: 'memorize',
-			    	   allowBlank: true, minLength: 3, maxLength: 200,
-			    	   listeners:{
-			    		   'blur' : function( e, eOpts ){
-			    			   theForm.getForm().getRecord().set(this.name, this.value)
-			    		   }
-			    	   }
+			    	   allowBlank: true, minLength: 3, maxLength: 200
 			       },
 			       {
 			    	   xtype: 'textareafield', fieldLabel: 'Then say', name: 'say',
-			    	   allowBlank: false, minLength: 1, maxLength: 200,
-			    	   listeners:{
-			    		   'blur' : function( e, eOpts ){
-			    			   theForm.getForm().getRecord().set(this.name, this.value)
-			    		   }
-			    	   }
+			    	   allowBlank: false, minLength: 1, maxLength: 200
 			       }
 		       ],
 		       bbar: [
@@ -907,6 +745,10 @@ function TeachingExtWrapper(){
 					   xtype: 'button', text: 'Save', 
 					   formBind : true,
 					   handler: function(){
+						   var record = theForm.getForm().getRecord()
+						   theForm.getForm().getFields().each( copyValueToRecord );
+						   function copyValueToRecord(field){ record.set(field.name, field.value) }
+						   
 						   theForm.getForm().getRecord().save({
 							   success: function(rec, op) { 
 								   theForm.up().close(); 
@@ -979,21 +821,17 @@ function TeachingExtWrapper(){
 	}
 }
 
-
 function InformationAndTeachingWindow() {
 	var informationExtWrapper = new InformationExtWrapper();
-	var infoGrid = informationExtWrapper.grid;
-	var teachingGrid = informationExtWrapper.teachingExtWrapper.grid;
 	Ext.create('Ext.window.Window', {
 		title:       'Informations & Teachings',
-		closeAction: 'hide',
 		modal:       true,
 		closable:    true,
 		resizable:	 false,
 		height:      600,
 		width:       900,
 		layout:      'border',
-		items:[	infoGrid, teachingGrid]
+		items:[	informationExtWrapper.grid, informationExtWrapper.teachingExtWrapper.grid]
 	}).show();
 }
 
