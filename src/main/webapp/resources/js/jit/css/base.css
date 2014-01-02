@@ -107,10 +107,11 @@ a {
 
 #infovis {
     position:relative;
-    width:700px;
-    height:600px;
+    width:660px;
+    height:503px;
     margin:auto;
     overflow:hidden;
+    /* background-color:#F2F2F2; */
     /* border:1px solid;
     border-radius:5px; */
 }

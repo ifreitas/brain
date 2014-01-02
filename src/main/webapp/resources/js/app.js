@@ -56,7 +56,9 @@ function initTree(json){
         Node: {
             height: 20,
             width: 80,
+            //color: '#6D89D5',
             type: 'rectangle',
+            align: "center",  
             overridable: true,
             CanvasStyles:{
             	shadowColor: 'black',
@@ -85,7 +87,6 @@ function initTree(json){
         },
         
         onCreateLabel: function(label, node){
-        	
         	Ext.EventManager.on(label, 'contextmenu', teste);
         	function teste(e,t){
         		window.getSelection().removeAllRanges();
@@ -129,13 +130,10 @@ function initTree(json){
             }
             else {
                 delete node.data.$color;
-                //if the node belongs to the last plotted level
-                if(!node.anySubnode("exist")) {
-                    var count = 0;
-                    node.eachSubnode(function(n) { count++; });
-                    //assign a node color based on how many children it has
-                    node.data.$color = ['#6D89D5', '#476DD5', '#133CAC', '#2B4281', '#062270', '#090974'][count];                    
-                }
+                var count = 0;
+                node.eachSubnode(function(n) { count++; });
+                //assign a node color based on how many children it has
+                node.data.$color = ['#6D89D5', '#476DD5', '#133CAC', '#2B4281', '#062270', '#090974'][count];                    
             }
         },
         
@@ -338,6 +336,21 @@ function KnowledgeExtWrapper(){
 	}
 	
 	function prepareForm(record, callbacks){
+		function saveAndNew(){
+			save();
+			knowledgeExtWrapper.create();
+		}
+		
+		function save(){
+			theForm.getForm().getRecord().save({
+				success: function(rec, op) { 
+					theForm.up().close(); 
+					if (callbacks != null) callbacks.success(rec, op); 
+				},
+				failure: function(rec, op) { if (callbacks != null) callbacks.failure(rec, op); }
+			});
+		}
+		
 		var theForm = Ext.create('Ext.form.Panel', {
 			border:false, layout:'form', bodyPadding: 5,
 			model: 'Brain.model.Knowledge',
@@ -354,17 +367,17 @@ function KnowledgeExtWrapper(){
 		       ],
 		       bbar: [
 		              {
-					   xtype: 'button', text: 'Save', 
-					   formBind : true,
-					   handler: function(){theForm.getForm().getRecord().save({
-						    success: function(rec, op) { 
-						    	theForm.up().close(); 
-						    	if (callbacks != null) callbacks.success(rec, op); 
-						    },
-						    failure: function(rec, op) { if (callbacks != null) callbacks.failure(rec, op); }
-						});},
-					   scope: this
-					}, '-',
+		            	  xtype: 'button', text: 'Save', 
+		            	  formBind : true,
+		            	  handler: save,
+		            	  scope: this
+		              }, '-'//,
+//		              {
+//					   xtype: 'button', text: 'Save and new', 
+//					   formBind : true,
+//					   handler: saveAndNew,
+//					   scope: this
+//					}, '-',
 					{
 					   xtype: 'button', text: 'Cancel',
 					   handler: function() { theForm.up().close(); },
