@@ -68,8 +68,8 @@ case class Knowledge(val name: String) extends DbObject {
         db removeVertex getVertex
     }
 	
-	def getInformations()(implicit db:TransactionalGraph):Set[Information] = Information.findByKnowledge(this)
-	def getNestedKnowledges(implicit db:TransactionalGraph):Set[Knowledge] = Knowledge.getNestedKnowledges(this)
+	def getInformations()(implicit db:Graph):Set[Information] = Information.findByKnowledge(this)
+	def getNestedKnowledges(implicit db:Graph):Set[Knowledge] = Knowledge.getNestedKnowledges(this)
 }
 
 object Knowledge extends PersistentName {
@@ -141,9 +141,4 @@ object Knowledge extends PersistentName {
         knowledge.id = Some(vertex.getId.toString)
         knowledge
     }
-}
-
-
-class KnowledgeToAimlAdapter(knowledge: Knowledge) {
-//    def toAiml = Aiml(knowledge.name, knowledge.topics.map(_.toAiml))
 }

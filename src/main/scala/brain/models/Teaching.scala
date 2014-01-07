@@ -34,11 +34,11 @@ import com.tinkerpop.blueprints.Graph
 import com.tinkerpop.blueprints.Vertex
 import brain.db.GraphDb
 import com.tinkerpop.blueprints.TransactionalGraph
-
 import aimltoxml.aiml.TemplateElement
 import aimltoxml.aiml.Text
 import aimltoxml.aiml.Category
 import aimltoxml.aiml.Srai
+import aimltoxml.aiml.Random
 
 case class Teaching(whenTheUserSays:String, say:String) extends DbObject{
     require(!whenTheUserSays.isEmpty, "Field 'when the user says', can not be empty.")
@@ -50,7 +50,7 @@ case class Teaching(whenTheUserSays:String, say:String) extends DbObject{
 	@Persistent var respondingTo:String = null
 	@Persistent var memorize:String = null
     
-    def toAiml = new TeachingToCategoryAdapter(this).toCategory
+    def toAiml:Set[Category] = new TeachingToCategoryAdapter(this).toCategory
     
     def save()(implicit db:TransactionalGraph) = transact{
         if(this.respondingTo == null || this.respondingTo.trim().equals("")) this.respondingTo = null
@@ -163,10 +163,12 @@ object Teaching extends PersistentName {
 }
 
 class TeachingToCategoryAdapter(teaching: Teaching) {
-
-    val whatWasSaid: Set[String] = teaching.whenTheUserSays.split("\r\n").toSet[String].filter(!_.isEmpty)
-    val whatToSay: Set[String] = teaching.say.split("\r\n").toSet[String].filter(!_.isEmpty)
-    val respondingTo = teaching.respondingTo
+	
+    require(teaching != null)
+    
+    val whatWasSaid: Set[String]= teaching.whenTheUserSays.split("\n").map(_.trim).toSet[String].filter(!_.isEmpty)
+    val whatToSay: Set[String] 	= teaching.say.split("\n").map(_.trim).toSet[String].filter(!_.trim().isEmpty)
+    val respondingTo:String 	= if(teaching.respondingTo != null) teaching.respondingTo else "*"
 
     def selectDefaultPattern(setOfWhatWasSaid: Set[String]) = {
         var defaultPattern         = ""
@@ -198,83 +200,16 @@ class TeachingToCategoryAdapter(teaching: Teaching) {
     // it should be a calculateThePatternComplexity's local function, but is not for tests purposes.
     def countSpecialChar(c: String, p: String) = { p.split("\\" + c + "+", -1).size - 1 }
 
-    def createCategory(whatWasSaid: String, defaultPattern: String, respondingTo: String, say: Set[String]) = {
-        if (whatWasSaid == defaultPattern) Category(whatWasSaid, createTemplateElements(say))
-        else Category(whatWasSaid, Set(Srai(defaultPattern)))
+    def createCategory(whatWasSaid: String, defaultPattern: String, respondingTo: String, say: Set[String]):Category = {
+        if (whatWasSaid == defaultPattern) Category(whatWasSaid, respondingTo, createTemplateElements(say))
+        else Category(whatWasSaid, respondingTo, Set[TemplateElement](Srai(defaultPattern)))
     }
 
-    def createTemplateElements(say: Set[String]): Set[TemplateElement] = say.map { Text(_) }
+    def createTemplateElements(say: Set[String]): Set[TemplateElement] = Set(new Random(say.map({Text(_)})))
 
     def toCategory: Set[Category] = {
         val defaultPattern = selectDefaultPattern(whatWasSaid)
         whatWasSaid.map(createCategory(_, defaultPattern, respondingTo, whatToSay))
     }
 }
-
-//object Teaching extends PersistentName {
-//    
-//    def vertexToTeaching(vertex:Vertex):Teaching=Teaching(vertex)
-//    
-//	def findById(id:String)(implicit db:Graph):Option[Teaching]  = {
-//	    Some(Teaching(query().has("id", id).vertices().head))
-//	}
-//	def findByInformationId(informationId:Any)(implicit db:Graph):Set[Teaching]  = {
-//	     query().has("in_", informationId).vertices().toSet[Vertex].map(v=>Teaching(v))
-//	}
-////    def create(teaching:Teaching)(implicit db:OrientGraph):Option[Teaching] = {
-////    	teaching.save.toCC[Teaching]
-//////        val result = GraphDb.transaction[Vertex]({
-//////        	val teachingVertex    = db.addVertex("class:Teaching", "whenTheUserSays", teaching.whenTheUserSays, "respondingTo", teaching.respondingTo, "memorize", teaching.memorize, "say", teaching.say)
-//////            val informationVertex = db.getVertex(teaching.informationId)
-//////            db.addEdge("class:Include", informationVertex, teachingVertex, "include")
-//////            teachingVertex
-//////        }).get
-//////        //result.map(v=>Teaching(v)) // TODO: a orient inconsistent behavior (sometimes the vertex came without all properties) force me to adopt other ways to construct the returning Teaching.
-//////        Some(Teaching(result.getId().toString(), teaching.informationId, teaching.whenTheUserSays, teaching.respondingTo, teaching.memorize, teaching.say))
-////	}
-////    def update(teaching:Teaching)(implicit db:OrientGraph):Option[Teaching] = {
-////        transact{
-////            var teachingVertex = db.getVertex(teaching.id)
-////            teachingVertex.setProperty("whenTheUserSays", teaching.whenTheUserSays)
-////            teachingVertex.setProperty("respondingTo", teaching.respondingTo)
-////            teachingVertex.setProperty("memorize", teaching.memorize)
-////            teachingVertex.setProperty("say", teaching.say)
-////            teachingVertex.toCC[Teaching]
-////        }
-////        
-//////        val result = GraphDb.transaction[Vertex]({
-//////            var teachingVertex = db.getVertex(teaching.id)
-//////            teachingVertex.setProperty("whenTheUserSays", teaching.whenTheUserSays)
-//////            teachingVertex.setProperty("respondingTo", teaching.respondingTo)
-//////            teachingVertex.setProperty("memorize", teaching.memorize)
-//////            teachingVertex.setProperty("say", teaching.say)
-//////            teachingVertex
-//////        }).get
-//////        //result.map(v=>Teaching(v)) // TODO: a orient inconsistent behavior (sometimes the vertex came without all properties) force me to adopt other ways to construct the returning Teaching.
-//////        Some(Teaching(result.getId().toString(), teaching.informationId, teaching.whenTheUserSays, teaching.respondingTo, teaching.memorize, teaching.say))
-////    }
-////    def delete(id:String)(implicit db:OrientGraph):Option[Teaching] = {
-////        transact{
-////            val sqlString = raw"select from (traverse out() from  $id)";
-////	        val vertices:java.lang.Iterable[Vertex] = db.command(new OSQLSynchQuery[Vertex](sqlString)).execute();
-////	        val teachingVertex = vertices.head
-////	        val teaching = Teaching(teachingVertex)// after the commit, the teachingVertex last all your properties.
-////	        db.removeVertex(teachingVertex)
-////	        Some(teaching)
-////        }
-//////        GraphDb.transaction[Teaching]({
-//////	        val sqlString = raw"select from (traverse out() from  $id)";
-//////	        val vertices:java.lang.Iterable[Vertex] = db.command(new OSQLSynchQuery[Vertex](sqlString)).execute();
-//////	        val teachingVertex = vertices.head
-//////	        val teaching = Teaching(teachingVertex)// after the commit, the teachingVertex last all your properties.
-//////	        db.removeVertex(teachingVertex)
-//////	        teaching
-//////        })
-////    }
-//    
-//    def apply(vertex:Vertex):Teaching = Teaching(vertex.getProperty("whenTheUserSays"), vertex.getProperty("respondingTo"), vertex.getProperty("memorize"), vertex.getProperty("say")) 
-//}
-
-
-
 

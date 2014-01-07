@@ -33,6 +33,8 @@ import com.tinkerpop.blueprints.Graph
 import com.tinkerpop.blueprints.Vertex
 import brain.db.GraphDb
 import com.tinkerpop.blueprints.TransactionalGraph
+import aimltoxml.aiml.Aiml
+import aimltoxml.aiml.Category
 
 case class Information(val name:String) extends DbObject{
     
@@ -52,7 +54,11 @@ case class Information(val name:String) extends DbObject{
     
     def getTeachings()(implicit db:Graph):Set[Teaching] = Teaching.findByInformation(this)
     
-    	override def toString():String  = s"Information: $name ($id)"
+    override def toString():String  = s"Information: $name ($id)"
+    
+    private def getCompleteName:String = "/tmp/brain/knowledge_base/"+this.name.replaceAll(" ", "_")+this.id.get.replace(":","_").replace("#", "")+".aiml"
+    
+    def toAiml(implicit db:Graph):Aiml = Aiml(getCompleteName, aimltoxml.aiml.Topic("*", getTeachings.flatMap(_.toAiml)))
 }
 
 object Information extends PersistentName {
@@ -67,7 +73,7 @@ object Information extends PersistentName {
     
     implicit def informationSetToJValue(informations: Set[Information]): JValue = JArray(informations.map(toJson).toList)
     
-    def findAll()(implicit db:Graph):Set[Knowledge] = query().vertices().toSet[Vertex].map(v=>Knowledge(v))
+    def findAll()(implicit db:Graph):Set[Information] = query().vertices().toSet[Vertex].map(v=>Information(v))
     
     def findById(id:String)(implicit db:Graph):Information = Information(db.getVertex(id))
     
@@ -120,4 +126,6 @@ object Information extends PersistentName {
         information.knowledgeId = Some(vertex.pipe.in("informations").iterator.next().getId().toString())
         information
     }
+    
+    def createTheKnowledgeBase()(implicit db:Graph):Unit = findAll.foreach{_.toAiml.toXmlFile}
 }

@@ -87,14 +87,19 @@ function initTree(json){
         },
         
         onCreateLabel: function(label, node){
-        	Ext.EventManager.on(label, 'contextmenu', teste);
-        	function teste(e,t){
+        	Ext.EventManager.on(label, 'contextmenu', function(e,t){
+        		e.preventDefault();
         		window.getSelection().removeAllRanges();
         		ObjectManager.setLastClicked(node);
-        		
-        		e.stopEvent();
         		contextMenu.showAt(e.getXY());
-        	}
+        	});
+//        	function teste(e,t){
+//        		window.getSelection().removeAllRanges();
+//        		ObjectManager.setLastClicked(node);
+//        		
+//        		e.stopEvent();
+//        		contextMenu.showAt(e.getXY());
+//        	}
         	
             label.id          = node.id;            
             label.innerHTML   = node.name;
@@ -215,6 +220,7 @@ Ext.application({
 			    }, {
 			        region: 'west',
 			        title: 'Help',
+			        iconCls:'help',
 			        width: 300,
 			        margins: '0 5 0 5'
 			        // could use a TreePanel or AccordionLayout for navigational items
@@ -236,19 +242,40 @@ Ext.application({
 				                {
 				                	title: 'Properties',
 				                	disabled: true,
+				                	iconCls:'application_view_list',
 			                		tabConfig: {
 						                tooltip: 'The properties of the selected element.'
 						            }
 						        }, 
 						        {
 						            title: 'Chat',
+						            iconCls:'comments',
 						            tabConfig: {
 						                tooltip: 'A chat to test the knowledge base.'
-						            }
+						            },
+						            items:[
+						                   {
+						                	    //height: 500,
+						                	    width: 500,
+						                	    border: false,
+						                	    layout: 'fit',
+						                	    autoScroll: false,
+						                	    html: "<iframe src='http://google.com' height=100% width=100% border='0'></iframe>",
+						                	    autoShow: true
+						                	}
+						            ]
 						        },
 						        {
 						            title: 'Utilities',
+						            iconCls:'wrench',
 						            disabled: true
+						        },
+						        {
+						        	title: 'About',
+						        	border: false,
+						        	iconCls:'information',
+						        	bodyPadding: 5,
+						        	contentEl: 'about'
 						        }
 					        ]
 					    })
@@ -259,11 +286,13 @@ Ext.application({
 			        items: [
 		                {
 		                	title: 'Knowledge Base',
+		                	iconCls:'book',
 		                	contentEl: 'theTree'
 				        }, 
 				        {
 				            title: 'Bots',
 				            disabled: true,
+				            iconCls:'status_offline',
 				            tabConfig: {
 				                tooltip: 'AIML Bots configurations set'
 				            }
@@ -273,6 +302,7 @@ Ext.application({
 							{
 								text:'Apply',
 								tooltip:'Apply the new Knowledge Base to the bot.',
+								iconCls:'accept',
 								handler: function(){
 									applyKnowledge();
 								}
@@ -367,11 +397,12 @@ function KnowledgeExtWrapper(){
 		       ],
 		       bbar: [
 		              {
-		            	  xtype: 'button', text: 'Save', 
+		            	  xtype: 'button', text: 'Save',
+		            	  iconCls:'accept',
 		            	  formBind : true,
 		            	  handler: save,
 		            	  scope: this
-		              }, '-'//,
+		              }, '-',
 //		              {
 //					   xtype: 'button', text: 'Save and new', 
 //					   formBind : true,
@@ -380,6 +411,7 @@ function KnowledgeExtWrapper(){
 //					}, '-',
 					{
 					   xtype: 'button', text: 'Cancel',
+					   iconCls:'cancel',
 					   handler: function() { theForm.up().close(); },
 					   scope: this
 					}
@@ -512,7 +544,8 @@ function InformationExtWrapper(){
 		       ],
 		       bbar: [
 		              {
-					   xtype: 'button', text: 'Save', 
+					   xtype: 'button', text: 'Save',
+					   iconCls:'accept',
 					   formBind : true,
 					   handler: function(){theForm.getForm().getRecord().save({
 						    success: function(rec, op) { 
@@ -525,6 +558,7 @@ function InformationExtWrapper(){
 					}, '-',
 					{
 					   xtype: 'button', text: 'Cancel',
+					   iconCls:'cancel',
 					   handler: function() { theForm.up().close(); },
 					   scope: this
 					}
@@ -544,14 +578,17 @@ function InformationExtWrapper(){
 		   tbar: [
 				{
 					  text: 'Create',
+					  iconCls:'application_add',
 					  handler:function(){ create(); }
 				}, '-',
 				{
 					  text: 'Update',
+					  iconCls:'application_edit',
 					  handler:function(){ update(); }
 				}, '-',
 				{
 					  text: 'Delete',
+					  iconCls:'application_delete',
 					  handler:function(){ destroy(); }
 				}
 			],
@@ -705,14 +742,17 @@ function TeachingExtWrapper(){
 			tbar: [
 		          {
 		        	  text: 'Create',
+		        	  iconCls:'application_add',
 					  handler:function(){ create(); }
 		          }, '-',
 		          {
 		        	  text: 'Update',
+		        	  iconCls:'application_edit',
 					  handler:function(){ update(); }
 		          }, '-',
 		          {
 		        	  text: 'Delete',
+		        	  iconCls:'application_delete',
 					  handler:function(){ destroy(); }
 		          }
 		          ],
@@ -755,7 +795,8 @@ function TeachingExtWrapper(){
 		       ],
 		       bbar: [
 		              {
-					   xtype: 'button', text: 'Save', 
+					   xtype: 'button', text: 'Save',
+					   iconCls:'accept',
 					   formBind : true,
 					   handler: function(){
 						   var record = theForm.getForm().getRecord()
@@ -774,6 +815,7 @@ function TeachingExtWrapper(){
 					}, '-',
 					{
 					   xtype: 'button', text: 'Cancel',
+					   iconCls:'cancel',
 					   handler: function() { theForm.up().close(); },
 					   scope: this
 					}
@@ -850,11 +892,16 @@ function InformationAndTeachingWindow() {
 
 var contextMenu = Ext.create('Ext.menu.Menu', {
 	items:[
-	       { text : 'Add a Knowledge',       handler : function(item){knowledgeExtWrapper.create();} }, 
-		   { text : 'Rename this Knowledge', handler : function(item){knowledgeExtWrapper.update();} }, 
-		   { text : 'Delete this Knowledge', handler : function(item){knowledgeExtWrapper.destroy();} }, 
+	       { text: 'Add a Knowledge',       iconCls:'book_add', handler : function(item){knowledgeExtWrapper.create();} }, 
+		   { text: 'Rename this Knowledge', iconCls:'book_edit', handler : function(item){knowledgeExtWrapper.update();} }, 
+		   { text: 'Delete this Knowledge', iconCls:'book_delete', handler : function(item){knowledgeExtWrapper.destroy();} }, 
 		   '-', 
-		   { text : 'Topics & Teachings',    handler : function(item){new InformationAndTeachingWindow()}}
+		   { text: 'Copy to', disabled: true, iconCls:'page_copy', tooltip:'Copies the current state of knowledge and its information to other knowledge. Changes in the original knowledge was not reflected in the copied knowledge.'},
+		   { text: 'Move to', disabled: true, iconCls:'page_copy', tooltip:'Moves this knowledge to other parent knowledge.'},
+		   { text: 'Clone in', disabled: true, iconCls:'page_attach', tooltip:'Knowledge clones share the same information. Changes in the original knowledge will be reflected in the copied knowledge.'},
+		   { text: 'Is a', disabled: true, iconCls:'page_link', tooltip:'Creates an inheritance relationship among knowledges. Makes this knowledge possess all the information on other knowledge. Changes in the original knowledge will be reflected in the copied knowledge.'},
+		   '-', 
+		   { text: 'Topics & Teachings', iconCls:'book_open', handler : function(item){new InformationAndTeachingWindow()}, tooltip: ''}
    ]
 });
 
