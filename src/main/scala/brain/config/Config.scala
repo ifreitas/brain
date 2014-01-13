@@ -18,7 +18,7 @@ object Config {
         this.graphDbPassword = Props.get("graphdb.password", "")
     }
 
-    def getGraphDbUri      = { graphDbType + ":" + graphDbDir + graphDbName }
+    def getGraphDbUri      = { graphDbType + ":" + System.getProperty("ORIENTDB_HOME") +"/databases/"+ graphDbName }
     def getGraphDbUser     = { graphDbUser }
     def getGraphDbPassword = { graphDbPassword }
     def getGraphDbType     = { graphDbType }

@@ -21,32 +21,27 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package brain.db
+package brain.web
 
-import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal
-import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx
-import com.orientechnologies.orient.core.db.graph.OGraphDatabasePool
-import com.orientechnologies.orient.core.db.record.ODatabaseRecordTx
-import com.tinkerpop.blueprints.impls.orient.OrientGraph
-import brain.config.Config
-import com.tinkerpop.blueprints.impls.orient.OrientGraphNoTx
+import brain.db.OrientDbServer
 
-object GraphDb {
-    def get: OrientGraph = {
-        var instance = ODatabaseRecordThreadLocal.INSTANCE.getIfDefined()
-        if (instance != null && !instance.isClosed())
-            new OrientGraph(new ODatabaseDocumentTx(ODatabaseRecordThreadLocal.INSTANCE.get.asInstanceOf[ODatabaseRecordTx]))
-        else {
-            new OrientGraph(Config.getGraphDbUri)
+object RunWebApp extends App {
+    try {
+        OrientDbServer.start
+
+        println(">>> PRESS ANY KEY TO STOP")
+        JettyServer.start
+        while (System.in.available() == 0) {
+            Thread.sleep(5000)
+        }
+        OrientDbServer.stop
+        JettyServer.stop
+        JettyServer.join
+    }
+    catch {
+        case exc: Exception => {
+            exc.printStackTrace()
+            System.exit(100)
         }
     }
-	def getNoTx: OrientGraphNoTx = {
-	    println("(ntx) trying to connect to: " + Config.getGraphDbUri)
-		if (ODatabaseRecordThreadLocal.INSTANCE.isDefined())
-			new OrientGraphNoTx(new ODatabaseDocumentTx(ODatabaseRecordThreadLocal.INSTANCE.get.asInstanceOf[ODatabaseRecordTx]))
-		else {
-			new OrientGraphNoTx(Config.getGraphDbUri)
-		}
-    }
-	
 }

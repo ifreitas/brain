@@ -35,6 +35,7 @@ import brain.db.GraphDb
 import com.tinkerpop.blueprints.TransactionalGraph
 import aimltoxml.aiml.Aiml
 import aimltoxml.aiml.Category
+import java.io.File
 
 case class Information(val name:String) extends DbObject{
     
@@ -56,7 +57,7 @@ case class Information(val name:String) extends DbObject{
     
     override def toString():String  = s"Information: $name ($id)"
     
-    private def getCompleteName:String = "/tmp/brain/knowledge_base/"+this.name.replaceAll(" ", "_")+this.id.get.replace(":","_").replace("#", "")+".aiml"
+    private def getCompleteName:String = "knowledge_base/"+this.name.replaceAll(" ", "_")+this.id.get.replace(":","_").replace("#", "")+".aiml"
     
     def toAiml(implicit db:Graph):Aiml = Aiml(getCompleteName, aimltoxml.aiml.Topic("*", getTeachings.flatMap(_.toAiml)))
 }
@@ -127,5 +128,10 @@ object Information extends PersistentName {
         information
     }
     
-    def createTheKnowledgeBase()(implicit db:Graph):Unit = findAll.foreach{_.toAiml.toXmlFile}
+    def createTheKnowledgeBase()(implicit db:Graph):Unit = {
+        val knowledgeBase = new File("knowledge_base")
+        knowledgeBase.delete()
+        knowledgeBase.mkdir()
+        findAll.foreach{_.toAiml.toXmlFile}
+    }
 }

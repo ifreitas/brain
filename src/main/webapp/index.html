@@ -9,25 +9,96 @@
         <div id="main" class="lift:surround?with=default;at=content">
             <div class="lift:App.onLoad"></div>
             <div id="theTree"><div id="infovis" class="infovis"></div></div>
-            <div id="log"></div>
 
         <div style="display: none">
+            <div id="log"></div>
             <div id="about">
               <h2>Brain</h2>
               0.1.0
                 <p>Brain is a tool to model, create and manage the 
                     knowledge base for aiml chaterbots.</p>
-                Uses:
+                <b>Uses:</b>
                 <ul>
                     <li><a href="http://www.scala-lang.org/">Scala</a></li>
                     <li><a href="http://liftweb.net/">Lift Web</a></li>
                     <li><a href="http://www.orientechnologies.com/">OrientDB</a></li>
+                    <li><a href="https://github.com/tinkerpop/blueprints/wiki">Blueprints</a></li>
+                    <li><a href="https://github.com/anvie/blueprints-scala">Blueprints-Scala</a></li>
                     <li><a href="https://github.com/philogb/jit">JIT</a></li>
                     <li><a href="http://www.sencha.com/products/extjs/">ExtJS</a></li>
                     <li><a href="http://www.famfamfam.com/lab/icons/silk/">Silk</a></li>
                     <li><a href="https://github.com/ifreitas/AimlToXml">AIML to XML</a></li>
-                    <li><a href="https://github.com/noelbush/programd">ProgramD</a> (Entirely optional. Just a convenient way to test the base.)</li>
+                    <!-- <li><a href="https://github.com/noelbush/programd">ProgramD</a> (Entirely optional. Just a convenient way to test the base.)</li> -->
                 </ul>
+                
+                <b>Contact:</b>
+                <p>israel.araujo.freitas@gmail.com</p>
+            </div>
+            
+            <div id="abstract" align="justify">//TODO</div>
+            <div id="modeling" align="justify">
+                <b>Modeling the Knowledge Base</b><br>
+                <p>No Brain, a modelagem é a representação gráfica do conhecimento, seus relacionamentos com outros conhecimentos (pais e filhos) e os tópicos nos quais o mesmo se divide, tudo isso através de um mapa mental. A modelagem faz parte do processo de criação da base de conhecimento propriamente dita e está sincronizada com a base real do robô.</p>
+                <p>Em um cérebro real, apenas o conhecimento que está sendo utilizado  (usar o nome científico disso!) é que fica na “área de trabalho (usar o nome científico disso!)”, enquanto todo o resto fica guardado no “hd” (usar o nome científico disso!). Isto acontece por vários motivos, mas principalmente para não sobrecarregar a mente (ou seria psiquê? usar o nome científico disso) evitando o colapso do sistema cognitivo, ao mesmo tempo em que viabiliza a máxima performance para conclusão do raciocínio já que ele está focando apenas no que interessa. Algo semelhante ocorre no Brain: apenas os conhecimentos relevantes são exibidos, para que a tela não fique cansativa por exibir muitas informações e para que o botmaster possa focar naquilo que realmente interessa. Os conhecimentos são exibidos ou ocultados conforme sua relevância para o conhecimento selecionado.</p>
+                <p>Modelar a base de conhecimento de um chatbot não é exatamente uma tarefa trivial, pois existe um conjunto de variáveis que afetam diretamente a efetividade de uma boa interação humano-robô, como por exemplo a riqueza do vocabulário de ambos, a clareza e objetividade das mensagens de ambos, a especialização ou a generalização esperada por um usuário sobre um determinado assunto, etc. Além disso determinados assuntos podem ser muito complexos ou muito grandes para serem tratados por um robô.</p> 
+                <p>Pensando nisso o Brain foi projetado para facilitar esta tarefa levando o “dividir para conquistar” muito a sério. Dividindo o conhecimento ele pode ser modelado com finíssima granularidade, sendo reduzido a vários pequenos conhecimentos onde cada um é muito específico, pois foca apenas em um determinado aspecto de um conhecimento maior. Algumas das vantagens desta abordagem é que tem uma visão mais ampla sobre o conhecimento e fica muito mais fácil definir todos os tópicos cobertos por um conhecimento. O resultado dessa abordagem é uma base com conhecimentos muito mais sólidos e completos.</p>
+                <p>Mas o mais importante para que a base seja bem modelada é que o botmaster domine cada conhecimento que deseja modelar. É necessário que o botmaster já tenha muito claro em sua mente o que deseja representar através do mapa mental do Brain.</p>
+
+Em resumo, é necessário:<br>
+1. Definir um público-alvo<br>
+2. Definir os temas de interesse para este público<br>
+3. Definir o escopo dos temas (os conhecimentos a serem modelados)<br>
+4. Para cada item do escopo (cada conhecimento):<br>
+1. Entender bem o conhecimento que será adicionado<br>
+2. Definir os relacionamentos (ascendentes e descendentes)<br>
+3. Definir os tópicos<br>
+
+                <br>
+                <b>Creating a Knowledge</b><br>//TODO <br>
+                <b>Renaming a Knowledge</b><br>//TODO <br>
+                <b>Deleting a Knowledge</b><br>//TODO <br>
+                <b>Copying a Knowledge</b><br>//TODO <br>
+                <b>Moving a Knowledge</b><br>//TODO <br>
+                <b>Cloning a Knowledge</b><br>//TODO <br>
+                <b>Creating a type of Knowledge</b><br>//TODO <br>
+            </div>
+            <div id="training" align="justify">
+                <b>Creating a Topic</b><br>//TODO <br>
+                <b>Renaming a Topic</b><br>//TODO <br>
+                <b>Deleting a Topic</b><br>//TODO <br>
+                <b>Creating a Topic Template</b><br>//TODO <br>
+                
+                <b>Creating a Teaching</b><br>//TODO <br>
+                <b>Editing a Teaching</b><br>//TODO <br>
+                <b>Deleting a Teaching</b><br>//TODO <br>
+            </div>
+            <div id="applyTheBase" align="justify">//TODO</div>
+            <div id="definitions" align="justify">
+              <b>Knowledge</b><br>//TODO <br><br>
+              <b>Knowledge Base</b><br>//TODO <br><br>
+              <b>Mental Map</b><br>//TODO <br><br>
+              <b>Topic</b>
+              <p>O Tópico é um grupo de ensinamentos, uma divisão interna de
+               um Conhecimento, e é específico apenas do Conhecimento ao qual 
+               pertence.</p>
+              <b>Teaching</b>
+                  <p>O ensinamento é a menor unidade de conhecimento passada 
+                  para o robô, é a instrução propriamente dita  do  que  ele 
+                  deve fazer conforme o texto digitado pelo usuário. Ou seja, 
+                  são os ensinamentos que realmente preparam o robô para lidar 
+                  com as situações criadas pelos usuários.</p>
+                  <p>O ensinamento é específico de apenas um Tópico, por isso
+                  ele só faz sentido para aquele Tópico ao qual pertence.</p>
+              <b>Normalization</b>
+                <p>É o processo de padronização do texto digitado pelo usuário, 
+                adequando este texto a determinadas normas de escrita e
+                 gramática utilizadas pelo robô. A normalização atua basicamente 
+                 nos seguintes pontos:</p>
+                Sinônimos. Exemplo: “visualizar” → “ver”.<br>
+                Abreviações/gírias: Exemplo: “vc” → “você”.<br>
+                Gênero. Exemplo: “Obrigada” → “Obrigado”.<br>
+                Correções ortográficas. Exemplo: “voce” → “você”.<br>
+                Correções gramaticais. Exemplo: “Oi como está vc” → “Oi. Como está você?”
             </div>
         </div>
     </div><!-- /main -->

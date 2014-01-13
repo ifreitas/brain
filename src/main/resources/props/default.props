@@ -1,6 +1,6 @@
 # GraphDB
 graphdb.dir=/tmp/brain/db/
 graphdb.name=brain_dev
-graphdb.type=remote
+graphdb.type=plocal
 graphdb.user=root
 graphdb.password=826C8F3C84160540746D5D1A3CD24C701F7C9AEFDA80EEF3D40440190E3DFF95

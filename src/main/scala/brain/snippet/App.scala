@@ -55,11 +55,14 @@ object App {
         </head>
         }
         catch{
-            case t : Throwable => <head>
-    		<script>
-    			Log.error("Unable to load the Knowledge Base Tree. Sorry.")
-    		</script>
-        </head>
+            case t : Throwable => {
+                t.printStackTrace()
+                <head>
+                	<script>
+    					Log.error("Unable to load the Knowledge Base Tree. Sorry.")
+                	</script>
+                </head>
+            }
         }
     }
 

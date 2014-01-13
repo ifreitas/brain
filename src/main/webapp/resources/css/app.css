@@ -34,6 +34,9 @@
 .cancel {
     background-image: url(/resources/images/icons/cancel.png) !important;
 }
+.chart_organisation {
+    background-image: url(/resources/images/icons/chart_organisation.png) !important;
+}
 .comments {
     background-image: url(/resources/images/icons/comments.png) !important;
 }
@@ -51,6 +54,9 @@
 }
 .page_copy {
     background-image: url(/resources/images/icons/page_copy.png) !important;
+}
+.page_go {
+    background-image: url(/resources/images/icons/page_go.png) !important;
 }
 .page_link {
     background-image: url(/resources/images/icons/page_link.png) !important;

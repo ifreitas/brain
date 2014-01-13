@@ -10,16 +10,28 @@ import com.orientechnologies.orient.core.db.graph.OGraphDatabasePool
 import scala.collection.JavaConversions.iterableAsScalaIterable
 import com.tinkerpop.blueprints.Vertex
 import scala.xml.Text
+import brain.db.OrientDbServer
+import com.orientechnologies.orient.client.remote.OServerAdmin
+import brain.config.Config
+import java.io.File
 
 object Teste2 {
 
     def main(args: Array[String]): Unit = {
-        implicit val db:Graph = new OrientGraph(OGraphDatabasePool.global().acquire("remote:/brain_dev", "root", "826C8F3C84160540746D5D1A3CD24C701F7C9AEFDA80EEF3D40440190E3DFF95"))
+//        implicit val db:Graph = GraphDb.get
         try{
-            Information.createTheKnowledgeBase
+            OrientDbServer.start
+            
+            implicit val db = new OrientGraph("plocal:/Users/israelfreitas/Documents/workspace/brain/databases/brain_dev")
+            
+            println(Knowledge.findAll.size)
+            
+            db.shutdown()
+            
+            OrientDbServer.stop
         }
         finally{
-            db.shutdown()
+//            db.shutdown()
         }
     }
 

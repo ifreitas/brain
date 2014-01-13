@@ -9,6 +9,7 @@ import org.scalatest.Matchers
 import org.scalatest.Suite
 import org.scalatest.selenium.WebBrowser
 import org.openqa.selenium.firefox.FirefoxDriver
+import brain.web.JettyServer
 
 trait WebApplication extends BeforeAndAfterAll { this: Suite =>
     val index = "http://localhost:8080"

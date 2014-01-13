@@ -25,11 +25,13 @@ var Log = {
   elem: false,
   info: function(text){
 	  if (!this.elem) this.elem = document.getElementById('log');
+	  this.elem.style.color='#23A4FF';
 	  this.elem.innerHTML       = text;
 	  this.elem.style.left      = (550 - this.elem.offsetWidth / 2) + 'px';
   },
   error: function(text){
 	  if (!this.elem) this.elem = document.getElementById('log');
+	  this.elem.style.color='red';
 	  this.elem.innerHTML       = text;
 	  this.elem.style.left      = (550 - this.elem.offsetWidth / 2) + 'px';  
   }
@@ -52,6 +54,11 @@ function initTree(json){
         transition: $jit.Trans.Quart.easeInOut,
         levelsToShow: 5,
         levelDistance: 50,
+        Navigation: {  
+            enable: true,  
+            panning: 'avoid nodes',  
+            zooming: false  
+          },
         
         Node: {
             height: 20,
@@ -68,7 +75,7 @@ function initTree(json){
         },
         
         Edge: {
-            type: 'arrow',
+            //type: 'bezier',
             color: '#A7B6FF',
             overridable: true,
             CanvasStyles:{
@@ -93,13 +100,11 @@ function initTree(json){
         		ObjectManager.setLastClicked(node);
         		contextMenu.showAt(e.getXY());
         	});
-//        	function teste(e,t){
-//        		window.getSelection().removeAllRanges();
-//        		ObjectManager.setLastClicked(node);
-//        		
-//        		e.stopEvent();
-//        		contextMenu.showAt(e.getXY());
-//        	}
+        	Ext.EventManager.on(label, 'dblclick', function(e,t){
+        		e.preventDefault();
+        		window.getSelection().removeAllRanges();
+        		knowledgeExtWrapper.update();
+        	});
         	
             label.id          = node.id;            
             label.innerHTML   = node.name;
@@ -214,7 +219,7 @@ Ext.application({
             items: [
                 {
 			        region: 'north',
-			        html: '<h1>Brain</h1>',
+			        html: '<h1 style="color:#4574ad">&nbsp;Brain</h1>',
 			        border: true,
 			        margins: '5 5 5 5'
 			    }, {
@@ -222,8 +227,55 @@ Ext.application({
 			        title: 'Help',
 			        iconCls:'help',
 			        width: 300,
-			        margins: '0 5 0 5'
-			        // could use a TreePanel or AccordionLayout for navigational items
+			        margins: '0 5 0 5',
+			        layout: 'accordion',
+			        items:[
+						{
+							xtype:'panel',
+							title: 'Abstract',
+							bodyPadding: 5,
+							layout:'fit',
+							border:false,
+							autoScroll:true,
+							contentEl:'abstract'
+						},
+						{
+							xtype:'panel',
+							title: 'Modeling',
+							bodyPadding: 5,
+							layout:'fit',
+							border:false,
+							autoScroll:true,
+							contentEl:'modeling'
+						},
+						{
+							xtype:'panel',
+							title: 'Training',
+							bodyPadding: 5,
+							layout:'fit',
+							border:false,
+							autoScroll:true,
+							contentEl:'training'
+						},
+						{
+							xtype:'panel',
+							title: 'Applying',
+							bodyPadding: 5,
+							layout:'fit',
+							border:false,
+							autoScroll:true,
+							contentEl:'applyTheBase'
+						},
+						{
+							xtype:'panel',
+							title: 'Definitions',
+							bodyPadding: 5,
+							layout:'fit',
+							border:false,
+							autoScroll:true,
+							contentEl:'definitions'
+						}
+			        ]
 			    }, {
 			        region: 'south',
 			        contentEl: 'log',
@@ -239,9 +291,17 @@ Ext.application({
 					    	region: 'center',
 					    	border:false,
 					        items: [
+								{
+									title: 'About',
+									border: false,
+									iconCls:'information',
+									bodyPadding: 5,
+									contentEl: 'about'
+								},
 				                {
 				                	title: 'Properties',
 				                	disabled: true,
+				                	border: false,
 				                	iconCls:'application_view_list',
 			                		tabConfig: {
 						                tooltip: 'The properties of the selected element.'
@@ -250,8 +310,10 @@ Ext.application({
 						        {
 						            title: 'Chat',
 						            iconCls:'comments',
+						            disabled: true,
+						            border:false,
 						            tabConfig: {
-						                tooltip: 'A chat to test the knowledge base.'
+						                tooltip: 'A chat for testing the knowledge base.'
 						            },
 						            items:[
 						                   {
@@ -260,7 +322,7 @@ Ext.application({
 						                	    border: false,
 						                	    layout: 'fit',
 						                	    autoScroll: false,
-						                	    html: "<iframe src='http://google.com' height=100% width=100% border='0'></iframe>",
+						                	    html: "<iframe src='http://thechatdomain.com' height=100% width=100% border='0'></iframe>",
 						                	    autoShow: true
 						                	}
 						            ]
@@ -268,15 +330,10 @@ Ext.application({
 						        {
 						            title: 'Utilities',
 						            iconCls:'wrench',
-						            disabled: true
-						        },
-						        {
-						        	title: 'About',
-						        	border: false,
-						        	iconCls:'information',
-						        	bodyPadding: 5,
-						        	contentEl: 'about'
+						            disabled: true,
+						            border:false,
 						        }
+						        
 					        ]
 					    })
 				    ]
@@ -286,6 +343,7 @@ Ext.application({
 			        items: [
 		                {
 		                	title: 'Knowledge Base',
+		                	//iconCls:'chart_organisation',
 		                	iconCls:'book',
 		                	contentEl: 'theTree'
 				        }, 
@@ -300,13 +358,29 @@ Ext.application({
 			        ],
 			        tbar: [
 							{
-								text:'Apply',
+								text: 'Apply',
 								tooltip:'Apply the new Knowledge Base to the bot.',
 								iconCls:'accept',
-								handler: function(){
-									applyKnowledge();
-								}
-							}
+								  handler:function(){
+									  Ext.Ajax.request({
+										   url: '/rest/knowledges/apply.json',
+										   success: function(response, opts) {
+											   var obj = Ext.decode(response.responseText);
+											   if(obj.success=="true"){
+												   Log.info("New Knowledge Base applied succesfully")
+											   }
+											   else
+											   {
+												   Log.error("Unable to apply the new Knowledge base. " + obj.msg)
+											   }
+										   },
+										   failure: function(response, opts) {// network error
+											   var obj = Ext.decode(response.responseText);
+											   Log.error("Unable to apply the new Knowledge base. " + obj.msg)
+										   }
+										})
+								  }
+							}	               
 						]
 			    })
             ]
@@ -357,12 +431,20 @@ function KnowledgeExtWrapper(){
 		else{
 			Ext.MessageBox.confirm('Confirm to delete the knowledge?', 'If yes, all its informations and nested knowledges will be removed too. Are you sure?', function(answer){
 				if(answer == 'yes'){
+					alert(ObjectManager.lastClicked.id);
 					var record = store.findRecord('id',ObjectManager.lastClicked.id)
+					alert(record);
 					store.remove(record)
+					alert(2);
 					store.sync();
+					alert(3);
 				}
 			});
 		};
+	}
+	
+	this.apply = function(){
+		
 	}
 	
 	function prepareForm(record, callbacks){
@@ -601,7 +683,7 @@ function InformationExtWrapper(){
 					me.teachingExtWrapper.setInformation(null)
 				},
 				itemdblclick: function( record, item, index, e, eOpts ){
-					me.update();
+					update();
 				}
 		    }
 		});
@@ -786,7 +868,7 @@ function TeachingExtWrapper(){
 			       },
 			       {
 			    	   xtype: 'textareafield', fieldLabel: 'Memorize', name: 'memorize',
-			    	   allowBlank: true, minLength: 3, maxLength: 200
+			    	   disabled:true, allowBlank: true, minLength: 3, maxLength: 200
 			       },
 			       {
 			    	   xtype: 'textareafield', fieldLabel: 'Then say', name: 'say',
@@ -896,12 +978,12 @@ var contextMenu = Ext.create('Ext.menu.Menu', {
 		   { text: 'Rename this Knowledge', iconCls:'book_edit', handler : function(item){knowledgeExtWrapper.update();} }, 
 		   { text: 'Delete this Knowledge', iconCls:'book_delete', handler : function(item){knowledgeExtWrapper.destroy();} }, 
 		   '-', 
-		   { text: 'Copy to', disabled: true, iconCls:'page_copy', tooltip:'Copies the current state of knowledge and its information to other knowledge. Changes in the original knowledge was not reflected in the copied knowledge.'},
-		   { text: 'Move to', disabled: true, iconCls:'page_copy', tooltip:'Moves this knowledge to other parent knowledge.'},
-		   { text: 'Clone in', disabled: true, iconCls:'page_attach', tooltip:'Knowledge clones share the same information. Changes in the original knowledge will be reflected in the copied knowledge.'},
-		   { text: 'Is a', disabled: true, iconCls:'page_link', tooltip:'Creates an inheritance relationship among knowledges. Makes this knowledge possess all the information on other knowledge. Changes in the original knowledge will be reflected in the copied knowledge.'},
+		   { text: 'Copy to ...', disabled: true, iconCls:'page_copy', tooltip:'Copies the current state of knowledge and its information to other knowledge. Changes in the original knowledge was not reflected in the copied knowledge.'},
+		   { text: 'Move to ...', disabled: true, iconCls:'page_go', tooltip:'Moves this knowledge to other parent knowledge.'},
+		   { text: 'Clone in ...', disabled: true, iconCls:'page_attach', tooltip:'Knowledge clones share the same information. Changes in the original knowledge will be reflected in the copied knowledge.'},
+		   { text: 'Is a ...', disabled: true, iconCls:'page_link', tooltip:'Creates an inheritance relationship among knowledges. Makes this knowledge possess all the information on other knowledge. Changes in the original knowledge will be reflected in the copied knowledge.'},
 		   '-', 
-		   { text: 'Topics & Teachings', iconCls:'book_open', handler : function(item){new InformationAndTeachingWindow()}, tooltip: ''}
+		   { text: 'Informations & Teachings', iconCls:'book_open', handler : function(item){new InformationAndTeachingWindow()}, tooltip: ''}
    ]
 });
 

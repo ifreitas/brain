@@ -1,4 +1,4 @@
-package brain.functionaltest
+package brain.web
 
 import org.eclipse.jetty.server.handler.ContextHandler
 import org.eclipse.jetty.server.nio.SelectChannelConnector
@@ -19,8 +19,8 @@ object JettyServer {
   context0.setHandler(context)
   server.setHandler(context0)
   
-  def start= { println("STARTING EMBEDDED JETTY SERVER");this.server.start()}
-  def stop = { println("STOPPING EMBEDDED JETTY SERVER");this.server.stop()}
+  def start= { println("STARTING EMBEDDED JETTY SERVER");this.server.start(); println("EMBEDDED JETTY SERVER STARTED");}
+  def stop = { println("STOPPING EMBEDDED JETTY SERVER");this.server.stop(); println("EMBEDDED JETTY SERVER STOPPED");}
   def join = { this.server.join()  }
   def isRunning = { this.server.isRunning() }
   

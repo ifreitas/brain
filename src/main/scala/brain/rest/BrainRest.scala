@@ -37,6 +37,8 @@ import net.liftweb.http.JsonResponse
 import net.liftweb.json.JField
 import net.liftweb.json.JString
 import net.liftweb.json.JObject
+import net.liftweb.json.JValue
+import net.liftweb.json.JObject
 
 object BrainRest extends RestHelper {
     
@@ -58,6 +60,23 @@ object BrainRest extends RestHelper {
             }
         }
         
+        //TODO change to Post!
+        case "apply" :: Nil JsonGet _ => {
+        	implicit val db = GraphDb.get
+			try{
+				Information.createTheKnowledgeBase
+				JObject(JField("success", JString("true")):: Nil)
+			}
+        	catch{
+        		case t: Throwable => t.printStackTrace; JObject(JField("failed", JString("true")) :: JField("msg", JString(t.getMessage)) :: Nil)
+        	}
+        	finally{
+        		db.shutdown()
+        	}
+        }
+        
+
+
         case id :: Nil JsonGet _ => {
             println("ID: "+id)
         	implicit val db = GraphDb.get
