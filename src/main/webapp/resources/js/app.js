@@ -862,18 +862,22 @@ function TeachingExtWrapper(){
 			items:[
 			       {
 			    	   xtype: 'textareafield', fieldLabel: 'When the user says', name: 'whenTheUserSays',
+			    	   emptyText:'Likely user\'s sentences (one per line)',
 			    	   allowBlank: false, minLength: 1, maxLength: 200
 			       },
 			       {
 			    	   xtype: 'textfield', fieldLabel: 'Responding to', name: 'respondingTo',
+			    	   emptyText:'Some bot phrase',
 			    	   allowBlank: true, minLength: 1, maxLength: 40
 			       },
 			       {
 			    	   xtype: 'textareafield', fieldLabel: 'Memorize', name: 'memorize',
+			    	   emptyText:'Some key=value pair like: name=\'Israel\' (one per line)',
 			    	   disabled:true, allowBlank: true, minLength: 3, maxLength: 200
 			       },
 			       {
 			    	   xtype: 'textareafield', fieldLabel: 'Then say', name: 'say',
+			    	   emptyText:'The bot\'s responses to the user input. Can access memorized variables. Example: Hello, ${name}. (one per line)',
 			    	   allowBlank: false, minLength: 1, maxLength: 200
 			       }
 		       ],
