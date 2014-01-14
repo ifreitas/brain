@@ -30,7 +30,7 @@ import brain.models.Knowledge.knowledgeSetToJValue
 import brain.models.Knowledge.toJson
 import net.liftweb.http.rest.RestHelper
 import net.liftweb.json.JValue
-import brain.models.Information
+import brain.models.Topic
 import brain.models.Teaching
 import net.liftweb.json.JField
 import net.liftweb.http.JsonResponse
@@ -64,7 +64,7 @@ object BrainRest extends RestHelper {
         case "apply" :: Nil JsonGet _ => {
         	implicit val db = GraphDb.get
 			try{
-				Information.createTheKnowledgeBase
+				Topic.createTheKnowledgeBase
 				JObject(JField("success", JString("true")):: Nil)
 			}
         	catch{
@@ -143,12 +143,12 @@ object BrainRest extends RestHelper {
         }
         
         /*
-         * INFORMATIONS
+         * TOPICS
          */
-        case knowledgeId :: "informations" :: Nil JsonGet _ => {
+        case knowledgeId :: "topics" :: Nil JsonGet _ => {
             implicit val db = GraphDb.get
             try{
-                Information.findByKnowledge(Knowledge.findById(knowledgeId)) : JValue
+                Topic.findByKnowledge(Knowledge.findById(knowledgeId)) : JValue
             }
             catch{
         	    case t: Throwable => t.printStackTrace; throw t
@@ -159,14 +159,14 @@ object BrainRest extends RestHelper {
         }
         
               // update
-        case knowledgeId :: "informations" :: id :: Nil JsonPut Information(information) -> _ => {
+        case knowledgeId :: "topics" :: id :: Nil JsonPut Topic(topic) -> _ => {
         	implicit val db = GraphDb.get
         	try{
         	    //TODO: retornar 404 caso este knowlege nao tenha esta information
         		val vertex = db.getVertex(id)
-        		vertex.setProperty("name", information.name)
+        		vertex.setProperty("name", topic.name)
         		db.commit
-        		information : JValue
+        		topic : JValue
         	}
         	catch{
         	    case t: Throwable => t.printStackTrace; throw t
@@ -177,14 +177,14 @@ object BrainRest extends RestHelper {
         }
 
         // create
-        case knowledgeId :: "informations" :: Nil JsonPost Information(information) -> _ => { 
+        case knowledgeId :: "topics" :: Nil JsonPost Topic(topic) -> _ => { 
         	implicit val db = GraphDb.get
 			try{
 			    //TODO: retornar 404 caso este knowlege nao tenha esta information
-			    val vertex = information.save
+			    val vertex = topic.save
         		db.commit
-        		information.id = Some(vertex.getId().toString())
-        		information : JValue
+        		topic.id = Some(vertex.getId().toString())
+        		topic : JValue
 			}
         	catch{
         	    case t: Throwable => t.printStackTrace; throw t
@@ -195,14 +195,14 @@ object BrainRest extends RestHelper {
         }
         
         //requires the id url param
-        case knowledgeId :: "informations" :: id :: Nil JsonDelete _ => {
+        case knowledgeId :: "topics" :: id :: Nil JsonDelete _ => {
         	implicit val db = GraphDb.get
         	try{
         	    // TODO: retornar 404 caso este knowlege nao tenha esta information
-        	    val information = Information(db.getVertex(id))
-        	    information.destroy
+        	    val topic = Topic(db.getVertex(id))
+        	    topic.destroy
         		db.commit
-        		JsonResponse(information)
+        		JsonResponse(topic)
         	}
         	catch{
         		case t: Throwable => t.printStackTrace; throw t
@@ -215,10 +215,10 @@ object BrainRest extends RestHelper {
         /*
          * TEACHINGS
          */
-        case knowledgeId :: "informations" :: informationId :: "teachings" :: Nil JsonGet _ => {
+        case knowledgeId :: "topics" :: topicId :: "teachings" :: Nil JsonGet _ => {
         	implicit val db = GraphDb.get
 			try{
-				Teaching.findByInformation(Information.findById(informationId)) : JValue
+				Teaching.findByTopic(Topic.findById(topicId)) : JValue
 			}
         	catch{
         		case t: Throwable => t.printStackTrace; throw t
@@ -229,7 +229,7 @@ object BrainRest extends RestHelper {
         }
         
         // update
-        case knowledgeId :: "informations" :: informationId :: "teachings" :: id :: Nil JsonPut Teaching(teaching) -> _ => {
+        case knowledgeId :: "topics" :: topicId :: "teachings" :: id :: Nil JsonPut Teaching(teaching) -> _ => {
         	implicit val db = GraphDb.get
 			try{
 				//TODO: retornar 404 caso este knowlege nao tenha esta information
@@ -250,7 +250,7 @@ object BrainRest extends RestHelper {
         }
         
         // create
-        case knowledgeId :: "informations" :: informationId :: "teachings" :: Nil JsonPost Teaching(teaching) -> _ => { 
+        case knowledgeId :: "topics" :: topicId :: "teachings" :: Nil JsonPost Teaching(teaching) -> _ => { 
         	implicit val db = GraphDb.get
 			try{
 				//TODO: retornar 404 caso este knowlege nao tenha esta information
@@ -268,7 +268,7 @@ object BrainRest extends RestHelper {
         }
         
         //requires the id url param
-        case knowledgeId :: "informations" :: informationId :: "teachings" :: id :: Nil JsonDelete _ => {
+        case knowledgeId :: "topics" :: topicId :: "teachings" :: id :: Nil JsonDelete _ => {
         	implicit val db = GraphDb.get
 			try{
 				// TODO: retornar 404 caso este knowlege nao tenha esta information

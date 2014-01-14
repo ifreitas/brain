@@ -63,12 +63,12 @@ case class Knowledge(val name: String) extends DbObject {
 	
 	def destroy()(implicit db:TransactionalGraph):Unit = transact{
 	    if(this.isRoot) throw new IllegalArgumentException("Unable to delete the root knowledge.")
-	    getInformations foreach (_ destroy)
+	    getTopics foreach (_ destroy)
         getNestedKnowledges foreach (_ destroy)
         db removeVertex getVertex
     }
 	
-	def getInformations()(implicit db:Graph):Set[Information] = Information.findByKnowledge(this)
+	def getTopics()(implicit db:Graph):Set[Topic] = Topic.findByKnowledge(this)
 	def getNestedKnowledges(implicit db:Graph):Set[Knowledge] = Knowledge.getNestedKnowledges(this)
 }
 

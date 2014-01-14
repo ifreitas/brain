@@ -23,32 +23,118 @@
  */
 package brain.models
 
-case class Topic(val name: String, val teachings: Set[Teaching]) {
-    require(name != null && !name.isEmpty(), "Name is required.")
+import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
+import com.ansvia.graph.BlueprintsWrapper._
+import net.liftweb.json._
+import net.liftweb.common.Box
+import net.liftweb.util.Helpers
+import com.tinkerpop.blueprints.Graph
+import com.tinkerpop.blueprints.Vertex
+import brain.db.GraphDb
+import com.tinkerpop.blueprints.TransactionalGraph
+import aimltoxml.aiml.Aiml
+import aimltoxml.aiml.Category
+import java.io.File
+
+/**
+ * Equivalent to an AIML file.
+ */
+case class Topic(val name:String) extends DbObject {
     
-    def toAiml: aimltoxml.aiml.Topic = new TopicToAimlTopicAdapter(this).toAimlTopic
-
-    def canEqual(other: Any) = {
-        other.isInstanceOf[brain.models.Topic]
+    var id:Option[String] = None
+	var knowledgeId:Option[String] = None
+    
+	def save()(implicit db:TransactionalGraph) = transact{
+        val that = super.save()
+        db.getVertex(knowledgeId.get) --> "topics" --> that
+        that
     }
-
-    override def equals(other: Any) = {
-        other match {
-            case that: brain.models.Topic => that.canEqual(Topic.this) && name == that.name && teachings == that.teachings
-            case _                        => false
-        }
+    
+    def destroy() (implicit db:TransactionalGraph) = transact{
+	    getTeachings foreach (_ destroy)
+        db removeVertex getVertex
     }
-
-    override def hashCode() = {
-        val prime = 41
-        prime * (prime + name.hashCode) + teachings.hashCode
-    }
-
+    
+    def getTeachings()(implicit db:Graph):Set[Teaching] = Teaching.findByTopic(Topic.this)
+    
+    override def toString():String  = s"Topic: $name ($id)"
+    
+    private def getCompleteName:String = "knowledge_base/"+Topic.this.name.replaceAll(" ", "_")+Topic.this.id.get.replace(":", "_").replace("#", "")+".aiml"
+    
+    def toAiml(implicit db:Graph):Aiml = Aiml(getCompleteName, aimltoxml.aiml.Topic("*", getTeachings.flatMap(_.toAiml)))
 }
 
-class TopicToAimlTopicAdapter(topic: Topic) {
-    require(topic != null, "The topic is required to be converted into a Aiml Topic")
-    require(topic.teachings != null && !topic.teachings.isEmpty, "Topic's teachings is required.")
+object Topic extends PersistentName {
+    private implicit val formats = net.liftweb.json.DefaultFormats
 
-    def toAimlTopic = aimltoxml.aiml.Topic(topic.name, topic.teachings.map(_.toAiml).flatten)
-} 
+    implicit def toJson(topic: Topic): JValue = JObject(
+		JField("id", JString(topic.id.get.replace("#", ""))) 	 ::
+        JField("name", JString(topic.name))		 ::
+        JField("knowledgeId", JString(topic.knowledgeId.get.replace("#", "")))  :: 
+        Nil
+    )
+    
+    implicit def topicSetToJValue(topics: Set[Topic]): JValue = JArray(topics.map(toJson).toList)
+    
+    def findAll()(implicit db:Graph):Set[Topic] = query().vertices().toSet[Vertex].map(v=>Topic(v))
+    
+    def findById(id:String)(implicit db:Graph):Topic = Topic(db.getVertex(id))
+    
+    def findByKnowledge(knowledge:Knowledge)(implicit db:Graph):Set[Topic] = knowledge.getVertex.pipe.out("topics").iterator.toSet[Vertex].map(v=>Topic(v))
+    
+    def apply(in: JValue):Box[Topic] = Helpers.tryo{
+        try {
+            val topic:Topic = new Topic((in \ "name").values.toString)
+	        (in \ "id") match {
+                case id: JString => topic.id = Some(id.values)
+                case _ => topic.id = None
+            }
+	        (in \ "knowledgeId") match {
+                case knowledgeId: JString => topic.knowledgeId = Some(knowledgeId.values)
+                case _ => topic.knowledgeId = None
+            }
+	        topic
+		}
+        catch{
+            case t:Throwable => t.printStackTrace(); throw t
+        }
+    }
+    def unapply(in:JValue):Option[Topic] = apply(in)
+    
+    def unapply(in:Any):Option[(Option[String], String, Option[String])] = {
+        in match {
+            case i : Topic => {
+               return Some((i.id, i.name, i.knowledgeId))
+            }
+            case i : String => {
+            	implicit val db = GraphDb.get
+				try{
+	        	    val topic = Topic.findById(i)
+	        	    Some(topic.id, topic.name, topic.knowledgeId)
+				}
+	        	catch{
+	        	    case t: Throwable => None
+	        	}
+	        	finally{
+	        		db.shutdown()
+	        	}
+            }
+            case _ => None
+        }
+    }
+    
+    def apply(vertex:Vertex)(implicit db:Graph):Topic = {
+        val topic = vertex.toCC[Topic].get
+        topic.id = Some(vertex.getId.toString)
+        topic.knowledgeId = Some(vertex.pipe.in("topics").iterator.next().getId().toString())
+        topic
+    }
+    
+    def createTheKnowledgeBase()(implicit db:Graph):Unit = {
+        val knowledgeBase = new File("knowledge_base")
+        println("Regerando base de conhecimento em: "+knowledgeBase.getAbsolutePath())
+        knowledgeBase.listFiles().foreach(_.delete)
+        findAll.filter(!_.getTeachings.isEmpty).foreach{_.toAiml.toXmlFile}
+    }
+}

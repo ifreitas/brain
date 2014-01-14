@@ -360,6 +360,7 @@ Ext.application({
 								tooltip:'Apply the new Knowledge Base to the bot.',
 								iconCls:'accept',
 								  handler:function(){
+									  this.setDisabled(true)
 									  Log.info("Applying the new Knowledge Base. Please wait...")
 									  Ext.Ajax.request({
 										   url: '/rest/knowledges/apply.json',
@@ -378,6 +379,7 @@ Ext.application({
 											   Log.error("Unable to apply the new Knowledge base. " + obj.msg)
 										   }
 										})
+										this.setDisabled(false)
 								  }
 							},
 							'->',
@@ -435,7 +437,7 @@ function KnowledgeExtWrapper(){
 			Ext.MessageBox.alert("","Unable to delete the tree's root knowledge")
 		}
 		else{
-			Ext.MessageBox.confirm('Confirm to delete the knowledge?', 'If yes, all its informations and nested knowledges will be removed too. Are you sure?', function(answer){
+			Ext.MessageBox.confirm('Confirm to delete the knowledge?', 'If yes, all its topicss and nested knowledges will be removed too. Are you sure?', function(answer){
 				if(answer == 'yes'){
 					var record = store.findRecord('id',ObjectManager.lastClicked.id)
 					store.remove(record)
@@ -558,7 +560,7 @@ var knowledgeExtWrapper = new KnowledgeExtWrapper();
 
 
 
-function InformationExtWrapper(){
+function TopicExtWrapper(){
 	var store = null;
 	defineModel();
 	initStore();
@@ -567,15 +569,15 @@ function InformationExtWrapper(){
 	var me = this
 	
 	function create(){
-		var record = Ext.create('Brain.model.Information', {name:'', knowledgeId:ObjectManager.getLastClicked().id})
+		var record = Ext.create('Brain.model.Topic', {name:'', knowledgeId:ObjectManager.getLastClicked().id})
 		var form = prepareForm(record, {
 			success: function(rec, op){
 				store.add(rec.data)
-				Log.info("Information named '" + rec.data.name + "' created successfully.");
+				Log.info("Topic named '" + rec.data.name + "' created successfully.");
 			},
 			failure: function(rec, op) { Log.error(op.getError()); }
 		});
-		var p = basicWindow('Create a Information', [ form ]);
+		var p = basicWindow('Create a Topic', [ form ]);
 		p.show();
 		return p;
 	}
@@ -589,11 +591,11 @@ function InformationExtWrapper(){
 		var form = prepareForm(record, {
 			success: function(rec, op) {
 				record.commit();
-				Log.info("Information renamed to '" + rec.data.name + "' successfully."); 
+				Log.info("Topic renamed to '" + rec.data.name + "' successfully."); 
 			},
 			failure: function(rec, op) { Log.error(op.getError()); }
 		});
-		var panel = basicWindow('Update the Information', [ form ])
+		var panel = basicWindow('Update the Topic', [ form ])
 		panel.show();
 		return panel;
 	}
@@ -601,7 +603,7 @@ function InformationExtWrapper(){
 	function destroy(){
 		var selectedItem = me.grid.getView().getSelectionModel().getSelection()[0];
 		if(selectedItem == null) return false;
-		Ext.MessageBox.confirm('Confirm to delete the Information?', 'If yes, all its teachings will be removed too. Are you sure?', function(answer){
+		Ext.MessageBox.confirm('Confirm to delete the Topic?', 'If yes, all its teachings will be removed too. Are you sure?', function(answer){
 			if(answer == 'yes'){
 				store.remove(selectedItem);
 				store.sync();
@@ -612,7 +614,7 @@ function InformationExtWrapper(){
 	function prepareForm(record, callbacks){
 		var theForm = Ext.create('Ext.form.Panel', {
 			border:false, layout:'form', bodyPadding: 5,
-			model: 'Brain.model.Information',
+			model: 'Brain.model.Topic',
 			items:[
 			       {
 			    	   xtype: 'textfield', fieldLabel: 'Name', name: 'name',
@@ -655,7 +657,7 @@ function InformationExtWrapper(){
 		   region: 'north',
 		   margins: '5 5 5 5',
 		   height: 205,
-		   title: 'Informations',
+		   title: 'Topics of ' + ObjectManager.getLastClicked().name,
 		   store: store,
 		   tbar: [
 				{
@@ -677,10 +679,10 @@ function InformationExtWrapper(){
 		    columns: [{ text: 'Name',  dataIndex: 'name', width:'100%'}],
 		    listeners:{
 		    	select:function( theGrid, record, index, eOpts ){
-		    		me.teachingExtWrapper.setInformation(record.data)
+		    		me.teachingExtWrapper.setTopic(record.data)
 		    	},
 				deselect:function( record, index, eOpts ){
-					me.teachingExtWrapper.setInformation(null)
+					me.teachingExtWrapper.setTopic(null)
 				},
 				itemdblclick: function( record, item, index, e, eOpts ){
 					update();
@@ -708,12 +710,12 @@ function InformationExtWrapper(){
 	}
 	
 	function defineModel(){
-		Ext.define( 'Brain.model.Information', {
+		Ext.define( 'Brain.model.Topic', {
 		    extend: 'Ext.data.Model',
 		    fields:['id', 'name', 'knowledgeId'],
 		    proxy: {
 				type: 'rest',
-				url : 'rest/knowledges/'+ObjectManager.lastClicked.id+'/informations',
+				url : 'rest/knowledges/'+ObjectManager.lastClicked.id+'/topics',
 				appendId: true
 		    }
 		});
@@ -721,13 +723,13 @@ function InformationExtWrapper(){
 		
 	function initStore(){
 		store = Ext.create('Ext.data.Store', {
-			model: 'Brain.model.Information',
+			model: 'Brain.model.Topic',
 			autoLoad: true,
 			autoSync: false,
 			listeners:{
 				'remove':function(store, record, index, isMove, eOpts){
-					me.teachingExtWrapper.setInformation(null)
-					Log.info("Information '"+record.data.name+"' deleted successfully.");
+					me.teachingExtWrapper.setTopic(null)
+					Log.info("Topic '"+record.data.name+"' deleted successfully.");
 				}
 			}
 		 });
@@ -741,17 +743,17 @@ function InformationExtWrapper(){
  */
 function TeachingExtWrapper(){
 
-	var information = null;
-	initProxy('rest/knowledges/'+ObjectManager.lastClicked.id+'/informations/noId/teachings');
+	var topic = null;
+	initProxy('rest/knowledges/'+ObjectManager.lastClicked.id+'/topics/noId/teachings');
 	defineModel();
 	var store = initStore();
 	var grid = this.grid = initGrid();
 	
 	
-	this.setInformation = function(newInformation){
-		information = newInformation;
+	this.setTopic = function(newTopic){
+		topic = newTopic;
 		
-		if(newInformation == null){
+		if(newTopic == null){
 			grid.setDisabled(true);
 			this.grid.getSelectionModel().clearSelections();
 			store.loadData([]);
@@ -759,8 +761,8 @@ function TeachingExtWrapper(){
 		else{
 			grid.setDisabled(false);
 			this.grid.getSelectionModel().clearSelections();
-			this.grid.setTitle("Teachings of " + information.name);
-			changeProxyUrlTo('rest/knowledges/'+ObjectManager.lastClicked.id+'/informations/'+information.id+'/teachings')
+			this.grid.setTitle("Teachings of " + topic.name);
+			changeProxyUrlTo('rest/knowledges/'+ObjectManager.lastClicked.id+'/topics/'+topic.id+'/teachings')
 			store.reload();
 		}
 	}
@@ -772,7 +774,7 @@ function TeachingExtWrapper(){
 	}
 	
 	function create(){
-		var record = Ext.create('Brain.model.Teaching', {informationId:information.id, whenTheUserSays:'', respondingTo:'', memorize:'', say:''})
+		var record = Ext.create('Brain.model.Teaching', {topicId:topic.id, whenTheUserSays:'', respondingTo:'', memorize:'', say:''})
 		var form = prepareForm(record, {
 			success: function(rec, op){
 				store.add(rec.data)
@@ -938,7 +940,7 @@ function TeachingExtWrapper(){
 	function defineModel(){
 		Ext.define('Brain.model.Teaching', {
 		    extend: 'Ext.data.Model',
-		    fields:['id', 'informationId', 'whenTheUserSays', 'respondingTo', 'memorize', 'say'],
+		    fields:['id', 'topicId', 'whenTheUserSays', 'respondingTo', 'memorize', 'say'],
 		    proxy: this.proxy
 		});
 	}
@@ -958,17 +960,17 @@ function TeachingExtWrapper(){
 	}
 }
 
-function InformationAndTeachingWindow() {
-	var informationExtWrapper = new InformationExtWrapper();
+function TopicAndTeachingWindow() {
+	var topicExtWrapper = new TopicExtWrapper();
 	Ext.create('Ext.window.Window', {
-		title:       'Informations & Teachings',
+		title:       'Topics & Teachings of ' + ObjectManager.getLastClicked().name,
 		modal:       true,
 		closable:    true,
 		resizable:	 false,
 		height:      600,
 		width:       900,
 		layout:      'border',
-		items:[	informationExtWrapper.grid, informationExtWrapper.teachingExtWrapper.grid]
+		items:[	topicExtWrapper.grid, topicExtWrapper.teachingExtWrapper.grid]
 	}).show();
 }
 
@@ -978,12 +980,12 @@ var contextMenu = Ext.create('Ext.menu.Menu', {
 		   { text: 'Rename this Knowledge', iconCls:'book_edit', handler : function(item){knowledgeExtWrapper.update();} }, 
 		   { text: 'Delete this Knowledge', iconCls:'book_delete', handler : function(item){knowledgeExtWrapper.destroy();} }, 
 		   '-', 
-		   { text: 'Copy to ...', disabled: true, iconCls:'page_copy', tooltip:'Copies the current state of knowledge and its information to other knowledge. Changes in the original knowledge was not reflected in the copied knowledge.'},
+		   { text: 'Copy to ...', disabled: true, iconCls:'page_copy', tooltip:'Copies the current state of knowledge and its topic to other knowledge. Changes in the original knowledge was not reflected in the copied knowledge.'},
 		   { text: 'Move to ...', disabled: true, iconCls:'page_go', tooltip:'Moves this knowledge to other parent knowledge.'},
-		   { text: 'Clone in ...', disabled: true, iconCls:'page_attach', tooltip:'Knowledge clones share the same information. Changes in the original knowledge will be reflected in the copied knowledge.'},
-		   { text: 'Is a ...', disabled: true, iconCls:'page_link', tooltip:'Creates an inheritance relationship among knowledges. Makes this knowledge possess all the information on other knowledge. Changes in the original knowledge will be reflected in the copied knowledge.'},
+		   { text: 'Clone in ...', disabled: true, iconCls:'page_attach', tooltip:'Knowledge clones share the same topic. Changes in the original knowledge will be reflected in the copied knowledge.'},
+		   { text: 'Is a ...', disabled: true, iconCls:'page_link', tooltip:'Creates an inheritance relationship among knowledges. Makes this knowledge possess all the topic on other knowledge. Changes in the original knowledge will be reflected in the copied knowledge.'},
 		   '-', 
-		   { text: 'Informations & Teachings', iconCls:'book_open', handler : function(item){new InformationAndTeachingWindow()}, tooltip: ''}
+		   { text: 'Topics & Teachings', iconCls:'book_open', handler : function(item){new TopicAndTeachingWindow()}, tooltip: ''}
    ]
 });
 

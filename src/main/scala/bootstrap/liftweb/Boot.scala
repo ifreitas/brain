@@ -118,7 +118,7 @@ class Boot {
         	db.createEdgeType("Division")
         	db.createVertexType("Conf")
         	db.createVertexType("Knowledge").createProperty("name", OType.STRING).setMandatory(true).setMin("2").setMax("40")
-        	db.createVertexType("Information").createProperty("name", OType.STRING).setMandatory(true).setMin("2").setMax("40")
+        	db.createVertexType("Topic").createProperty("name", OType.STRING).setMandatory(true).setMin("2").setMax("40")
         	val teachingVertex = db.createVertexType("Teaching")
         	teachingVertex.createProperty("whenTheUserSays", OType.STRING).setMandatory(true).setMin("1").setMax("100")
         	teachingVertex.createProperty("respondingTo", OType.STRING).setMandatory(true).setMin("1").setMax("100")

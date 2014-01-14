@@ -45,7 +45,7 @@ case class Teaching(whenTheUserSays:String, say:String) extends DbObject{
     require(!say.isEmpty, "Field 'say', can not be empty.")
     
     var id:Option[String] = None
-	var informationId:Option[String] = None
+	var topicId:Option[String] = None
 	
 	@Persistent var respondingTo:String = null
 	@Persistent var memorize:String = null
@@ -57,7 +57,7 @@ case class Teaching(whenTheUserSays:String, say:String) extends DbObject{
         if(this.memorize == null || this.memorize.trim().equals("")) this.memorize = null
         
         val that = super.save()
-        db.getVertex(informationId.get) --> "include" --> that
+        db.getVertex(topicId.get) --> "include" --> that
         that
     }
     
@@ -76,17 +76,17 @@ object Teaching extends PersistentName {
         JField("respondingTo", JString(teaching.respondingTo)) 			::
         JField("memorize", JString(teaching.memorize)) 				::
         JField("say", JString(teaching.say)) 					::
-        JField("informationId", JString(teaching.informationId.get.replace("#", ""))) :: 
+        JField("topicId", JString(teaching.topicId.get.replace("#", ""))) :: 
         Nil
     )
     
-    implicit def informationSetToJValue(informations: Set[Teaching]): JValue = JArray(informations.map(toJson).toList)
+    implicit def topicSetToJValue(topics: Set[Teaching]): JValue = JArray(topics.map(toJson).toList)
     
     def findAll()(implicit db:Graph):Set[Knowledge] = query().vertices().toSet[Vertex].map(v=>Knowledge(v))
     
     def findById(id:String)(implicit db:Graph):Teaching = Teaching(db.getVertex(id))
     
-    def findByInformation(information:Information)(implicit db:Graph):Set[Teaching] = information.getVertex.pipe.out("include").iterator.toSet[Vertex].map(v=>Teaching(v))
+    def findByTopic(topic:Topic)(implicit db:Graph):Set[Teaching] = topic.getVertex.pipe.out("include").iterator.toSet[Vertex].map(v=>Teaching(v))
     
     def apply(in: JValue):Box[Teaching] = Helpers.tryo{
         try {
@@ -94,8 +94,8 @@ object Teaching extends PersistentName {
         	    case id: JString => Some(id.values)
         	    case _ =>  None
         	}
-	        val informationId = (in \ "informationId") match {
-        	    case informationId: JString => Some(informationId.values)
+	        val topicId = (in \ "topicId") match {
+        	    case topicId: JString => Some(topicId.values)
         	    case _ => None
         	}
 	        val whenTheUserSays = (in \ "whenTheUserSays") match {
@@ -117,7 +117,7 @@ object Teaching extends PersistentName {
 	        
 	        val teaching = Teaching(whenTheUserSays, say)
 	        teaching.id = id
-	        teaching.informationId = informationId
+	        teaching.topicId = topicId
 	        respondingTo map { teaching.respondingTo = _}
 	        memorize map { teaching.memorize = _}
 	        teaching
@@ -133,7 +133,7 @@ object Teaching extends PersistentName {
             case teaching : Teaching => {
                val respondingTo = if(teaching.respondingTo == null) None else Some(teaching.respondingTo)
                val memorize = if(teaching.memorize == null) None else Some(teaching.memorize)
-               Some((teaching.id, teaching.informationId, respondingTo, memorize, teaching.whenTheUserSays, teaching.say))
+               Some((teaching.id, teaching.topicId, respondingTo, memorize, teaching.whenTheUserSays, teaching.say))
             }
             case id : String => {
             	implicit val db = GraphDb.get
@@ -141,7 +141,7 @@ object Teaching extends PersistentName {
 					val teaching = Teaching.findById(id)
 	        		val respondingTo = if(teaching.respondingTo == null) None else Some(teaching.respondingTo)
 	        		val memorize = if(teaching.memorize == null) None else Some(teaching.memorize)
-	        		Some((teaching.id, teaching.informationId, respondingTo, memorize, teaching.whenTheUserSays, teaching.say))
+	        		Some((teaching.id, teaching.topicId, respondingTo, memorize, teaching.whenTheUserSays, teaching.say))
 				}
 	        	catch{
 	        	    case t: Throwable => None
@@ -157,7 +157,7 @@ object Teaching extends PersistentName {
     def apply(vertex:Vertex)(implicit db:Graph):Teaching = {
         val teaching = vertex.toCC[Teaching].get
         teaching.id = Some(vertex.getId.toString)
-        teaching.informationId = Some(vertex.pipe.in("include").iterator.next().getId().toString())
+        teaching.topicId = Some(vertex.pipe.in("include").iterator.next().getId().toString())
         teaching
     }
 }
