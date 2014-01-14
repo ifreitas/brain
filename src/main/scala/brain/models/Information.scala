@@ -130,8 +130,8 @@ object Information extends PersistentName {
     
     def createTheKnowledgeBase()(implicit db:Graph):Unit = {
         val knowledgeBase = new File("knowledge_base")
-        knowledgeBase.delete()
-        knowledgeBase.mkdir()
+        println("Regerando base de conhecimento em: "+knowledgeBase.getAbsolutePath())
+        knowledgeBase.listFiles().foreach(_.delete)
         findAll.foreach{_.toAiml.toXmlFile}
     }
 }

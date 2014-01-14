@@ -67,10 +67,19 @@ object App {
     }
 
     private def getKnowledges(): String = {
-		def toJsonString(sb:StringBuilder, vertex:Vertex):String={
-		    sb.append(s"{id: '${vertex.getId.toString().replace("#", "")}', name: '${vertex.getProperty("name")}', data: {topics:[${vertex.getVertices(Direction.OUT, "divisions").map(t=>s"{id:${t.getId}, name:${t.getProperty("name")}}").mkString(",")}]}, children: [")
-			sb.append(vertex.getVertices(Direction.OUT, "include").map(v=>toJsonString(new StringBuilder, v)).mkString(","))
-			sb.append("]}")
+		def toJsonString(sb:StringBuilder, root:Vertex):String={
+		    
+		    sb.append("[")
+			toJsonStringRecursive(sb, root)
+		    sb.append("]")
+		    
+		    def toJsonStringRecursive(sb:StringBuilder, vertex:Vertex):Unit={
+	    		sb.append(s"{id: '${vertex.getId.toString().replace("#", "")}', name: '${vertex.getProperty("name")}', data: {topics:[${vertex.getVertices(Direction.OUT, "divisions").map(t=>s"{id:${t.getId}, name:${t.getProperty("name")}}").mkString(",")}]}, adjacencies: [")
+	    		sb.append(vertex.getVertices(Direction.OUT, "include").map(v=>"'"+v.getId().toString().replace("#", "")+"'").mkString(","))
+	    		sb.append("]},")
+	    		vertex.getVertices(Direction.OUT, "include").foreach(v=>toJsonStringRecursive(sb, v))
+		    }
+		    
 			sb.toString
 		}
     		

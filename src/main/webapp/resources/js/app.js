@@ -25,15 +25,15 @@ var Log = {
   elem: false,
   info: function(text){
 	  if (!this.elem) this.elem = document.getElementById('log');
-	  this.elem.style.color='#23A4FF';
-	  this.elem.innerHTML       = text;
-	  this.elem.style.left      = (550 - this.elem.offsetWidth / 2) + 'px';
+	  this.elem.style.color	='#23A4FF';
+	  this.elem.innerHTML   = text;
+	  this.elem.style.left  = (550 - this.elem.offsetWidth / 2) + 'px';
   },
   error: function(text){
 	  if (!this.elem) this.elem = document.getElementById('log');
-	  this.elem.style.color='red';
-	  this.elem.innerHTML       = text;
-	  this.elem.style.left      = (550 - this.elem.offsetWidth / 2) + 'px';  
+	  this.elem.style.color	='red';
+	  this.elem.innerHTML   = text;
+	  this.elem.style.left  = (550 - this.elem.offsetWidth / 2) + 'px';  
   }
 };
 
@@ -68,9 +68,9 @@ function initTree(json){
             align: "center",  
             overridable: true,
             CanvasStyles:{
-            	shadowColor: 'black',
-                shadowBlur: 10,
-                shadowOffsetY: 10
+//            	shadowColor: 'black',
+//                shadowBlur: 10,
+//                shadowOffsetY: 3
             }
         },
         
@@ -79,9 +79,9 @@ function initTree(json){
             color: '#A7B6FF',
             overridable: true,
             CanvasStyles:{
-            	shadowColor: 'black',
-                shadowBlur: 10,
-                shadowOffsetY: 10
+//            	shadowColor: 'black',
+//                shadowBlur: 10,
+//                shadowOffsetY: 7
             }
         },
         
@@ -199,14 +199,13 @@ function initTree(json){
     }
     
     try{
-    	if(json.id == null) throw "Invalid server data."
     	st.loadJSON(json);
     	st.compute();
     	st.geom.translate(new $jit.Complex(0, -300), "current");//optional: make a translation of the tree
     	st.onClick(st.root);
     }
     catch(e){
-    	alert("Unable to load the tree. Cause: " + e)
+    	Log.error("Unable to load the tree. Cause: " + e)
     }
     
 }
@@ -298,41 +297,41 @@ Ext.application({
 									bodyPadding: 5,
 									contentEl: 'about'
 								},
-				                {
-				                	title: 'Properties',
-				                	disabled: true,
-				                	border: false,
-				                	iconCls:'application_view_list',
-			                		tabConfig: {
-						                tooltip: 'The properties of the selected element.'
-						            }
-						        }, 
-						        {
-						            title: 'Chat',
-						            iconCls:'comments',
-						            disabled: true,
-						            border:false,
-						            tabConfig: {
-						                tooltip: 'A chat for testing the knowledge base.'
-						            },
-						            items:[
-						                   {
-						                	    //height: 500,
-						                	    width: 500,
-						                	    border: false,
-						                	    layout: 'fit',
-						                	    autoScroll: false,
-						                	    html: "<iframe src='http://thechatdomain.com' height=100% width=100% border='0'></iframe>",
-						                	    autoShow: true
-						                	}
-						            ]
-						        },
-						        {
-						            title: 'Utilities',
-						            iconCls:'wrench',
-						            disabled: true,
-						            border:false,
-						        }
+//				                {
+//				                	title: 'Properties',
+//				                	disabled: true,
+//				                	border: false,
+//				                	iconCls:'application_view_list',
+//			                		tabConfig: {
+//						                tooltip: 'The properties of the selected element.'
+//						            }
+//						        }, 
+//						        {
+//						            title: 'Chat',
+//						            iconCls:'comments',
+//						            disabled: true,
+//						            border:false,
+//						            tabConfig: {
+//						                tooltip: 'A chat for testing the knowledge base.'
+//						            },
+//						            items:[
+//						                   {
+//						                	    //height: 500,
+//						                	    width: 500,
+//						                	    border: false,
+//						                	    layout: 'fit',
+//						                	    autoScroll: false,
+//						                	    html: "<iframe src='http://thechatdomain.com' height=100% width=100% border='0'></iframe>",
+//						                	    autoShow: true
+//						                	}
+//						            ]
+//						        },
+//						        {
+//						            title: 'Utilities',
+//						            iconCls:'wrench',
+//						            disabled: true,
+//						            border:false,
+//						        }
 						        
 					        ]
 					    })
@@ -343,18 +342,17 @@ Ext.application({
 			        items: [
 		                {
 		                	title: 'Knowledge Base',
-		                	//iconCls:'chart_organisation',
 		                	iconCls:'book',
 		                	contentEl: 'theTree'
 				        }, 
-				        {
-				            title: 'Bots',
-				            disabled: true,
-				            iconCls:'status_offline',
-				            tabConfig: {
-				                tooltip: 'AIML Bots configurations set'
-				            }
-				        }
+//				        {
+//				            title: 'Bots',
+//				            disabled: true,
+//				            iconCls:'status_offline',
+//				            tabConfig: {
+//				                tooltip: 'AIML Bots configurations set'
+//				            }
+//				        }
 			        ],
 			        tbar: [
 							{
@@ -362,12 +360,13 @@ Ext.application({
 								tooltip:'Apply the new Knowledge Base to the bot.',
 								iconCls:'accept',
 								  handler:function(){
+									  Log.info("Applying the new Knowledge Base. Please wait...")
 									  Ext.Ajax.request({
 										   url: '/rest/knowledges/apply.json',
 										   success: function(response, opts) {
 											   var obj = Ext.decode(response.responseText);
 											   if(obj.success=="true"){
-												   Log.info("New Knowledge Base applied succesfully")
+												   Log.info("New Knowledge Base applied succesfully.")
 											   }
 											   else
 											   {
@@ -380,7 +379,14 @@ Ext.application({
 										   }
 										})
 								  }
-							}	               
+							},
+							'->',
+//					        {
+//								//disabled: true,
+//					            xtype    : 'textfield',
+//					            name     : 'field1',
+//					            emptyText: 'type to search...'
+//					        },
 						]
 			    })
             ]
@@ -403,7 +409,7 @@ function KnowledgeExtWrapper(){
 				store.add(rec.data);
 				st.add({id:rec.data.id, name:rec.data.name, data:{}, children:[]});
 			},
-			failure: function(rec, op) { alert(op.getError()); }
+			failure: function(rec, op) { Log.error(op.getError()); }
 		});
 		var panel = basicWindow('Create a Knowledge', [ form ])
 		panel.show();
@@ -417,7 +423,7 @@ function KnowledgeExtWrapper(){
 				record.commit();
 				st.rename(ObjectManager.lastClicked, rec.data.name); 
 			},
-			failure: function(rec, op) { alert(op.getError()); }
+			failure: function(rec, op) { Log.error(op.getError()); }
 		});
 		var panel = basicWindow('Update the Knowledge', [ form ])
 		panel.show();
@@ -431,20 +437,12 @@ function KnowledgeExtWrapper(){
 		else{
 			Ext.MessageBox.confirm('Confirm to delete the knowledge?', 'If yes, all its informations and nested knowledges will be removed too. Are you sure?', function(answer){
 				if(answer == 'yes'){
-					alert(ObjectManager.lastClicked.id);
 					var record = store.findRecord('id',ObjectManager.lastClicked.id)
-					alert(record);
 					store.remove(record)
-					alert(2);
 					store.sync();
-					alert(3);
 				}
 			});
 		};
-	}
-	
-	this.apply = function(){
-		
 	}
 	
 	function prepareForm(record, callbacks){
@@ -538,6 +536,8 @@ function KnowledgeExtWrapper(){
 		    proxy: this.proxy
 		});
 	}
+	
+	this.getStore = function(){return store;}
 		
 	function defineStore(){
 		store = Ext.create('Ext.data.Store', {
@@ -573,7 +573,7 @@ function InformationExtWrapper(){
 				store.add(rec.data)
 				Log.info("Information named '" + rec.data.name + "' created successfully.");
 			},
-			failure: function(rec, op) { alert(op.getError()); }
+			failure: function(rec, op) { Log.error(op.getError()); }
 		});
 		var p = basicWindow('Create a Information', [ form ]);
 		p.show();
@@ -591,7 +591,7 @@ function InformationExtWrapper(){
 				record.commit();
 				Log.info("Information renamed to '" + rec.data.name + "' successfully."); 
 			},
-			failure: function(rec, op) { alert(op.getError()); }
+			failure: function(rec, op) { Log.error(op.getError()); }
 		});
 		var panel = basicWindow('Update the Information', [ form ])
 		panel.show();
@@ -779,7 +779,7 @@ function TeachingExtWrapper(){
 				record.commit();
 				Log.info("Teaching created successfully.");
 			},
-			failure: function(rec, op) { alert(op.getError()); }
+			failure: function(rec, op) { Log.error(op.getError()); }
 		});
 		var p = basicWindow('Create a Teaching', [ form ])
 		p.show();
@@ -795,7 +795,7 @@ function TeachingExtWrapper(){
 				record.commit();
 				Log.info("Teaching updated successfully."); 
 			},
-			failure: function(rec, op) { alert(op.getError()); }
+			failure: function(rec, op) { Log.error(op.getError()); }
 		});
 		var panel = basicWindow('Update the Teaching', [ form ])
 		panel.show();

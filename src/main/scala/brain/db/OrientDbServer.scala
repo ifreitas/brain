@@ -21,7 +21,7 @@ object OrientDbServer {
 	def stop:Unit = {
 		try{
 	    	serverInstance.shutdown
-	    	println("The Database is stop now.")
+	    	println("The Database is stopped now.")
 	    }
 	    catch{
 	        case e:Throwable => throw new Exception("Unable to stop the Database.", e)

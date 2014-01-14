@@ -79,7 +79,7 @@ object Knowledge extends PersistentName {
 		JField("id", JString(knowledge.id.get.replace("#", ""))) 	 ::
         JField("name", JString(knowledge.name))		 ::
         JField("data", JObject(List.empty[JField]))  :: 
-    	JField("chidren", JArray(List.empty[JValue])):: 
+    	JField("adjacencies", JArray(List.empty[JValue])):: 
         Nil
     )
     
