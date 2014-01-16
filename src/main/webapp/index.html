@@ -105,6 +105,16 @@
                     conhecimentos internos que ele possuir, começando claro e indo escurecendo 
                     conforme a quantidade de conhecimentos internos vai aumentando.
                     </p>
+                <p><b>Knowledge</b></p>
+                <p>No Brain, o conhecimento é um objeto que encapsula as descrições 
+                  sobre alguma coisa. Este Conhecimento pode fazer parte de um 
+                  conhecimento maior e também pode ser composto por outros conhecimentos 
+                  menores. Internamente o Conhecimento é divido em Tópicos.</p>
+                  <p>Para facilitar o tratamento de assuntos complexos ou abrangentes, 
+                  o Brain utiliza a estratégia de "Dividir para Conquistar". Desta
+                  forma quanto mais fragmentado e mais específico for um Conhecimento, 
+                  ou seja, quanto mais tópicos e conhecimentos filhos um conhecimento 
+                  tiver, melhor será o domínio do robô sobre ele.</p>
                 <p><b>Adding a Knowledge</b></p>
                     <p>
                     No Brain, não existem conhecimentos isolados, todo conhecimento está, 
@@ -128,24 +138,33 @@
                     <ol>
                         <li>Clique com o botão direito sobre o conhecimento que deseja deletar;</li>
                         <li>Clique na opção "Delete this Knowledge";</li>
-                        <li>Clique em "Yes"</li>
+                        <li>Clique em "Yes".</li>
                     </ol>
 
-                <p><b>Creating a Topic</b></p>
+                <p>
+                    <b>Topics</b>
+                </p>
+                <p>O Tópico é um grupo de ensinamentos, uma divisão
+                    interna de um Conhecimento, e é específico apenas do
+                    Conhecimento ao qual pertence. Desta forma, para
+                    criar, editar ou deletar um Topic o usuário
+                    deve acessar esta tela através dos seguintes passos:</p>
+                <ol>
+                    <li>Clique com o botão direito sobre o conhecimento que deseja adicionar o Topic;</li>
+                    <li>Clique na opção "Topics & Teachings";</li>
+                    <li>Espere o painel de Tópicos carregar.</li>
+                </ol>
+                <p>
+                    <b>Creating a Topic</b>
+                </p>
+                <ol>
+                    <li>Clique em "Create";</li>
+                    <li>Informe o nome do novo Topic;</li>
+                    <li>Clique em "Save".</li>
+                </ol>
+
+                <b>Renaming a Topic</b>
                     <ol>
-                        <li>Clique com o botão direito sobre o conhecimento;</li>
-                        <li>Clique na opção "Topics & Teachings";</li>
-                        <li>Espere o painel de Topicos carregar;</li>
-                        <li>Clique em "Create";</li>
-                        <li>Informe o nome do novo Topic;</li>
-                        <li>Clique em "Save".</li>
-                    </ol>
-                    
-                    <b>Renaming a Topic</b>
-                    <ol>
-                        <li>Clique com o botão direito sobre o conhecimento;</li>
-                        <li>Clique na opção "Topics & Teachings";</li>
-                        <li>Espere o painel de Topicos carregar;</li>
                         <li>Clique no Topic que deseja atualizar;</li>
                         <li>Clique em "Update";</li>
                         <li>Informe o novo nome;</li>
@@ -154,50 +173,108 @@
                     
                     <p><b>Deleting a Topic</b></p>
                     <ol>
-                        <li>Clique com o botão direito sobre o conhecimento;</li>
-                        <li>Clique na opção "Topics & Teachings";</li>
-                        <li>Espere o painel de Topicos carregar;</li>
                         <li>Clique no Topic que deseja deletar;</li>
                         <li>Clique em "Delete";</li>
                         <li>Clique em "Yes".</li>
                     </ol>
-
             </div>
             <div id="training" align="justify">
-                
+                <p>
+                A princípio, o robô deve ser visto como uma criança: inicialmente não tem
+                qualquer conhecimento, mas passa a adquirí-lo a partir dos ensinamentos
+                que lhes são passados.
+                </p>
+                <p>
+                O ensinamento é a menor unidade de conhecimento passada 
+                  para o robô, é a instrução propriamente dita  do  que  ele 
+                  deve fazer conforme o texto digitado pelo usuário. Ou seja, 
+                  são os ensinamentos que realmente preparam o robô para lidar 
+                  com as situações criadas pelos usuários.
+                </p>
+                <p>
+                O ensinamento é específico de apenas um Tópico, por isso
+                ele só faz sentido para aquele Tópico ao qual pertence. Desta forma,
+                para criar, editar ou deletar um ensinamento o usuário deve acessar 
+                esta tela através dos seguintes passos:
+                </p>
+                <ol>
+                    <li>Clique com o botão direito sobre o conhecimento que deseja criar os ensinamentos;</li>
+                    <li>Clique na opção "Topics & Teachings";</li>
+                    <li>Espere o painel de Tópicos carregar;</li>
+                    <li>Clique no Topic que conterá os ensinamentos;</li>
+                    <li>Espere o painel de Teachings carregar.</li>
+                </ol>
                 
                 <p><b>Creating a Teaching</b></p>
                 <ol>
-                    <li>Clique com o botão direito sobre o conhecimento;</li>
-                    <li>Clique na opção "Topics & Teachings";</li>
-                    <li>Espere o painel de Topicos carregar;</li>
-                    <li>Clique no Topic;</li>
-                    <li>Espere o painel de Teachings carregar;</li>
                     <li>Clique em "Create";</li>
-                    <li>Informe os conteúdos dos campos solicitados;</li>
+                    <li>Informe o conteúdo dos campos solicitados:</li>
+                      <ul>
+                        <li>
+                            <i>When the user says</i>: 
+                            <p>
+                            Informe neste campo as sentenças que os usuários do 
+                            chat provavelmente escreverão sobre este Tópico específico. Podem ser informadas várias
+                            sentenças de uma única vez, sendo apenas uma por linha. Quanto mais sentenças cadastradas
+                            maior é a capacidade de "interpretação" do robô.
+                            </p>
+                            <p>Por exemplo, para o Tópico 
+                            "definicao", podem ser informadas as seguintes sentenças:</p>
+<textarea rows="3" cols="23" readonly="readonly">O que é o brain?
+Não sei o que é.
+Não sei.
+Não.
+</textarea>
+                            <p>Neste exemplo, o robô é capaz de entender e dar uma resposta 
+                            adequada para qualquer uma destas sentenças.</p>
+                        </li>
+                        
+                        <li>
+                            <i>Responding to</i>:
+                            <p>Informe neste campo a sentença do robô que motivou esta nova interação do usuário.</p>
+                            <p>Por exemplo, a seguinte mensagem do robô pode ter motivar
+                            o usuário a digitar uma das sentenças dadas no exemplo do campo "<i>When the user says</i>":</p>
+                            <input type="text" value="você sabe o que é o brain?" readonly="readonly"/>
+                            <p>Este campo é útil para manter o diálogo com o robô contextualizado, pois .</p>
+                        </li> 
+                        
+                        <li>
+                            <i>Memorize</i>:
+                            <i>Não implementando ainda.</i>
+                        </li>
+                        
+                        <li>
+                            <i>Say</i>:
+                            <p>
+                            Informe neste campo o que o robô deve dizer quando o usuário
+                            digitar alguma das sentenças informadas no campo "<i>When the user says</i>".
+                            Podem ser informadas várias respostas de uma única vez, sendo
+                            apenas uma por linha. Esta abordagem capacita o robô a dar diferentes
+                            respostas para uma mesma sentença, pois esta resposta será o resultado
+                            de uma seleção randômica entre as várias possíveis respostas cadastradas.
+                            Logo, quanto mais respostas cadastradas, maior será a "inteligência" do robô.
+                            </p>
+                            <p>Por exemplo, para mesmo o Tópico 
+                            "definição", podem ser informadas as seguintes sentenças:</p>
+<textarea rows="10" cols="23" readonly="readonly">O Brain é um sistema para modelar, criar e gerenciar a base de conhecimento de chatbots baseados na tecnologia AIML.
+
+É o mais avançado sistema de modelagem e criação da base de conhecimentos para chatbots baseados em AIML.
+
+É uma ferramenta que facilita a vida dos botmasters AIML, por permitir modelar visualmente a base de conhecimento e encorajar a gerar o máximo conteúdo possível.</textarea>
+                        </li>
+                      </ul>
                     <li>Clique em "Save".</li>
                 </ol>
                 
                 <p><b>Editing a Teaching</b></p>
                 <ol>
-                    <li>Clique com o botão direito sobre o conhecimento;</li>
-                    <li>Clique na opção "Topics & Teachings";</li>
-                    <li>Espere o painel de Topicos carregar;</li>
-                    <li>Clique no Topic;</li>
-                    <li>Espere o painel de Teachings carregar;</li>
-                    <li>Clique no Teaching que deseja editar;</li>
                     <li>Clique em "Update";</li>
-                    <li>Informe os conteúdos dos campos solicitados;</li>
+                    <li>Informe o conteúdo dos campos solicitados;</li>
                     <li>Clique em "Save".</li>
                 </ol>
                 
                 <p><b>Deleting a Teaching</b></p>
                 <ol>
-                    <li>Clique com o botão direito sobre o conhecimento;</li>
-                    <li>Clique na opção "Topics & Teachings";</li>
-                    <li>Espere o painel de Topicos carregar;</li>
-                    <li>Clique no Topic;</li>
-                    <li>Espere o painel de Teachings carregar;</li>
                     <li>Clique no Teaching que deseja deletar;</li>
                     <li>Clique em "Delete";</li>
                     <li>Clique em "Yes".</li>
@@ -235,6 +312,7 @@
                   <p>O ensinamento é específico de apenas um Tópico, por isso
                   ele só faz sentido para aquele Tópico ao qual pertence.</p>
               <b>Normalization</b>
+              <i>Não implementando ainda.</i>
                   <p>É o processo de padronização do texto digitado pelo usuário, 
                   adequando este texto a determinadas normas de escrita e
                   gramática utilizadas pelo robô. A normalização atua basicamente 
