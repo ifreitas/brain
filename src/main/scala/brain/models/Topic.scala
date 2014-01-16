@@ -60,12 +60,18 @@ case class Topic(val name:String) extends DbObject {
     
     override def toString():String  = s"Topic: $name ($id)"
     
-    private def getCompleteName:String = "knowledge_base/"+Topic.this.name.replaceAll(" ", "_")+Topic.this.id.get.replace(":", "_").replace("#", "")+".aiml"
+    private def getFileName:String = Topic.this.name.replaceAll(" ", "_")+Topic.this.id.get.replace(":", "_").replace("#", "")+".aiml"
+    private def getCompleteName:String = Topic.getKnowledgeBasePath+"/"+this.getFileName
     
     def toAiml(implicit db:Graph):Aiml = Aiml(getCompleteName, aimltoxml.aiml.Topic("*", getTeachings.flatMap(_.toAiml)))
 }
 
 object Topic extends PersistentName {
+	
+    def getKnowledgeBasePath = knowledgeBaseDir.getAbsolutePath()
+    
+    val knowledgeBaseDir = new File("knowledge_base")
+        
     private implicit val formats = net.liftweb.json.DefaultFormats
 
     implicit def toJson(topic: Topic): JValue = JObject(
@@ -132,9 +138,8 @@ object Topic extends PersistentName {
     }
     
     def createTheKnowledgeBase()(implicit db:Graph):Unit = {
-        val knowledgeBase = new File("knowledge_base")
-        println("Regerando base de conhecimento em: "+knowledgeBase.getAbsolutePath())
-        knowledgeBase.listFiles().foreach(_.delete)
+        println("Regerando base de conhecimento em: "+getKnowledgeBasePath)
+        knowledgeBaseDir.listFiles().foreach(_.delete)
         findAll.filter(!_.getTeachings.isEmpty).foreach{_.toAiml.toXmlFile}
     }
 }

@@ -38,49 +38,194 @@
             <div id="abstract" align="justify">//TODO</div>
             <div id="modeling" align="justify">
                 <b>Modeling the Knowledge Base</b><br>
-                <p>No Brain, a modelagem é a representação gráfica do conhecimento, seus relacionamentos com outros conhecimentos (pais e filhos) e os tópicos nos quais o mesmo se divide, tudo isso através de um mapa mental. A modelagem faz parte do processo de criação da base de conhecimento propriamente dita e está sincronizada com a base real do robô.</p>
-                <p>Em um cérebro real, apenas o conhecimento que está sendo utilizado  (usar o nome científico disso!) é que fica na “área de trabalho (usar o nome científico disso!)”, enquanto todo o resto fica guardado no “hd” (usar o nome científico disso!). Isto acontece por vários motivos, mas principalmente para não sobrecarregar a mente (ou seria psiquê? usar o nome científico disso) evitando o colapso do sistema cognitivo, ao mesmo tempo em que viabiliza a máxima performance para conclusão do raciocínio já que ele está focando apenas no que interessa. Algo semelhante ocorre no Brain: apenas os conhecimentos relevantes são exibidos, para que a tela não fique cansativa por exibir muitas informações e para que o botmaster possa focar naquilo que realmente interessa. Os conhecimentos são exibidos ou ocultados conforme sua relevância para o conhecimento selecionado.</p>
-                <p>Modelar a base de conhecimento de um chatbot não é exatamente uma tarefa trivial, pois existe um conjunto de variáveis que afetam diretamente a efetividade de uma boa interação humano-robô, como por exemplo a riqueza do vocabulário de ambos, a clareza e objetividade das mensagens de ambos, a especialização ou a generalização esperada por um usuário sobre um determinado assunto, etc. Além disso determinados assuntos podem ser muito complexos ou muito grandes para serem tratados por um robô.</p> 
-                <p>Pensando nisso o Brain foi projetado para facilitar esta tarefa levando o “dividir para conquistar” muito a sério. Dividindo o conhecimento ele pode ser modelado com finíssima granularidade, sendo reduzido a vários pequenos conhecimentos onde cada um é muito específico, pois foca apenas em um determinado aspecto de um conhecimento maior. Algumas das vantagens desta abordagem é que tem uma visão mais ampla sobre o conhecimento e fica muito mais fácil definir todos os tópicos cobertos por um conhecimento. O resultado dessa abordagem é uma base com conhecimentos muito mais sólidos e completos.</p>
-                <p>Mas o mais importante para que a base seja bem modelada é que o botmaster domine cada conhecimento que deseja modelar. É necessário que o botmaster já tenha muito claro em sua mente o que deseja representar através do mapa mental do Brain.</p>
+                
+                <p>No Brain, a modelagem é a representação gráfica do conhecimento, 
+                seus relacionamentos com outros conhecimentos (pais e filhos) e os 
+                tópicos nos quais o mesmo se divide, tudo isso através de um  mapa 
+                mental. A modelagem faz parte do processo de criação da base de 
+                conhecimento propriamente dita e está sincronizada com a base real 
+                do robô.</p>
+                
+                <p>Modelar a base de conhecimento de um chatbot não é exatamente uma 
+                tarefa trivial, pois existe um conjunto de variáveis que afetam diretamente
+                a efetividade de uma boa interação humano-robô, como por exemplo a riqueza 
+                do vocabulário de ambos, a clareza e objetividade das mensagens de ambos,
+                 a especialização ou a generalização esperada por um usuário sobre um 
+                 determinado assunto, etc. Além disso determinados assuntos podem ser muito 
+                 complexos ou muito grandes para serem tratados por um robô.</p> 
+                
+                <p>Pensando nisso o Brain foi projetado para facilitar esta tarefa adotando a
+                 estratégia de “dividir para conquistar”. Dividindo o conhecimento ele pode 
+                 ser modelado com finíssima granularidade, sendo reduzido a vários pequenos 
+                 conhecimentos onde cada um é muito específico, pois foca apenas em um 
+                 determinado aspecto de um conhecimento maior. Algumas das vantagens desta 
+                 abordagem é que tem uma visão mais ampla sobre o conhecimento e fica muito 
+                 mais fácil definir todos os tópicos cobertos por um conhecimento. O resultado 
+                 dessa abordagem é uma base com conhecimentos muito mais sólidos e completos.</p>
+                
+                <p>Mas o mais importante para que a base seja bem modelada é que o botmaster 
+                domine cada conhecimento que deseja modelar. É necessário que o botmaster já 
+                tenha muito claro em sua mente o que deseja representar através do mapa mental 
+                do Brain. Segue abaixo uma sugestão de processo de modelagem:</p>
 
-Em resumo, é necessário:<br>
-1. Definir um público-alvo<br>
-2. Definir os temas de interesse para este público<br>
-3. Definir o escopo dos temas (os conhecimentos a serem modelados)<br>
-4. Para cada item do escopo (cada conhecimento):<br>
-1. Entender bem o conhecimento que será adicionado<br>
-2. Definir os relacionamentos (ascendentes e descendentes)<br>
-3. Definir os tópicos<br>
+                <ol style="text-align: left;">
+                <li>Definir um público-alvo;</li>
+                <li>Definir os temas de interesse para este público;</li>
+                <li>Definir o escopo dos temas (os conhecimentos a serem modelados);</li>
+                <li>Para cada item do escopo (cada conhecimento):</li>
+                    <ol>
+                        <li>Entender bem o conhecimento que será adicionado;</li>
+                        <li>Definir os relacionamentos (ascendentes e descendentes);</li>
+                        <li>Definir os tópicos.</li>
+                    </ol>
+                </ol>
+                
+                <p><b>Entendendo o comportamento da base de conhecimento</b></p>
+                A base de conhecimento possui um comportamento muito dinâmico em relação à sua
+                visualização, mas este dinamismo visa justamente aumentar a produtividade do usuário
+                durante a modelagem da base ou criação de ensinamentos e abrange os seguintes comportamentos:
+                <p>1. Exibição seletiva</p>
+                    <p>
+                    Os conhecimentos são automaticamente exibidos ou ocultados conforme sua relevância para o 
+                    conhecimento clicado, desta forma apenas os conhecimentos relevantes são 
+                    exibidos, para que a tela não fique cansativa por exibir muitas informações 
+                    e para que o usuário possa focar apenas naquilo que realmente interessa. 
+                    </p>
+                    
+                <p>2. Contextualização visual</p>
+                    <p>
+                    Quando o usuário clica em um conhecimento, o Brain seleciona automaticamente
+                    todos os seus conhecimentos pais, deixando todo o caminho desde o
+                    Root até o que foi clicado com uma cor diferente dos demais. Isto acontece para facilitar
+                    a contextualização do usuário em relação ao conhecimento que foi selecionado.
+                    </p>
+                <p>3. Coloração automática</p>
+                    <p>
+                    A cor do conhecimento varia automaticamente em função da quantidade de
+                    conhecimentos internos que ele possuir, começando claro e indo escurecendo 
+                    conforme a quantidade de conhecimentos internos vai aumentando.
+                    </p>
+                <p><b>Adding a Knowledge</b></p>
+                    <p>
+                    No Brain, não existem conhecimentos isolados, todo conhecimento está, 
+                    obrigatoriamente, conectado a outro, sendo o Root o mais básico, do qual 
+                    todos derivam.
+                    </p>
+                    <ol>
+                        <li>Clique com o botão direito sobre um conhecimento existente;</li>
+                        <li>Clique na opção "Add a Knowledge";</li>
+                        <li>Informe o nome do novo conhecimento;</li>
+                        <li>Clique em "Save".</li>
+                    </ol>
+                <p><b>Renaming a Knowledge</b></p>
+                    <ol>
+                        <li>Clique com o botão direito sobre o conhecimento que deseja atualizar;</li>
+                        <li>Clique na opção "Rename this Knowledge";</li>
+                        <li>Informe o novo nome;</li>
+                        <li>Clique em "Save".</li>
+                    </ol>
+                <p> <b> Deleting a Knowledge </b> </p>
+                    <ol>
+                        <li>Clique com o botão direito sobre o conhecimento que deseja deletar;</li>
+                        <li>Clique na opção "Delete this Knowledge";</li>
+                        <li>Clique em "Yes"</li>
+                    </ol>
 
-                <br>
-                <b>Creating a Knowledge</b><br>//TODO <br>
-                <b>Renaming a Knowledge</b><br>//TODO <br>
-                <b>Deleting a Knowledge</b><br>//TODO <br>
-                <b>Copying a Knowledge</b><br>//TODO <br>
-                <b>Moving a Knowledge</b><br>//TODO <br>
-                <b>Cloning a Knowledge</b><br>//TODO <br>
-                <b>Creating a type of Knowledge</b><br>//TODO <br>
+                <p><b>Creating a Topic</b></p>
+                    <ol>
+                        <li>Clique com o botão direito sobre o conhecimento;</li>
+                        <li>Clique na opção "Topics & Teachings";</li>
+                        <li>Espere o painel de Topicos carregar;</li>
+                        <li>Clique em "Create";</li>
+                        <li>Informe o nome do novo Topic;</li>
+                        <li>Clique em "Save".</li>
+                    </ol>
+                    
+                    <b>Renaming a Topic</b>
+                    <ol>
+                        <li>Clique com o botão direito sobre o conhecimento;</li>
+                        <li>Clique na opção "Topics & Teachings";</li>
+                        <li>Espere o painel de Topicos carregar;</li>
+                        <li>Clique no Topic que deseja atualizar;</li>
+                        <li>Clique em "Update";</li>
+                        <li>Informe o novo nome;</li>
+                        <li>Clique em "Save".</li>
+                    </ol>
+                    
+                    <p><b>Deleting a Topic</b></p>
+                    <ol>
+                        <li>Clique com o botão direito sobre o conhecimento;</li>
+                        <li>Clique na opção "Topics & Teachings";</li>
+                        <li>Espere o painel de Topicos carregar;</li>
+                        <li>Clique no Topic que deseja deletar;</li>
+                        <li>Clique em "Delete";</li>
+                        <li>Clique em "Yes".</li>
+                    </ol>
+
             </div>
             <div id="training" align="justify">
-                <b>Creating a Topic</b><br>//TODO <br>
-                <b>Renaming a Topic</b><br>//TODO <br>
-                <b>Deleting a Topic</b><br>//TODO <br>
-                <b>Creating a Topic Template</b><br>//TODO <br>
                 
-                <b>Creating a Teaching</b><br>//TODO <br>
-                <b>Editing a Teaching</b><br>//TODO <br>
-                <b>Deleting a Teaching</b><br>//TODO <br>
+                
+                <p><b>Creating a Teaching</b></p>
+                <ol>
+                    <li>Clique com o botão direito sobre o conhecimento;</li>
+                    <li>Clique na opção "Topics & Teachings";</li>
+                    <li>Espere o painel de Topicos carregar;</li>
+                    <li>Clique no Topic;</li>
+                    <li>Espere o painel de Teachings carregar;</li>
+                    <li>Clique em "Create";</li>
+                    <li>Informe os conteúdos dos campos solicitados;</li>
+                    <li>Clique em "Save".</li>
+                </ol>
+                
+                <p><b>Editing a Teaching</b></p>
+                <ol>
+                    <li>Clique com o botão direito sobre o conhecimento;</li>
+                    <li>Clique na opção "Topics & Teachings";</li>
+                    <li>Espere o painel de Topicos carregar;</li>
+                    <li>Clique no Topic;</li>
+                    <li>Espere o painel de Teachings carregar;</li>
+                    <li>Clique no Teaching que deseja editar;</li>
+                    <li>Clique em "Update";</li>
+                    <li>Informe os conteúdos dos campos solicitados;</li>
+                    <li>Clique em "Save".</li>
+                </ol>
+                
+                <p><b>Deleting a Teaching</b></p>
+                <ol>
+                    <li>Clique com o botão direito sobre o conhecimento;</li>
+                    <li>Clique na opção "Topics & Teachings";</li>
+                    <li>Espere o painel de Topicos carregar;</li>
+                    <li>Clique no Topic;</li>
+                    <li>Espere o painel de Teachings carregar;</li>
+                    <li>Clique no Teaching que deseja deletar;</li>
+                    <li>Clique em "Delete";</li>
+                    <li>Clique em "Yes".</li>
+                </ol>
             </div>
-            <div id="applyTheBase" align="justify">//TODO</div>
+            <div id="applyTheBase" align="justify">
+              <p>Para que as alterações na base de conhecimento se reflitam sobre a base real do robô,
+              basta clicar no botão "Apply", que fica no topo do painel central. Quando as regeração
+              da base for concluída, o sistema informará o status da execução, na barra de status do sistema,
+              bem como o local onde os arquivos AIML foram gerados.</p>
+            </div>
             <div id="definitions" align="justify">
-              <b>Knowledge</b><br>//TODO <br><br>
-              <b>Knowledge Base</b><br>//TODO <br><br>
-              <b>Mental Map</b><br>//TODO <br><br>
+              <b>Knowledge Base</b>
+                  <p>É o local onde todo o conhecimento do robô é armazenado e é representado graficamente através de um mapa mental.</p>
+              <b>Knowledge</b>
+                  <p>No Brain, o conhecimento é um objeto que encapsula as descrições 
+                  sobre alguma coisa. Este Conhecimento pode fazer parte de um 
+                  conhecimento maior e também pode ser composto por outros conhecimentos 
+                  menores. Internamente o Conhecimento é divido em Tópicos.</p>
+                  <p>Para facilitar o tratamento de assuntos complexos ou abrangentes, 
+                  o Brain utiliza a estratégia de "Dividir para Conquistar". Desta
+                  forma quanto mais fragmentado e mais específico for um Conhecimento, 
+                  ou seja, quanto mais tópicos e conhecimentos filhos um conhecimento 
+                  tiver, melhor será o domínio do robô sobre ele.</p>
               <b>Topic</b>
-              <p>O Tópico é um grupo de ensinamentos, uma divisão interna de
-               um Conhecimento, e é específico apenas do Conhecimento ao qual 
-               pertence.</p>
+                  <p>O Tópico é um grupo de ensinamentos, uma divisão interna de
+                   um Conhecimento, e é específico apenas do Conhecimento ao qual 
+                   pertence.</p>
               <b>Teaching</b>
                   <p>O ensinamento é a menor unidade de conhecimento passada 
                   para o robô, é a instrução propriamente dita  do  que  ele 
@@ -90,15 +235,22 @@ Em resumo, é necessário:<br>
                   <p>O ensinamento é específico de apenas um Tópico, por isso
                   ele só faz sentido para aquele Tópico ao qual pertence.</p>
               <b>Normalization</b>
-                <p>É o processo de padronização do texto digitado pelo usuário, 
-                adequando este texto a determinadas normas de escrita e
-                 gramática utilizadas pelo robô. A normalização atua basicamente 
-                 nos seguintes pontos:</p>
-                Sinônimos. Exemplo: “visualizar” → “ver”.<br>
-                Abreviações/gírias: Exemplo: “vc” → “você”.<br>
-                Gênero. Exemplo: “Obrigada” → “Obrigado”.<br>
-                Correções ortográficas. Exemplo: “voce” → “você”.<br>
-                Correções gramaticais. Exemplo: “Oi como está vc” → “Oi. Como está você?”
+                  <p>É o processo de padronização do texto digitado pelo usuário, 
+                  adequando este texto a determinadas normas de escrita e
+                  gramática utilizadas pelo robô. A normalização atua basicamente 
+                  nos seguintes pontos:</p>
+                 <table style="width: 100%">
+                     <thead>
+                      <tr><th width="100px">Tipo</th><th>Termo</th><th>Normalizado</th></tr>
+                     </thead>
+                     <tbody>
+                      <tr><td><b>Sinônimos</b></td><td>visualizar</td><td>ver</td></tr>
+                      <tr><td><b>Abreviações/<br>Gírias</b></td><td>vc</td><td>você</td></tr>
+                      <tr><td><b>Gênero</b></td><td>Obrigada</td><td>Obrigado</td></tr>
+                      <tr><td><b>Correções Ortográficas</b></td><td>voce</td><td>você</td></tr>
+                      <tr><td><b>Correções Gramaticais</b></td><td>oi tudo bem</td><td>Oi. Tudo bem?</td></tr>
+                     </tbody>
+                 </table>
             </div>
         </div>
     </div><!-- /main -->

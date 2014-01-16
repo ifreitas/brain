@@ -65,7 +65,7 @@ object BrainRest extends RestHelper {
         	implicit val db = GraphDb.get
 			try{
 				Topic.createTheKnowledgeBase
-				JObject(JField("success", JString("true")):: Nil)
+				JObject(JField("success", JString("true")) :: JField("path", JString(Topic.getKnowledgeBasePath)) :: Nil)
 			}
         	catch{
         		case t: Throwable => t.printStackTrace; JObject(JField("failed", JString("true")) :: JField("msg", JString(t.getMessage)) :: Nil)

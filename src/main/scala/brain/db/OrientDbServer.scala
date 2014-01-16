@@ -11,6 +11,7 @@ object OrientDbServer {
 	        if(System.getProperty("ORIENTDB_HOME")==null){
 	        	System.setProperty("ORIENTDB_HOME", System.getProperty("user.dir"))
 	        }
+	        println("Trying to start the database. ORIENTDB_HOME: "+System.getProperty("ORIENTDB_HOME"))
 	        serverInstance.activate()
 	    	println("The Database is running now.")
 	    }

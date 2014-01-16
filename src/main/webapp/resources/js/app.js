@@ -65,12 +65,12 @@ function initTree(json){
             width: 80,
             //color: '#6D89D5',
             type: 'rectangle',
-            align: "center",  
+            align: "right",  
             overridable: true,
             CanvasStyles:{
-//            	shadowColor: 'black',
-//                shadowBlur: 10,
-//                shadowOffsetY: 3
+            	shadowColor: 'gray',
+                shadowBlur: 10,
+                shadowOffsetY: 3
             }
         },
         
@@ -79,9 +79,9 @@ function initTree(json){
             color: '#A7B6FF',
             overridable: true,
             CanvasStyles:{
-//            	shadowColor: 'black',
-//                shadowBlur: 10,
-//                shadowOffsetY: 7
+            	shadowColor: 'gray',
+                shadowBlur: 10,
+                shadowOffsetY: 3
             }
         },
         
@@ -229,15 +229,15 @@ Ext.application({
 			        margins: '0 5 0 5',
 			        layout: 'accordion',
 			        items:[
-						{
-							xtype:'panel',
-							title: 'Abstract',
-							bodyPadding: 5,
-							layout:'fit',
-							border:false,
-							autoScroll:true,
-							contentEl:'abstract'
-						},
+//						{
+//							xtype:'panel',
+//							title: 'Abstract',
+//							bodyPadding: 5,
+//							layout:'fit',
+//							border:false,
+//							autoScroll:true,
+//							contentEl:'abstract'
+//						},
 						{
 							xtype:'panel',
 							title: 'Modeling',
@@ -363,11 +363,11 @@ Ext.application({
 									  this.setDisabled(true)
 									  Log.info("Applying the new Knowledge Base. Please wait...")
 									  Ext.Ajax.request({
-										   url: '/rest/knowledges/apply.json',
+										   url: 'rest/knowledges/apply.json',
 										   success: function(response, opts) {
 											   var obj = Ext.decode(response.responseText);
 											   if(obj.success=="true"){
-												   Log.info("New Knowledge Base applied succesfully.")
+												   Log.info("Knowledge Base applied succesfully. New files in: " + obj.path+".")
 											   }
 											   else
 											   {

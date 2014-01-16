@@ -1,69 +1,69 @@
 .accept {
-    background-image: url(/resources/images/icons/accept.png) !important;
+    background-image: url("../images/icons/accept.png") !important;
 }
 .add {
-    background-image: url(/resources/images/icons/add.png) !important;
+    background-image: url(../images/icons/add.png) !important;
 }
 .application_add {
-    background-image: url(/resources/images/icons/application_add.png) !important;
+    background-image: url(../images/icons/application_add.png) !important;
 }
 .application_edit {
-    background-image: url(/resources/images/icons/application_edit.png) !important;
+    background-image: url(../images/icons/application_edit.png) !important;
 }
 .application_delete {
-    background-image: url(/resources/images/icons/application_delete.png) !important;
+    background-image: url(../images/icons/application_delete.png) !important;
 }
 .application_view_list {
-    background-image: url(/resources/images/icons/application_view_list.png) !important;
+    background-image: url(../images/icons/application_view_list.png) !important;
 }
 .book {
-    background-image: url(/resources/images/icons/book.png) !important;
+    background-image: url(../images/icons/book.png);
 }
 .book_add {
-    background-image: url(/resources/images/icons/book_add.png) !important;
+    background-image: url(../images/icons/book_add.png) !important;
 }
 .book_edit {
-    background-image: url(/resources/images/icons/book_edit.png) !important;
+    background-image: url(../images/icons/book_edit.png) !important;
 }
 .book_delete {
-    background-image: url(/resources/images/icons/book_delete.png) !important;
+    background-image: url(../images/icons/book_delete.png) !important;
 }
 .book_open {
-    background-image: url(/resources/images/icons/book_open.png) !important;
+    background-image: url(../images/icons/book_open.png) !important;
 }
 .cancel {
-    background-image: url(/resources/images/icons/cancel.png) !important;
+    background-image: url(../images/icons/cancel.png) !important;
 }
 .chart_organisation {
-    background-image: url(/resources/images/icons/chart_organisation.png) !important;
+    background-image: url(../images/icons/chart_organisation.png) !important;
 }
 .comments {
-    background-image: url(/resources/images/icons/comments.png) !important;
+    background-image: url(../images/icons/comments.png) !important;
 }
 .delete {
-    background-image: url(/resources/images/icons/delete.png) !important;
+    background-image: url(../images/icons/delete.png) !important;
 }
 .help {
-    background-image: url(/resources/images/icons/help.png) !important;
+    background-image: url(../images/icons/help.png) !important;
 }
 .information {
-    background-image: url(/resources/images/icons/information.png) !important;
+    background-image: url(../images/icons/information.png) !important;
 }
 .page_attach {
-    background-image: url(/resources/images/icons/page_attach.png) !important;
+    background-image: url(../images/icons/page_attach.png) !important;
 }
 .page_copy {
-    background-image: url(/resources/images/icons/page_copy.png) !important;
+    background-image: url(../images/icons/page_copy.png) !important;
 }
 .page_go {
-    background-image: url(/resources/images/icons/page_go.png) !important;
+    background-image: url(../images/icons/page_go.png) !important;
 }
 .page_link {
-    background-image: url(/resources/images/icons/page_link.png) !important;
+    background-image: url(../images/icons/page_link.png) !important;
 }
 .status_offline {
-    background-image: url(/resources/images/icons/status_offline.png) !important;
+    background-image: url(../images/icons/status_offline.png) !important;
 }
 .wrench {
-    background-image: url(/resources/images/icons/wrench.png) !important;
+    background-image: url(../images/icons/wrench.png) !important;
 }
