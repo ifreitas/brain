@@ -860,7 +860,7 @@ function TeachingExtWrapper(){
 			       {
 			    	   xtype: 'textfield', fieldLabel: 'Responding to', name: 'respondingTo',
 			    	   emptyText:'Some bot phrase',
-			    	   allowBlank: true, minLength: 1, maxLength: 40, validator:validateEmptyString
+			    	   allowBlank: true, minLength: 1, maxLength: 40
 			       },
 			       {
 			    	   xtype: 'textareafield', fieldLabel: 'Memorize', name: 'memorize',
