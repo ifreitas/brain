@@ -461,7 +461,7 @@ function KnowledgeExtWrapper(){
 			items:[
 			       {
 			    	   xtype: 'textfield', fieldLabel: 'Name', name: 'name',
-			    	   allowBlank: false, minLength: 2, maxLength: 40,
+			    	   allowBlank: false, minLength: 2, maxLength: 40, validator:validateEmptyString,
 			    	   listeners:{
 			    		   'blur' : function( e, eOpts ){
 			    			   theForm.getForm().getRecord().set(this.name, this.value)
@@ -610,7 +610,7 @@ function TopicExtWrapper(){
 			items:[
 			       {
 			    	   xtype: 'textfield', fieldLabel: 'Name', name: 'name',
-			    	   allowBlank: false, minLength: 2, maxLength: 40,
+			    	   allowBlank: false, minLength: 2, maxLength: 40, validator:validateEmptyString,
 			    	   listeners:{
 			    		   'blur' : function( e, eOpts ){
 			    			   theForm.getForm().getRecord().set(this.name, this.value)
@@ -855,22 +855,22 @@ function TeachingExtWrapper(){
 			       {
 			    	   xtype: 'textareafield', fieldLabel: 'When the user says', name: 'whenTheUserSays',
 			    	   emptyText:'Likely user\'s sentences (one per line)',
-			    	   allowBlank: false, minLength: 1, maxLength: 200, height:85
+			    	   allowBlank: false, minLength: 1, maxLength: 200, height:85, validator:validateEmptyString
 			       },
 			       {
 			    	   xtype: 'textfield', fieldLabel: 'Responding to', name: 'respondingTo',
 			    	   emptyText:'Some bot phrase',
-			    	   allowBlank: true, minLength: 1, maxLength: 40
+			    	   allowBlank: true, minLength: 1, maxLength: 40, validator:validateEmptyString
 			       },
 			       {
 			    	   xtype: 'textareafield', fieldLabel: 'Memorize', name: 'memorize',
 			    	   emptyText:'Some key=value pair like: name=\'Israel\' (one per line)',
-			    	   disabled:true, allowBlank: true, minLength: 3, maxLength: 200, height:85
+			    	   disabled:true, allowBlank: true, minLength: 3, maxLength: 200, height:85, validator:validateEmptyString,
 			       },
 			       {
 			    	   xtype: 'textareafield', fieldLabel: 'Then say', name: 'say',
 			    	   emptyText:'The bot\'s responses to the user input. Can access memorized variables. Example: Hello, ${name}. (one per line)',
-			    	   allowBlank: false, minLength: 1, maxLength: 200, height:85
+			    	   allowBlank: false, minLength: 1, maxLength: 200, height:85, validator:validateEmptyString,
 			       }
 		       ],
 		       bbar: [
@@ -984,4 +984,9 @@ var contextMenu = Ext.create('Ext.menu.Menu', {
 		   { text: 'Topics & Teachings', iconCls:'book_open', handler : function(item){new TopicAndTeachingWindow()}, tooltip: ''}
    ]
 });
+
+function validateEmptyString(str){    
+	if(str && str.trim() != "") return true;    
+	return "This field can not be empty"
+}
 
