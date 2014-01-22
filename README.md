@@ -23,6 +23,9 @@ The knowledge is represented graphically by means of a mental map which allows y
 - It's simpler, more intuitive and more productive than any other AIML content generator;
 - Encourages the creation of much content as possible.
 
+### Instalation
+- Download the [brain.war](https://github.com/ifreitas/brain/zipball/master)
+- Deploy it to the java web server
 
 ### Version
 The Brain is currently in a very early version, now he does not have a tenth of its functionality implemented, but will evolve as my availability for the project and as I'm getting feedbacks from their users.

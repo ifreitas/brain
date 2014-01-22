@@ -136,6 +136,7 @@ function initTree(json){
                 node.eachSubnode(function(n) { count++; });
                 //assign a node color based on how many children it has
                 node.data.$color = ['#6D89D5', '#476DD5', '#133CAC', '#2B4281', '#062270', '#090974'][count];                    
+                //node.data.$color = ['#0069D1', '#1069D1', '#2069D1', '#3069D1', '#4069D1', '#5069D1', '#6069D1', '#7069D1', '#8069D1', '#9069D1'][count];                    
             }
         },
         
