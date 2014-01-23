@@ -28,6 +28,7 @@ import com.tinkerpop.blueprints.TransactionalGraph
 import aimltoxml.aiml.Aiml
 import aimltoxml.aiml.Category
 import java.io.File
+import brain.config.Config
 
 /**
  * Equivalent to an AIML file.
@@ -50,10 +51,11 @@ case class Topic(val name:String) extends DbObject {
     
     def getTeachings()(implicit db:Graph):Set[Teaching] = Teaching.findByTopic(Topic.this)
     
-    override def toString():String  = s"Topic: $name ($id)"
+    private def nameFmt = Topic.this.name.replaceAll(" ", "_")
+    private def idFmt   = Topic.this.id.get.replace(":", "_").replace("#", "")
     
-    private def getFileName:String = Topic.this.name.replaceAll(" ", "_")+Topic.this.id.get.replace(":", "_").replace("#", "")+".aiml"
-    private def getCompleteName:String = Topic.getKnowledgeBasePath+"/"+this.getFileName
+    private def getFileName:String = s"$nameFmt$idFmt.aiml"
+    private def getCompleteName:String = Config.getKnowledgeBasePath+"/"+this.getFileName
     
     def toAiml(implicit db:Graph):Aiml = Aiml(getCompleteName, aimltoxml.aiml.Topic("*", getTeachings.flatMap(_.toAiml)))
     
@@ -74,10 +76,6 @@ case class Topic(val name:String) extends DbObject {
 
 object Topic extends PersistentName {
 	
-    def getKnowledgeBasePath = knowledgeBaseDir.getAbsolutePath()
-    
-    val knowledgeBaseDir = new File("knowledge_base")
-        
     private implicit val formats = net.liftweb.json.DefaultFormats
 
     implicit def toJson(topic: Topic): JValue = JObject(
@@ -144,8 +142,11 @@ object Topic extends PersistentName {
     }
     
     def createTheKnowledgeBase()(implicit db:Graph):Unit = {
-        println("Regerando base de conhecimento em: "+getKnowledgeBasePath)
-        knowledgeBaseDir.listFiles().foreach(_.delete)
+        println("Regerando base de conhecimento em: "+Config.getKnowledgeBasePath)
+        if(!Config.getKnowledgeBaseDir.exists()){
+            Config.getKnowledgeBaseDir.mkdirs()
+        }
+        Config.getKnowledgeBaseDir.listFiles().foreach(_.delete)
         findAll.filter(!_.getTeachings.isEmpty).foreach{_.toAiml.toXmlFile}
     }
 }

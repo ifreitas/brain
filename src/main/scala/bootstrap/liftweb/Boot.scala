@@ -71,10 +71,10 @@ class Boot {
         val orientServerAdmin = new OServerAdmin("remote:localhost")
         orientServerAdmin.connect(Config.getGraphDbUser, Config.getGraphDbPassword)
         try {
-        	println("antes de criar o schema")
+        	println("before to creating the schema")
         	println(orientServerAdmin.listDatabases().keySet())
             if(!orientServerAdmin.listDatabases().keySet().contains(Config.getGraphDbName)){
-                println("criando schema...")
+                println("creating the database...")
             	orientServerAdmin.createDatabase(Config.getGraphDbName, "graph", "plocal")
             	//createSchema
                 createRootVertexAndConf
@@ -100,7 +100,7 @@ class Boot {
             db.commit // https://github.com/orientechnologies/orientdb/wiki/Transactions#optimistic-transaction
             Configuration(knowledge.getId().toString(), 3).save
             db.commit // https://github.com/orientechnologies/orientdb/wiki/Transactions#optimistic-transaction
-            println("done")
+            println("root created.")
         }
         catch {
         	

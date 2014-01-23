@@ -1,5 +1,4 @@
 # GraphDB
-graphdb.dir=/tmp/brain/db/
 graphdb.name=brain_dev
 graphdb.type=plocal
 graphdb.user=root

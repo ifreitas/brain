@@ -17,26 +17,44 @@ package brain.config
 
 import java.util.Properties
 import net.liftweb.util.Props
+import java.io.File
 
 object Config {
     private var graphDbUser: String     = ""
     private var graphDbPassword: String = ""
     private var graphDbName: String     = ""
     private var graphDbType: String     = ""
-    private var graphDbDir: String      = ""
+    private var knowledgeBaseDir:File   = null
 
     def load(): Unit = {
-        this.graphDbDir      = Props.get("graphdb.dir", "")
+        createDirUnlessAlreadyExists(getBrainDataPath)
+        createDirUnlessAlreadyExists(getGraphDatabasePath)
+        createDirUnlessAlreadyExists(getKnowledgeBasePath)
+        
+        this.knowledgeBaseDir = new File(getKnowledgeBasePath)
+        
         this.graphDbType     = Props.get("graphdb.type", "")
         this.graphDbName     = Props.get("graphdb.name", "")
         this.graphDbUser     = Props.get("graphdb.user", "")
         this.graphDbPassword = Props.get("graphdb.password", "")
     }
+    
+    def createDirUnlessAlreadyExists(dirName:String):Unit = {
+        var dir = new File(dirName)
+        if(! dir.exists()){
+            println(s"Creating the directory '$dir'.")
+            dir.mkdir
+        }
+    }
 
-    def getGraphDbUri      = { graphDbType + ":" + System.getProperty("ORIENTDB_HOME") +"/databases/"+ graphDbName }
+    def getGraphDbUri      = { s"$graphDbType:$getGraphDatabasePath/$graphDbName" }
     def getGraphDbUser     = { graphDbUser }
     def getGraphDbPassword = { graphDbPassword }
     def getGraphDbType     = { graphDbType }
-    def getGraphDbDir      = { graphDbDir }
     def getGraphDbName     = { graphDbName }
+    
+    def getBrainDataPath     = System.getProperty("user.home")+"/brain"
+    def getGraphDatabasePath = getBrainDataPath+"/databases"
+    def getKnowledgeBasePath = getBrainDataPath+"/knowledge_base"
+    def getKnowledgeBaseDir  = knowledgeBaseDir
 }

@@ -22,8 +22,9 @@ import brain.models.Topic
 import brain.models.Teaching
 import net.liftweb.http.JsonResponse
 import net.liftweb.http.rest.RestHelper
-import net.liftweb.json.JsonDSL._ 
+import net.liftweb.json.JsonDSL._
 import net.liftweb.json.JsonAST._
+import brain.config.Config
 
 object BrainRest extends RestHelper {
     
@@ -50,7 +51,7 @@ object BrainRest extends RestHelper {
         	implicit val db = GraphDb.get
 			try{
 				Topic.createTheKnowledgeBase
-				JObject(JField("success", JString("true")) :: JField("path", JString(Topic.getKnowledgeBasePath)) :: Nil)
+				JObject(JField("success", JString("true")) :: JField("path", JString(Config.getKnowledgeBasePath)) :: Nil)
 			}
         	catch{
         	    case t: Throwable => t.printStackTrace; JsonResponse((("success"->false) ~ ("msg"->t.getMessage)), 200)

@@ -33,7 +33,6 @@ object GraphDb {
         }
     }
 	def getNoTx: OrientGraphNoTx = {
-	    println("(ntx) trying to connect to: " + Config.getGraphDbUri)
 		if (ODatabaseRecordThreadLocal.INSTANCE.isDefined())
 			new OrientGraphNoTx(new ODatabaseDocumentTx(ODatabaseRecordThreadLocal.INSTANCE.get.asInstanceOf[ODatabaseRecordTx]))
 		else {

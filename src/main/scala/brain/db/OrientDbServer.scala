@@ -24,7 +24,7 @@ object OrientDbServer {
 	def start:Unit = {
 	    try{
 	        if(System.getProperty("ORIENTDB_HOME")==null){
-	        	System.setProperty("ORIENTDB_HOME", System.getProperty("user.dir"))
+	        	System.setProperty("ORIENTDB_HOME", Config.getBrainDataPath)
 	        }
 	        println("Trying to start the database. ORIENTDB_HOME: "+System.getProperty("ORIENTDB_HOME"))
 	        serverInstance.activate()
