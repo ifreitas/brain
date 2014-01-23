@@ -18,19 +18,12 @@ package brain.rest
 import com.ansvia.graph.BlueprintsWrapper._
 import brain.db.GraphDb
 import brain.models.Knowledge
-import brain.models.Knowledge.knowledgeSetToJValue
-import brain.models.Knowledge.toJson
-import net.liftweb.http.rest.RestHelper
-import net.liftweb.json.JValue
 import brain.models.Topic
 import brain.models.Teaching
-import net.liftweb.json.JField
 import net.liftweb.http.JsonResponse
-import net.liftweb.json.JField
-import net.liftweb.json.JString
-import net.liftweb.json.JObject
-import net.liftweb.json.JValue
-import net.liftweb.json.JObject
+import net.liftweb.http.rest.RestHelper
+import net.liftweb.json.JsonDSL._ 
+import net.liftweb.json.JsonAST._
 
 object BrainRest extends RestHelper {
     
@@ -45,7 +38,7 @@ object BrainRest extends RestHelper {
                 Knowledge.findAll : JValue
             }
             catch{
-        	    case t: Throwable => t.printStackTrace; throw t
+        	    case t: Throwable => t.printStackTrace; JsonResponse((("success"->false) ~ ("msg"->t.getMessage)), 200)
         	}
             finally{
                 db.shutdown()
@@ -60,7 +53,7 @@ object BrainRest extends RestHelper {
 				JObject(JField("success", JString("true")) :: JField("path", JString(Topic.getKnowledgeBasePath)) :: Nil)
 			}
         	catch{
-        		case t: Throwable => t.printStackTrace; JObject(JField("failed", JString("true")) :: JField("msg", JString(t.getMessage)) :: Nil)
+        	    case t: Throwable => t.printStackTrace; JsonResponse((("success"->false) ~ ("msg"->t.getMessage)), 200)
         	}
         	finally{
         		db.shutdown()
@@ -76,7 +69,7 @@ object BrainRest extends RestHelper {
         		Knowledge.findById(id) : JValue
 			}
         	catch{
-        	    case t: Throwable => t.printStackTrace; throw t
+        	    case t: Throwable => t.printStackTrace; JsonResponse((("success"->false) ~ ("msg"->t.getMessage)), 200)
         	}
         	finally{
         		db.shutdown()
@@ -93,7 +86,7 @@ object BrainRest extends RestHelper {
         		knowledge : JValue
         	}
         	catch{
-        	    case t: Throwable => t.printStackTrace; throw t
+        	    case t: Throwable => t.printStackTrace; JsonResponse((("success"->false) ~ ("msg"->t.getMessage)), 200)
         	}
         	finally{
         		db.shutdown()
@@ -110,7 +103,7 @@ object BrainRest extends RestHelper {
         		knowledge : JValue
 			}
         	catch{
-        	    case t: Throwable => t.printStackTrace; throw t
+        	    case t: Throwable => t.printStackTrace; JsonResponse((("success"->false) ~ ("msg"->t.getMessage)), 200)
         	}
         	finally{
         		db.shutdown()
@@ -127,7 +120,7 @@ object BrainRest extends RestHelper {
         		JsonResponse(knowledge)
         	}
         	catch{
-        		case t: Throwable => t.printStackTrace; throw t
+        		case t: Throwable => t.printStackTrace; JsonResponse((("success"->false) ~ ("msg"->t.getMessage)), 200)
         	}
         	finally{
         		db.shutdown()
@@ -143,7 +136,7 @@ object BrainRest extends RestHelper {
                 Topic.findByKnowledge(Knowledge.findById(knowledgeId)) : JValue
             }
             catch{
-        	    case t: Throwable => t.printStackTrace; throw t
+        	    case t: Throwable => t.printStackTrace; JsonResponse((("success"->false) ~ ("msg"->t.getMessage)), 200)
         	}
             finally{
                 db.shutdown()
@@ -161,7 +154,7 @@ object BrainRest extends RestHelper {
         		topic : JValue
         	}
         	catch{
-        	    case t: Throwable => t.printStackTrace; throw t
+        	    case t: Throwable => t.printStackTrace; JsonResponse((("success"->false) ~ ("msg"->t.getMessage)), 200)
         	}
         	finally{
         		db.shutdown()
@@ -179,7 +172,7 @@ object BrainRest extends RestHelper {
         		topic : JValue
 			}
         	catch{
-        	    case t: Throwable => t.printStackTrace; throw t
+        	    case t: Throwable => t.printStackTrace; JsonResponse((("success"->false) ~ ("msg"->t.getMessage)), 200)
         	}
         	finally{
         		db.shutdown()
@@ -197,7 +190,7 @@ object BrainRest extends RestHelper {
         		JsonResponse(topic)
         	}
         	catch{
-        		case t: Throwable => t.printStackTrace; throw t
+        		case t: Throwable => t.printStackTrace; JsonResponse((("success"->false) ~ ("msg"->t.getMessage)), 200)
         	}
         	finally{
         		db.shutdown()
@@ -213,7 +206,7 @@ object BrainRest extends RestHelper {
 				Teaching.findByTopic(Topic.findById(topicId)) : JValue
 			}
         	catch{
-        		case t: Throwable => t.printStackTrace; throw t
+        		case t: Throwable => t.printStackTrace; JsonResponse((("success"->false) ~ ("msg"->t.getMessage)), 200)
         	}
         	finally{
         		db.shutdown()
@@ -234,7 +227,7 @@ object BrainRest extends RestHelper {
 				teaching : JValue
 			}
         	catch{
-        		case t: Throwable => t.printStackTrace; throw t
+        		case t: Throwable => t.printStackTrace; JsonResponse((("success"->false) ~ ("msg"->t.getMessage)), 200)
         	}
         	finally{
         		db.shutdown()
@@ -252,7 +245,7 @@ object BrainRest extends RestHelper {
 				teaching : JValue
 			}
         	catch{
-        		case t: Throwable => t.printStackTrace; throw t
+        		case t: Throwable => t.printStackTrace; JsonResponse((("success"->false) ~ ("msg"->t.getMessage)), 200)
         	}
         	finally{
         		db.shutdown()
@@ -270,7 +263,7 @@ object BrainRest extends RestHelper {
 				JsonResponse(teaching)
 			}
         	catch{
-        	case t: Throwable => t.printStackTrace; throw t
+        		case t: Throwable => t.printStackTrace; JsonResponse((("success"->false) ~ ("msg"->t.getMessage)), 200)
         	}
         	finally{
         		db.shutdown()

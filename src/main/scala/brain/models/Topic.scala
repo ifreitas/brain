@@ -56,6 +56,20 @@ case class Topic(val name:String) extends DbObject {
     private def getCompleteName:String = Topic.getKnowledgeBasePath+"/"+this.getFileName
     
     def toAiml(implicit db:Graph):Aiml = Aiml(getCompleteName, aimltoxml.aiml.Topic("*", getTeachings.flatMap(_.toAiml)))
+    
+    def canEqual(other: Any) = other.isInstanceOf[brain.models.Topic]
+  
+    override def equals(other: Any) = {
+    	other match {
+    		case that: brain.models.Topic => Topic.super.equals(that) && that.canEqual(Topic.this) && id == that.id && name == that.name
+    		case _ => false
+    	}
+    }
+  
+    override def hashCode() = {
+    	val prime = 41
+    	prime * (prime * Topic.super.hashCode() + id.hashCode) + name.hashCode
+    }
 }
 
 object Topic extends PersistentName {

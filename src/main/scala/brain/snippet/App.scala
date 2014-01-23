@@ -81,7 +81,8 @@ object App {
         val rootId:String = conf.getProperty[String]("rootId")
         val depth:Integer = conf.getProperty[Int]("depth")
         try{
-            val sqlString = raw"select from (traverse out() from  $rootId while $depth <= "+ conf.getProperty("defaultDepthTraverse") +")";
+            //val sqlString = raw"select from (traverse out() from  $rootId while $depth <= "+ conf.getProperty("defaultDepthTraverse") +")";
+        	val sqlString = raw"select from (traverse out() from  $rootId)";
             val vertices:java.lang.Iterable[Vertex] = db.command(new OSQLSynchQuery[Vertex](sqlString)).execute();
             toJsonString(new StringBuilder, vertices.head)
         }

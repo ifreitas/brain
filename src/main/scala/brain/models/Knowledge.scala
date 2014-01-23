@@ -37,12 +37,12 @@ import com.ansvia.graph.annotation.Persistent
 import net.liftweb.http.Req
 import brain.db.GraphDb
 
-case class Knowledge(val name: String) extends DbObject {
+case class Knowledge(val name: String) extends DbObject with Equals {
 	require(!name.isEmpty(), "Name is required.")
 	
 	var id:Option[String] = None
 	var parentId:Option[String] = None
-	    
+	
 	override def toString():String  = s"Knowledge: $name ($id)"
 	
 	def save()(implicit db:TransactionalGraph) = transact{
@@ -56,34 +56,60 @@ case class Knowledge(val name: String) extends DbObject {
 	def destroy()(implicit db:TransactionalGraph):Unit = transact{
 	    if(this.isRoot) throw new IllegalArgumentException("Unable to delete the root knowledge.")
 	    getTopics foreach (_ destroy)
-        getNestedKnowledges foreach (_ destroy)
+        getChildren foreach (_ destroy)
+	    this.reload // Previne "OConcurrentModificationException: Cannot DELETE the record #9:18 because the version is not the latest. Probably you are deleting an old record or it has been modified by another user (db=v23 your=v21)"
         db removeVertex getVertex
     }
 	
 	def getTopics()(implicit db:Graph):Set[Topic] = Topic.findByKnowledge(this)
-	def getNestedKnowledges(implicit db:Graph):Set[Knowledge] = Knowledge.getNestedKnowledges(this)
+	def getChildren(implicit db:Graph):Set[Knowledge] = Knowledge.getChildren(this)
+	
+	def canEqual(other: Any) = other.isInstanceOf[brain.models.Knowledge]
+  
+	override def equals(other: Any) = {
+		other match {
+			case that: brain.models.Knowledge => Knowledge.super.equals(that) && that.canEqual(Knowledge.this) && id == that.id && name == that.name
+			case _ => false
+		}
+	}
+  
+	override def hashCode() = {
+		val prime = 41
+		prime * (prime * Knowledge.super.hashCode() + id.hashCode) + name.hashCode
+	}
 }
 
 object Knowledge extends PersistentName {
     private implicit val formats = net.liftweb.json.DefaultFormats
 
-    implicit def toJson(knowledge: Knowledge): JValue = JObject(
-		JField("id", JString(knowledge.id.get.replace("#", ""))) 	 ::
-        JField("name", JString(knowledge.name))		 ::
-        JField("data", JObject(List.empty[JField]))  :: 
-    	JField("adjacencies", JArray(List.empty[JValue])):: 
-        Nil
-    )
+    //implicit def toJson(knowledge: Knowledge): JValue = JObject(
+	//	JField("id", JString(knowledge.id.get.replace("#", ""))) 	 ::
+    //  JField("name", JString(knowledge.name))		 ::
+    //  JField("data", JObject(List.empty[JField]))  :: 
+    //	JField("adjacencies", JArray(List.empty[JValue])):: 
+    //  Nil
+    //)
+    implicit def toJson(knowledge: Knowledge): JValue = {
+        import net.liftweb.json.JsonDSL._ 
+        import net.liftweb.json.JsonAST._
+        
+        ("id" -> knowledge.id.get.replace("#", "")) ~
+        ("name" -> knowledge.name) ~
+        ("data" -> JObject(List.empty[JField])) ~
+        ("adjacencies" -> JArray(List.empty[JValue]))
+        
+    }
     
     implicit def knowledgeSetToJValue(knowledges: Set[Knowledge]): JValue = JArray(knowledges.map(toJson).toList)
     
-    def findAll()(implicit db:Graph):Set[Knowledge] = query().vertices().toSet[Vertex].map(v=>Knowledge(v))
+    def findAll()(implicit db:Graph):Set[Knowledge] = query().vertices().map(Knowledge(_)).toSet
+    def findAll2()(implicit db:Graph):List[Knowledge] = query().vertices().map(Knowledge(_)).toList
     
     def findById(id:String)(implicit db:Graph):Knowledge = Knowledge(db.getVertex(id))
     
     def root()(implicit db:Graph):Knowledge=Knowledge(Knowledge.query.vertices.head)
     
-    def getNestedKnowledges(knowledge:Knowledge)(implicit db:Graph):Set[Knowledge] = {
+    def getChildren(knowledge:Knowledge)(implicit db:Graph):Set[Knowledge] = {
         knowledge.getVertex.pipe.out("include").iterator.toSet[Vertex].map(v=>Knowledge(v))
     }
     

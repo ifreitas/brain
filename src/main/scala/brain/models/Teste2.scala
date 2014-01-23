@@ -33,21 +33,41 @@ import java.io.File
 object Teste2 {
 
     def main(args: Array[String]): Unit = {
-//        implicit val db:Graph = GraphDb.get
-        try{
-            OrientDbServer.start
-            
-            implicit val db = new OrientGraph("plocal:/Users/israelfreitas/Documents/workspace/brain/databases/brain_dev")
-            
-            println(Knowledge.findAll.size)
-            
-            db.shutdown()
-            
-            OrientDbServer.stop
-        }
-        finally{
-//            db.shutdown()
-        }
+        OrientDbServer.start
+        
+        implicit val db = new OrientGraph("plocal:/Users/israelfreitas/Documents/workspace/brain/databases/brain_dev")
+        
+//        val knowledges = Knowledge.query.vertices //Knowledge.findAll
+//        println(knowledges.size)
+//        println(knowledges.head.getProperty("name"))
+        
+        val knowledges = Knowledge.findAll
+        println(knowledges.size)
+        println(knowledges.head.name)
+        println(knowledges.head.getChildren.size)
+        println((knowledges.head :: knowledges.flatMap(_.getChildren) :: Nil).size)
+        
+        db.shutdown()
+        
+        OrientDbServer.stop        
     }
+    
+//	def main(args: Array[String]): Unit = {
+////        implicit val db:Graph = GraphDb.get
+//        try{
+//            OrientDbServer.start
+//            
+//            implicit val db = new OrientGraph("plocal:/Users/israelfreitas/Documents/workspace/brain/databases/brain_dev")
+//            
+//            println(Knowledge.findAll.size)
+//            
+//            db.shutdown()
+//            
+//            OrientDbServer.stop
+//        }
+//        finally{
+////            db.shutdown()
+//        }
+//    }
 
 }

@@ -433,8 +433,17 @@ function KnowledgeExtWrapper(){
 			Ext.MessageBox.confirm('Confirm to delete the knowledge?', 'If yes, all its topicss and nested knowledges will be removed too. Are you sure?', function(answer){
 				if(answer == 'yes'){
 					var record = store.findRecord('id',ObjectManager.lastClicked.id)
-					store.remove(record)
-					store.sync();
+					record.destroy({
+						callback: function(rec, operation){
+							if(operation.success){
+								store.remove(record);
+								store.commitChanges();
+							}
+							else{
+								Log.error("Unable to delete the knowledege '" + ObjectManager.lastClicked.name + "'. " + rec.proxy.getReader().jsonData.msg)
+							}
+						}
+					});
 				}
 			});
 		};
@@ -598,8 +607,17 @@ function TopicExtWrapper(){
 		if(selectedItem == null) return false;
 		Ext.MessageBox.confirm('Confirm to delete the Topic?', 'If yes, all its teachings will be removed too. Are you sure?', function(answer){
 			if(answer == 'yes'){
-				store.remove(selectedItem);
-				store.sync();
+				selectedItem.destroy({
+					callback: function(rec, operation){
+						if(operation.success){
+							store.remove(selectedItem);
+							store.commitChanges();
+						}
+						else{
+							Log.error("Unable to delete the Topic '" + selectedItem.data.name + "'. " + rec.proxy.getReader().jsonData.msg)
+						}
+					}
+				});
 			}
 		});
 	}
@@ -802,8 +820,17 @@ function TeachingExtWrapper(){
 		if(selectedItem == null) return false;
 		Ext.MessageBox.confirm('Confirm to delete the theaching?', 'Are you sure?', function(answer){
 			if(answer == 'yes'){
-				store.remove(selectedItem);
-				store.sync();
+				selectedItem.destroy({
+					callback: function(rec, operation){
+						if(operation.success){
+							store.remove(selectedItem);
+							store.commitChanges();
+						}
+						else{
+							Log.error("Unable to delete the teaching. " + rec.proxy.getReader().jsonData.msg)
+						}
+					}
+				});
 			}
 		});
 	}
