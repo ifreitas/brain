@@ -33,6 +33,7 @@ import aimltoxml.aiml.Category
 import aimltoxml.aiml.Text
 import aimltoxml.aiml.Srai
 import aimltoxml.aiml.TemplateElement
+import aimltoxml.aiml.Random
 
 class TeachingToCategoryAdapterTest extends FunSpec with Matchers with BeforeAndAfter {
 
@@ -139,12 +140,12 @@ class TeachingToCategoryAdapterTest extends FunSpec with Matchers with BeforeAnd
             adapter = new TeachingToCategoryAdapter(validTeaching)
         }
         it("when the pattern is equals to the default pattern then returns a category with the fully filled template") {
-            val expectedCategory = Category("hi", Set(Text("hello there")))
-            adapter.createCategory("hi", "hi", null, Set("hello there")) should be(expectedCategory)
+            val expectedCategory = Category("hi", Set(Random("hello there")))
+            adapter.createCategory("hi", "hi", "*", Set("hello there")) should be(expectedCategory)
         }
-        it("when the pattern is not equals to the default pattern then returns a category with the template which contains only a srai pointing to the default pattern") {
+        it("when the pattern is not equals to the default pattern then returns a category which template contains only a srai pointing to the default pattern") {
             val expectedCategory = Category("hello", Set(Srai("hi")))
-            adapter.createCategory("hello", "hi", null, Set("hello there")) should be(expectedCategory)
+            adapter.createCategory("hello", "hi", "*", Set("hello there")) should be(expectedCategory)
         }
     }
 
@@ -156,7 +157,7 @@ class TeachingToCategoryAdapterTest extends FunSpec with Matchers with BeforeAnd
             val categories = adapter.toCategory
             categories.size should be(3)
             categories.map(_.pattern) should be(Set(Text("hi"), Text("hello"), Text("hello there")))
-            categories.toList.map(_.templateElements.head) should be(List(Text("hi"), Srai("hi"), Srai("hi")))
+            categories.toList.map(_.templateElements.head) should be(List(Random("hi"), Srai("hi"), Srai("hi")))
         }
     }
 

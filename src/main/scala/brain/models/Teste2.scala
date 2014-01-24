@@ -24,33 +24,54 @@ import com.tinkerpop.blueprints.impls.orient.OrientGraph
 import com.orientechnologies.orient.core.db.graph.OGraphDatabasePool
 import scala.collection.JavaConversions.iterableAsScalaIterable
 import com.tinkerpop.blueprints.Vertex
-import scala.xml.Text
 import brain.db.OrientDbServer
 import com.orientechnologies.orient.client.remote.OServerAdmin
 import brain.config.Config
 import java.io.File
+import aimltoxml.aiml.TemplateElement
+import aimltoxml.aiml.Text
+import aimltoxml.aiml.Get
 
 object Teste2 {
 
     def main(args: Array[String]): Unit = {
-        OrientDbServer.start
+        /*
+         * val regex = """\$\{([a-z0-9]*)\}""".r
+         * val matches = regex.findAllIn(phrase)
+         * val split   = phrase.split(regex.toString)
+         * val resultado = new scala.collection.mutable.ListBuffer[String]
+         * for(i <- 0 to (split.size-1) ) resultado += s"${split(i)}${variaveis(i)}"
+         */
         
-        implicit val db = new OrientGraph("plocal:/Users/israelfreitas/Documents/workspace/brain/databases/brain_dev")
+        var list = List(1,2,3)
         
-//        val knowledges = Knowledge.query.vertices //Knowledge.findAll
-//        println(knowledges.size)
-//        println(knowledges.head.getProperty("name"))
-        
-        val knowledges = Knowledge.findAll
-        println(knowledges.size)
-        println(knowledges.head.name)
-        println(knowledges.head.getChildren.size)
-        println((knowledges.head :: knowledges.flatMap(_.getChildren) :: Nil).size)
-        
-        db.shutdown()
-        
-        OrientDbServer.stop        
+        val x = "9+10+10+1"
+            // hi ${ name }
+    		// hi ${name}
+    		// hi $name
+        //val phrase = "olá, ${nome}, ${idade}" //  \$\{([a-z]*)\}
+		//val phrase = "olá, ${nome} ${idade}"  //  \$\{([a-z]*)\}
+		//val phrase = "olá, ${nome}${idade}"   //  \$\{([a-z]*)\}
+        "olá, $nome, $idade" //  \$\{([a-z]*)\}
+		"olá, $nome $idade" //  \$\{([a-z]*)\}
+		"olá, $nome$idade" //  \$\{([a-z]*)\}
+        Set(Text("olá, "), new Get("nome"))
     }
+//    def main(args: Array[String]): Unit = {
+//    		OrientDbServer.start
+//    		
+//    		implicit val db = new OrientGraph("plocal:/Users/israelfreitas/Documents/workspace/brain/databases/brain_dev")
+//    		
+//    		val knowledges = Knowledge.findAll
+//    		println(knowledges.size)
+//    		println(knowledges.head.name)
+//    		println(knowledges.head.getChildren.size)
+//    		println((knowledges.head :: knowledges.flatMap(_.getChildren) :: Nil).size)
+//    		
+//    		db.shutdown()
+//    		
+//    		OrientDbServer.stop        
+//    }
     
 //	def main(args: Array[String]): Unit = {
 ////        implicit val db:Graph = GraphDb.get

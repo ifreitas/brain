@@ -31,6 +31,8 @@ import aimltoxml.aiml.Text
 import aimltoxml.aiml.Category
 import aimltoxml.aiml.Srai
 import aimltoxml.aiml.Random
+import aimltoxml.aiml.Get
+import aimltoxml.aiml.AimlSet
 
 case class Teaching(whenTheUserSays:String, say:String) extends DbObject{
     require(!whenTheUserSays.isEmpty, "Field 'when the user says', can not be empty.")
@@ -158,9 +160,37 @@ class TeachingToCategoryAdapter(teaching: Teaching) {
 	
     require(teaching != null)
     
-    val whatWasSaid: Set[String]= teaching.whenTheUserSays.split("\n").map(_.trim).toSet[String].filter(!_.isEmpty)
-    val whatToSay: Set[String] 	= teaching.say.split("\n").map(_.trim).toSet[String].filter(!_.trim().isEmpty)
-    val respondingTo:String 	= if(teaching.respondingTo != null) teaching.respondingTo else "*"
+	/* Para processar o say:
+	 *  var frase = "${var1} Ola, ${var2}, ${var3}"
+	 *  val regex = """\$\{([a-z0-9]*)\}""".r
+	 *  val matches = regex.findAllIn(frase)
+	 *  val split   = frase.split(regex.toString)
+	 *  val resultado = new scala.collection.mutable.ListBuffer[String]
+	 *  split.foreach{f=> resultado += s"${f}${matches.next}" }
+	 *  resultado.mkString("")
+     */
+    
+    val respondingTo  : String 	    = if(teaching.respondingTo != null) teaching.respondingTo else "*"
+    val whatWasSaid   : Set[String] = nonEmptyLinesToSet(teaching.whenTheUserSays)
+    val whatToMemorize: Set[String] = nonEmptyLinesToSet(teaching.memorize)
+    val whatToSay     : Set[String] = nonEmptyLinesToSet(teaching.say)
+    
+    def toCategory: Set[Category] = {
+        val defaultPattern = selectDefaultPattern(whatWasSaid)
+        //whatWasSaid.map(createCategory(_, defaultPattern, respondingTo, whatToMemorize, whatToSay))
+        whatWasSaid.map(createCategory(_, defaultPattern, respondingTo, whatToSay))
+    }
+    
+    private def nonEmptyLinesToSet(aText:String):Set[String] = aText.split("\n").map(_.trim).toSet[String].filter(!_.trim.isEmpty)
+        
+    def extractAimlSets(memorize:String):Set[AimlSet] = {
+        val keyValues = nonEmptyLinesToSet(memorize)
+        if(keyValues.isEmpty){ return Set.empty[AimlSet] }
+        keyValues.map{ keyValue =>
+            var kv = keyValue.split("=")
+            new AimlSet(kv(0).trim,Text(kv(1).trim))
+        }
+    }
 
     def selectDefaultPattern(setOfWhatWasSaid: Set[String]) = {
         var defaultPattern         = ""
@@ -192,16 +222,12 @@ class TeachingToCategoryAdapter(teaching: Teaching) {
     // it should be a calculateThePatternComplexity's local function, but is not for tests purposes.
     def countSpecialChar(c: String, p: String) = { p.split("\\" + c + "+", -1).size - 1 }
 
-    def createCategory(whatWasSaid: String, defaultPattern: String, respondingTo: String, say: Set[String]):Category = {
-        if (whatWasSaid == defaultPattern) Category(whatWasSaid, respondingTo, createTemplateElements(say))
+    def createCategory(whatWasSaid: String, defaultPattern: String, respondingTo: String, whatToSay: Set[String]):Category = {
+        if (whatWasSaid == defaultPattern) Category(whatWasSaid, respondingTo, createTemplateElements(whatToSay))
         else Category(whatWasSaid, respondingTo, Set[TemplateElement](Srai(defaultPattern)))
     }
 
     def createTemplateElements(say: Set[String]): Set[TemplateElement] = Set(new Random(say.map({Text(_)})))
 
-    def toCategory: Set[Category] = {
-        val defaultPattern = selectDefaultPattern(whatWasSaid)
-        whatWasSaid.map(createCategory(_, defaultPattern, respondingTo, whatToSay))
-    }
 }
 
