@@ -57,7 +57,7 @@ function initTree(json){
             width: 80,
             //color: '#6D89D5',
             type: 'rectangle',
-            align: "right",  
+            align: "center",  
             overridable: true,
             CanvasStyles:{
             	shadowColor: 'gray',
@@ -121,7 +121,8 @@ function initTree(json){
             		ObjectManager.setLastClicked(node);
             		st.onClick(node.id);
             	}
-            }
+            },
+        
         },
         
         onBeforePlotNode: function(node){
@@ -400,26 +401,37 @@ function KnowledgeExtWrapper(){
 	this.create = function(){
 		var record = Ext.create('Brain.model.Knowledge', {name:'', parentId:ObjectManager.getLastClicked().id})
 		var form = prepareForm(record, {
-			success: function(rec, op){
-				store.add(rec.data);
-				st.add({id:rec.data.id, name:rec.data.name, data:{}, children:[]});
+				success: function(rec, op){
+					store.add(rec.data);
+					st.add({id:rec.data.id, name:rec.data.name, data:{}, children:[]});
+				},
+				failure: function(rec, op){
+					store.rejectChanges();
+					Log.error(rec.proxy.getReader().jsonData.msg); 
+				}
 			},
-			failure: function(rec, op) { Log.error(op.getError()); }
-		});
+			false
+		);
 		var panel = basicWindow('Create a Knowledge', [ form ])
 		panel.show();
 		return panel;
-	}
+	};
 	
 	this.update  = function(){
 		var record = store.findRecord('id',ObjectManager.lastClicked.id)
 		var form = prepareForm(record, {
-			success: function(rec, op) {
-				record.commit();
-				st.rename(ObjectManager.lastClicked, rec.data.name); 
+				success: function(rec, op) {
+					record.commit();
+					st.rename(ObjectManager.lastClicked, rec.data.name); 
+				},
+				failure: function(rec, op){ 
+					store.rejectChanges();
+					Log.error(rec.proxy.getReader().jsonData.msg);
+				}
 			},
-			failure: function(rec, op) { Log.error(op.getError()); }
-		});
+			true
+		);
+		
 		var panel = basicWindow('Update the Knowledge', [ form ])
 		panel.show();
 		return panel;
@@ -440,6 +452,7 @@ function KnowledgeExtWrapper(){
 								store.commitChanges();
 							}
 							else{
+								store.rejectChanges();
 								Log.error("Unable to delete the knowledege '" + ObjectManager.lastClicked.name + "'. " + rec.proxy.getReader().jsonData.msg)
 							}
 						}
@@ -449,7 +462,8 @@ function KnowledgeExtWrapper(){
 		};
 	}
 	
-	function prepareForm(record, callbacks){
+	
+	function prepareForm(record, callbacks, disableSaveAndNew){
 		function saveAndNew(){
 			save();
 			knowledgeExtWrapper.create();
@@ -480,26 +494,31 @@ function KnowledgeExtWrapper(){
 			       }
 		       ],
 		       bbar: [
-		              {
-		            	  xtype: 'button', text: 'Save',
-		            	  iconCls:'accept',
-		            	  formBind : true,
-		            	  handler: save,
-		            	  scope: this
-		              }, '-',
-//		              {
-//					   xtype: 'button', text: 'Save and new', 
-//					   formBind : true,
-//					   handler: saveAndNew,
-//					   scope: this
-//					}, '-',
 					{
-					   xtype: 'button', text: 'Cancel',
-					   iconCls:'cancel',
-					   handler: function() { theForm.up().close(); },
-					   scope: this
+						xtype    : 'button', 
+						text     : 'Save and new',
+						disabled : disableSaveAndNew,
+						iconCls  :'add',
+						formBind : !disableSaveAndNew,
+						handler  : saveAndNew,
+						scope    : this
+					},
+					{
+						xtype    : 'button', 
+						text     : 'Save',
+						iconCls  :'accept',
+						formBind : true,
+						handler  : save,
+						scope    : this
+					},
+					{
+						xtype   : 'button', 
+						text    : 'Cancel',
+						iconCls :'cancel',
+						handler : function() { theForm.up().close(); },
+						scope   : this
 					}
-				]
+		       ]
 		});
 		theForm.getForm().loadRecord(record);
 		return theForm;
@@ -563,9 +582,10 @@ var knowledgeExtWrapper = new KnowledgeExtWrapper();
 
 
 function TopicExtWrapper(){
+	
 	var store = null;
 	defineModel();
-	initStore();
+	defineStore();
 	this.grid = initGrid(); //temp implementation
 	this.teachingExtWrapper = new TeachingExtWrapper();
 	var me = this
@@ -573,30 +593,38 @@ function TopicExtWrapper(){
 	function create(){
 		var record = Ext.create('Brain.model.Topic', {name:'', knowledgeId:ObjectManager.getLastClicked().id})
 		var form = prepareForm(record, {
-			success: function(rec, op){
-				store.add(rec.data)
-				Log.info("Topic named '" + rec.data.name + "' created successfully.");
+				success: function(rec, op){
+					store.add(rec.data)
+					Log.info("Topic named '" + rec.data.name + "' created successfully.");
+				},
+				failure: function(rec, op) { 
+					store.rejectChanges();
+					Log.error(rec.proxy.getReader().jsonData.msg);
+				}
 			},
-			failure: function(rec, op) { Log.error(op.getError()); }
-		});
+			false
+		);
 		var p = basicWindow('Create a Topic', [ form ]);
 		p.show();
 		return p;
 	}
 	
 	function update(){
-		
 		if(me.grid.getSelectionModel().getLastSelected() == null) return false;
-		
 		var selectedItem = me.grid.getSelectionModel().getLastSelected().data
 		var record = store.findRecord('id', selectedItem.id)
 		var form = prepareForm(record, {
-			success: function(rec, op) {
-				record.commit();
-				Log.info("Topic renamed to '" + rec.data.name + "' successfully."); 
+				success: function(rec, op) {
+					record.commit();
+					Log.info("Topic renamed to '" + rec.data.name + "' successfully."); 
+				},
+				failure: function(rec, op){ 
+					store.rejectChanges();
+					Log.error(rec.proxy.getReader().jsonData.msg);
+				}
 			},
-			failure: function(rec, op) { Log.error(op.getError()); }
-		});
+			true
+		);
 		var panel = basicWindow('Update the Topic', [ form ])
 		panel.show();
 		return panel;
@@ -607,22 +635,38 @@ function TopicExtWrapper(){
 		if(selectedItem == null) return false;
 		Ext.MessageBox.confirm('Confirm to delete the Topic?', 'If yes, all its teachings will be removed too. Are you sure?', function(answer){
 			if(answer == 'yes'){
-				selectedItem.destroy({
-					callback: function(rec, operation){
-						if(operation.success){
-							store.remove(selectedItem);
-							store.commitChanges();
-						}
-						else{
-							Log.error("Unable to delete the Topic '" + selectedItem.data.name + "'. " + rec.proxy.getReader().jsonData.msg)
-						}
+				store.remove(selectedItem);
+				store.sync({
+					success: function(batch, options){
+						store.commitChanges();
+						me.teachingExtWrapper.setTopic(null)
+						Log.info("Topic '"+selectedItem.data.name+"' deleted successfully.");
+					},
+					failure: function(batch, options){
+						store.rejectChanges();
+						Log.error("Unable to delete the Topic '" + selectedItem.data.name + "'. " + batch.proxy.getReader().jsonData.msg)
 					}
 				});
 			}
 		});
 	}
 	
-	function prepareForm(record, callbacks){
+	function prepareForm(record, callbacks, disableSaveAndNew){
+		function saveAndNew(){
+			save();
+			create();
+		}
+		
+		function save(){
+			theForm.getForm().getRecord().save({
+				success: function(rec, op) { 
+					theForm.up().close(); 
+					if (callbacks != null) callbacks.success(rec, op); 
+				},
+				failure: function(rec, op) { if (callbacks != null) callbacks.failure(rec, op); }
+			});
+		}
+		
 		var theForm = Ext.create('Ext.form.Panel', {
 			border:false, layout:'form', bodyPadding: 5,
 			model: 'Brain.model.Topic',
@@ -638,17 +682,20 @@ function TopicExtWrapper(){
 			       }
 		       ],
 		       bbar: [
-		              {
+					{
+						xtype    : 'button', 
+						text     : 'Save and new',
+						disabled : disableSaveAndNew,
+						iconCls  :'add',
+						formBind : !disableSaveAndNew,
+						handler  : saveAndNew,
+						scope    : this
+					},
+		            {
 					   xtype: 'button', text: 'Save',
 					   iconCls:'accept',
 					   formBind : true,
-					   handler: function(){theForm.getForm().getRecord().save({
-						    success: function(rec, op) { 
-						    	theForm.up().close(); 
-						    	if (callbacks != null) callbacks.success(rec, op); 
-						    },
-						    failure: function(rec, op) { if (callbacks != null) callbacks.failure(rec, op); }
-						});},
+					   handler: save,
 					   scope: this
 					}, '-',
 					{
@@ -665,12 +712,13 @@ function TopicExtWrapper(){
 	
 	function initGrid(){
 		return Ext.create('Ext.grid.Panel', {
-		   region: 'north',
-		   margins: '5 5 5 5',
-		   height: 205,
-		   title: 'Topics of ' + ObjectManager.getLastClicked().name,
-		   store: store,
-		   tbar: [
+		   region  : 'north',
+		   margins : '5 5 5 5',
+		   height  : 205,
+		   title   : 'Topics of ' + ObjectManager.getLastClicked().name,
+		   store   : store,
+		   columns : [{ text: 'Name',  dataIndex: 'name', width:'100%'}],
+		   tbar    : [
 				{
 					  text: 'Create',
 					  iconCls:'application_add',
@@ -687,7 +735,6 @@ function TopicExtWrapper(){
 					  handler:function(){ destroy(); }
 				}
 			],
-		    columns: [{ text: 'Name',  dataIndex: 'name', width:'100%'}],
 		    listeners:{
 		    	select:function( theGrid, record, index, eOpts ){
 		    		me.teachingExtWrapper.setTopic(record.data)
@@ -722,29 +769,30 @@ function TopicExtWrapper(){
 	
 	function defineModel(){
 		Ext.define( 'Brain.model.Topic', {
-		    extend: 'Ext.data.Model',
-		    fields:['id', 'name', 'knowledgeId'],
-		    proxy: {
+		    extend : 'Ext.data.Model',
+		    fields : ['id', 'name', 'knowledgeId'],
+		    proxy  : {
 				type: 'rest',
 				url : 'rest/knowledges/'+ObjectManager.lastClicked.id+'/topics',
-				appendId: true
+				appendId: true,
+				model:    'Brain.model.Topic',
+				format:   'json'
 		    }
 		});
 	}
-		
-	function initStore(){
+
+	function defineStore(){
 		store = Ext.create('Ext.data.Store', {
-			model: 'Brain.model.Topic',
-			autoLoad: true,
-			autoSync: false,
-			listeners:{
-				'remove':function(store, record, index, isMove, eOpts){
-					me.teachingExtWrapper.setTopic(null)
-					Log.info("Topic '"+record.data.name+"' deleted successfully.");
-				}
-			}
-		 });
-	}
+		     model     : 'Brain.model.Topic',
+		     autoLoad  : true,
+		     autoSync  : false,
+		     sortOnLoad: true,
+		     sorters: [{
+		         property: 'name',
+		         direction: 'ASC'
+		     }]
+		})
+	};
 }
 
 
@@ -792,8 +840,11 @@ function TeachingExtWrapper(){
 				record.commit();
 				Log.info("Teaching created successfully.");
 			},
-			failure: function(rec, op) { Log.error(op.getError()); }
-		});
+			failure: function(rec, op){ 
+				store.rejectChanges();
+				Log.error(rec.proxy.getReader().jsonData.msg);
+			}
+		}, false);
 		var p = basicWindow('Create a Teaching', [ form ])
 		p.show();
 		return p;
@@ -808,8 +859,11 @@ function TeachingExtWrapper(){
 				record.commit();
 				Log.info("Teaching updated successfully."); 
 			},
-			failure: function(rec, op) { Log.error(op.getError()); }
-		});
+			failure: function(rec, op){ 
+				store.rejectChanges();
+				Log.error(rec.proxy.getReader().jsonData.msg);
+			}
+		}, true);
 		var panel = basicWindow('Update the Teaching', [ form ])
 		panel.show();
 		return panel;
@@ -820,15 +874,15 @@ function TeachingExtWrapper(){
 		if(selectedItem == null) return false;
 		Ext.MessageBox.confirm('Confirm to delete the theaching?', 'Are you sure?', function(answer){
 			if(answer == 'yes'){
-				selectedItem.destroy({
-					callback: function(rec, operation){
-						if(operation.success){
-							store.remove(selectedItem);
-							store.commitChanges();
-						}
-						else{
-							Log.error("Unable to delete the teaching. " + rec.proxy.getReader().jsonData.msg)
-						}
+				store.remove(selectedItem);
+				store.sync({
+					success : function(batch, options){
+						store.commitChanges();
+						Log.info("Teaching deleted successfully.")
+					},
+					failure : function(batch, options){
+						store.rejectChanges();
+						Log.error("Unable to delete the teaching. " + batch.proxy.getReader().jsonData.msg)
 					}
 				});
 			}
@@ -875,7 +929,26 @@ function TeachingExtWrapper(){
 	   });
 	}
 	
-	function prepareForm(record, callbacks){
+	function prepareForm(record, callbacks, disableSaveAndNew){
+		function saveAndNew(){
+			save();
+			create();
+		}
+		
+		function save(){
+			var record = theForm.getForm().getRecord()
+			theForm.getForm().getFields().each( copyValueToRecord );
+			function copyValueToRecord(field){ record.set(field.name, field.value) }
+			   
+			theForm.getForm().getRecord().save({
+				success: function(rec, op) { 
+					theForm.up().close(); 
+					if (callbacks != null) callbacks.success(rec, op); 
+				},
+				failure: function(rec, op) { if (callbacks != null) callbacks.failure(rec, op); }
+			});
+		}
+		
 		var theForm = Ext.create('Ext.form.Panel', {
 			border:false, layout:'form', bodyPadding: 5,
 			model: 'Brain.model.Teaching',
@@ -902,23 +975,20 @@ function TeachingExtWrapper(){
 			       }
 		       ],
 		       bbar: [
+					{
+						xtype    : 'button', 
+						text     : 'Save and new',
+						disabled : disableSaveAndNew,
+						iconCls  :'add',
+						formBind : !disableSaveAndNew,
+						handler  : saveAndNew,
+						scope    : this
+					},
 		              {
 					   xtype: 'button', text: 'Save',
 					   iconCls:'accept',
 					   formBind : true,
-					   handler: function(){
-						   var record = theForm.getForm().getRecord()
-						   theForm.getForm().getFields().each( copyValueToRecord );
-						   function copyValueToRecord(field){ record.set(field.name, field.value) }
-						   
-						   theForm.getForm().getRecord().save({
-							   success: function(rec, op) { 
-								   theForm.up().close(); 
-								   if (callbacks != null) callbacks.success(rec, op); 
-							   },
-							   failure: function(rec, op) { if (callbacks != null) callbacks.failure(rec, op); }
-						   });
-					   },
+					   handler: save,
 					   scope: this
 					}, '-',
 					{
@@ -975,11 +1045,11 @@ function TeachingExtWrapper(){
 		     proxy: this.proxy,
 		     autoLoad: false,
 		     autoSync: false,
-			listeners:{
-				'remove':function(store, record, index, isMove, eOpts){
-					Log.info("Teaching deleted successfully.")
-				}
-			}
+		     sortOnLoad: true,
+		     sorters: [{
+		         property: 'whenTheUserSays',
+		         direction: 'ASC'
+		     }]
 		 });
 	}
 }
