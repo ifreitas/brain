@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html>
+    <head>
+         <meta name="viewport" content="width=device-width, initial-scale=1.0"></meta>
+
+        <!-- CSS -->
+        <link type="text/css" href="/stylesheets/ext-theme-classic/ext-theme-classic-all.css" rel="stylesheet" />
+        <link type="text/css" href="/javascripts/jit/css/base.css" rel="stylesheet" />
+        <link type="text/css" href="/javascripts/jit/css/Spacetree.css" rel="stylesheet" />
+
+         <!--app specific tweeks and overrides external to module goes here-->
+         <link href="/stylesheets/app.css" rel="stylesheet" ></link>
+         
+         <script type="text/javascript" src="/javascripts/jquery-1.10.2.min.js"></script>
+         <script type="text/javascript" src="/javascripts/ext4/ext-all.js"></script>
+
+        <meta content="text/html; charset=UTF-8" http-equiv="content-type"></meta>
+        <title>Brain - DEMO</title>
+    </head>
+
+    <body oncontextmenu="return false;">
+        <div id="main" class="lift:surround?with=default;at=content">
+            <div class="lift:App.onLoad"></div>
+            <div id="theTree"><div id="infovis" class="infovis"></div></div>
+
+        <div style="display: none">
+            <div id="log" style="overflow-y: scroll;"></div>
+            <div id="about">
+              <h2>Brain</h2>
+              0.1.0
+                <p>Brain is a tool to model, create and manage the 
+                    knowledge base for aiml chaterbots.</p>
+                <b>Uses:</b>
+                <ul>
+                    <li><a href="http://www.scala-lang.org/">Scala</a></li>
+                    <li><a href="http://liftweb.net/">Lift Web</a></li>
+                    <li><a href="http://www.orientechnologies.com/">OrientDB</a></li>
+                    <li><a href="https://github.com/tinkerpop/blueprints/wiki">Blueprints</a></li>
+                    <li><a href="https://github.com/anvie/blueprints-scala">Blueprints-Scala</a></li>
+                    <li><a href="https://github.com/philogb/jit">JIT</a></li>
+                    <li><a href="http://www.sencha.com/products/extjs/">ExtJS</a></li>
+                    <li><a href="http://www.famfamfam.com/lab/icons/silk/">Silk</a></li>
+                    <li><a href="https://github.com/ifreitas/AimlToXml">AIML to XML</a></li>
+                    <!-- <li><a href="https://github.com/noelbush/programd">ProgramD</a> (Entirely optional. Just a convenient way to test the base.)</li> -->
+                </ul>
+                
+                <b>Contact:</b>
+                <p>israel.araujo.freitas@gmail.com</p>
+            </div>
+            
+            <div id="abstract" align="justify">//TODO</div>
+            <div id="modeling" align="justify">
+                <b>Modeling the Knowledge Base</b><br>
+
+                <p>In the Brain, modeling is the graphical
+                    representation of the knowledge, their relationships
+                    with other knowledges ( parents and children ) and
+                    the topics in which the same is divided, all through
+                    a mental map. The modeling is part of the process of
+                    creating the knowledge base itself, and is
+                    synchronized with the robot's real base.</p>
+
+                <p>Model the knowledge base of a chatbot is not
+                    exactly a trivial task, since there is a set of
+                    variables that directly affect the effectiveness of
+                    a good human-robot interaction, such as the richness
+                    of the vocabulary of both, or the clarity and
+                    objectivity of messages of both, or the
+                    specialization or generalization expected by a user
+                    on a particular subject, etc. Also certain subjects
+                    may be too complex or too large to be handled by a
+                    robot.</p>
+
+                <p>Thinking about that, the Brain was designed to
+                    facilitate this task by adopting the strategy of
+                    "divide and conquer". By dividing, the knowledge can
+                    be modeled with very fine granularity, being reduced
+                    to several small knowledges ( which we call "atomic
+                    knowledge" ) where each is very specific, since
+                    focuses only on a particular aspect of a greater
+                    knowledge. Some of the advantages of this approach
+                    is to have a broader view on knowledge and be much
+                    easier to define all the topics covered by it. The
+                    result of this approach is a much more solid base
+                    and complete knowledge.</p>
+
+                <p>But the most important for the base to be well
+                    modeled is that the botmaster master each knowledge
+                    he wants to model. Must already have very clear in
+                    his mind what he wants to represent through the
+                    mental map of the Brain. Below is an outline of the
+                    modeling process:</p>
+
+                <ol style="text-align: left;">
+                    <li>Set a target audience ;</li>
+                    <li>Set the topics of interest to this audience;</li>
+                    <li>Define the scope of topics ( knowledge to be modeled );</li>
+                    <li>For each item of scope ( all knowledge ):</li>
+                    <ol>
+                        <li>Understanding and knowledge that will be added;</li>
+                        <li>Define the relationships ( upward and downward );</li>
+                        <li>Set the topics.</li>
+                    </ol>
+                </ol>
+
+
+                <p><b>Understanding the behavior of the knowledge base</b></p>
+                The knowledge base has a very dynamic regarding their
+                viewing behavior, but this dynamism is specifically
+                designed to increase user productivity when modeling the
+                base or creating lessons, and covers the following
+                behaviors:
+                
+                <p>1. Selective Display</p>
+                <p>The knowledges are automatically displayed or
+                    hidden as relevant to clicked knowledge, so only the
+                    most relevant are displayed, so that the screen does
+                    not get tiring to display a lot of information and
+                    so the user can focus only on what really matters.</p>
+
+                <p>2. Visual Contextualization</p>
+                <p>When the user clicks a knowledge, the Brain
+                    automatically selects all its knowledge parents,
+                    leaving all the way from the root until it was
+                    clicked with a different color from the others. This
+                    is to facilitate the user's context in relation to
+                    knowledge that was selected.</p>
+                    
+                <p>3. Automatic Coloring</p>
+                <p>The color of knowledge automatically varies with
+                    the amount of internal knowledge that he has,
+                    starting light and going darker depending on the
+                    amount of internal knowledge increases.</p>
+                    
+                <p><b>The Knowledge</b></p>
+                <p>In the Brain, the knowledge is an object that
+                    encapsulates the descriptions about something . It
+                    can be part of a larger knowledge and can also be
+                    composed of other minor knowledges. Internally the
+                    knowledge is divided into topics.</p>
+                <p>To facilitate the processing of complex or
+                    comprehensive subjects , Brain uses the strategy of
+                    "Divide and Conquer". Thus how much fragmented and
+                    specific a knowledge is, ie, how much topics and
+                    knowledges children have that knowledge, the better
+                    is the domain of robot on it.</p>
+
+                <p><b>Adding a Knowledge</b></p>
+                <p>In the Brain, there are no isolated knowledge,
+                    all knowledge is necessarily connected to another,
+                    being the most basic root from which all derive.</p>
+                <ol>
+                    <li>Right click on an existing knowledge;</li>
+                    <li>Click on "Add to Knowledge" option;</li>
+                    <li>Enter the name of new knowledge;</li>
+                    <li>Click "Save".</li>
+                </ol>
+
+                <p><b>Renaming a Knowledge</b></p>
+                <ol>
+                    <li>Right click on the Knowledge you want to update;</li>
+                    <li>Click on "Rename this Knowledge" option;</li>
+                    <li>Type the new name;</li>
+                    <li>Click "Save".</li>
+                </ol>
+
+                <p><b>Deleting a Knowledge</b></p>
+                Attention: When a knowledge is deleted, are also deleted
+                in cascade all your children knowledge, its topics and
+                its teachings.
+                <ol>
+                    <li>Right click on the knowledge that you wantto delete;
+                    <li>Click the on "Delete this Knowledge" option;
+                    <li>Click "Yes".
+                </ol>
+
+                <p><b>Topics</b></p>
+                <p>The Topic is a group of teachings, an internal
+                    division of a Knowledge, and is specific only to
+                    Knowledge which it belongs to. Thus, for creating,
+                    editing or deleting a Topic you must access this
+                    screen through the following steps:</p>
+                <ol>
+                    <li>Right click on the Knowledge you want to add the Topic;</li>
+                    <li>Click on "Topics & Teachings" option;</li>
+                    <li>Wait loading the Topics panel.</li>
+                </ol>
+                
+                <p><b>Creating a Topic</b></p>
+                <ol>
+                    <li>Click " Create";</li>
+                    <li>Type the name of the new Topic;</li>
+                    <li>Click " Save".</li>
+                </ol>
+
+                <b>Renaming a Topic</b>
+                <ol>
+                    <li>Click the Topic you want to update;</li>
+                    <li>Click " Update";</li>
+                    <li>Type the new name;</li>
+                    <li>Click " Save".</li>
+                </ol>
+
+                <p><b>Deleting a Topic</b></p>
+                <p>Attention: When a Topic is deleted, are also deleted all its teachings.</p>
+                <ol>
+                    <li>Click the Topic you want to delete;</li>
+                    <li>Click "Delete";</li>
+                    <li>Click "Yes".</li>
+                </ol>
+            </div>
+            
+            
+            <div id="training" align="justify">
+                <p>At first, the robot should be seen as a child:
+                    initially has no knowledge, but starts to acquire it
+                    from the teachings that are passed to them.</p>
+                    
+                <p>The teaching is the smallest unit of knowledge
+                    passed to the robot, it is the statement itself of
+                    what he should do according to the text typed by the
+                    user. Are the teachings that actually prepare the
+                    robot to handle situations created by users.</p>
+
+                <p>The teaching is specific to just one topic, so it
+                    only makes sense for that topic to which it belongs
+                    to. Thus, to create, edit or delete a teaching, the
+                    user must access this screen through the following
+                    steps:</p>
+                    
+                <ol>
+                    <li>Right click on the Knowledge you want to add the teachings;</li>
+                    <li>Click on " Topics & Teachings" option;</li>
+                    <li>Wait load the Topics panel;</li>
+                    <li>Click the Topic that will contains the teachings;</li>
+                    <li>Wait loading the Teachings panel.</li>
+                </ol>
+
+                <p><b>Creating a Teaching</b></p>
+                <ol>
+                    <li>Click on "Create";</li>
+                    <li>Enter the content of the requested fields:</li>
+                      <ul>
+                        <li>
+                            <i>When the user says</i>: 
+                            <p>Enter in this field the sentences
+                                that users of chat probably write about
+                                this particular topic . May be reported
+                                several sentences at once , with only
+                                one per line. How much more sentences
+                                registered greater is the ability to
+                                "interpretation" of the robot.</p>
+                                
+                            <p>For example, for the topic "favorite
+                                movies", the following sentences may be
+                                typed:</p>
+                                
+<textarea rows="4" cols="23" readonly="readonly">My favorite movie is The Matrix
+My favorite movie is Iron Man
+My favorite movie is Déjà vu
+</textarea>
+                            <p>In this example, the robot is able to
+                                understand and respond appropriately to
+                                any of these sentences.</p>
+                        </li>
+                        
+                        <li>
+                            <i>Responding to</i>:
+                            <p>
+                                Type in this field the robot sentence
+                                that motivated this new user
+                                interaction. For example, the following
+                                robot message could have motivated the
+                                user to enter one of the sentences given
+                                in the example above ("<i>When the user says</i>"):</p>
+                                
+                            <input type="text" value="What is your favorite movie?" readonly="readonly"/>
+                            
+                            <p>This field maintains the dialogue with
+                                the robot contextualized, so that he may
+                                to "remember" what was said before the
+                                user type his last message. Leave this
+                                field empty when the previous robot
+                                sentence is not relevant.</p>
+                        </li> 
+                        
+                        <li>
+                            <i>Memorize</i>:
+                            <i>Not implemented yet.</i>
+                        </li>
+                        
+                        <li>
+                            <i>Say</i>:
+                            <p>Type in this field what the robot
+                                should say when the user types any of
+                                the sentences informed in the field
+                                "When the user says". May be reported
+                                several responses at once, with only one
+                                per line. This approach enables the
+                                robot to give different answers to the
+                                same sentence, because this response is
+                                the result of a random selection among
+                                several possible answers registered.
+                                Therefore, how much responses
+                                registered, greater is the
+                                "intelligence" of the robot.</p>
+                            <p>For example, even for the topic "favorite
+                                movies", the following sentences may be
+                                reported:</p>
+<textarea rows="4" cols="23" readonly="readonly">It is also my favorite.
+This is my favorite too.
+Excellent movie!</textarea>
+                        </li>
+                      </ul>
+                    <li>Click "Save".</li>
+                </ol>
+                <p>Here is the complete example:</p>
+<pre>
+When the user says:
+   My favorite movie is The Matrix
+   <i>(or)</i> My favorite movie is Iron Man
+   <i>(or)</i> My favorite movie is Déjà vu
+
+Replying to:
+   What is your favorite movie?
+
+Say:
+   It is also my favorite.
+   <i>(or)</i> This is my favorite too.
+   <i>(or)</i> Excellent movie!
+</pre>
+                
+                <p><b>Editing a Teaching</b></p>
+                <ol>
+                    <li>Click "Update";</li>
+                    <li>Enter the content of the requested fields;</li>
+                    <li>Click "Save".</li>
+                </ol>
+
+                <p><b>Deleting a Teaching</b></p>
+                <ol>
+                    <li>Click the Teaching you want to delete;</li>
+                    <li>Click "Delete";</li>
+                    <li>Click "Yes".</li>
+                </ol>
+            </div>
+            
+            
+            <div id="applyTheBase" align="justify">
+                <p>In order to the changes over to the knowledge
+                    base to be reflected on the real robot base, just
+                    click on "Apply" button, which sits on top of the
+                    center panel. When the generation of the base is
+                    finished, the system will report the status of this
+                    execution in the status bar, also will report the
+                    place where the AIML files were generated in.</p>
+            </div>
+            
+            
+            <div id="definitions" align="justify">
+                <b>Knowledge Base</b>
+                <p>This is where all the robot's knowledge is stored
+                    in and is represented graphically through a mental
+                    map.</p>
+                
+                <b>Knowledge</b>
+                <p>In the Brain, the knowledge is an object that
+                    encapsulates the descriptions about something. It
+                    can be part of a greater knowledge and can also be
+                    composed of other minor knowledges. The knowledge is
+                    internally divided into topics.</p>
+                <p>To facilitate the processing of complex or larger
+                    subjects, Brain uses the strategy of "Divide and
+                    Conquer". Thus, how much fragmented and specific a
+                    Knowledge is, ie, how much Topics and children have
+                    that Knowledge, the better is the domain of robot on
+                    it.</p>
+                    
+                <b>Topic</b>
+                <p>The Topic is a group of Teachings, an internal
+                    division of a Knowledge, and is specific only to
+                    Tnowledge which it belongs to.</p>
+                    
+                <b>Teaching</b>
+                <p>The teaching is the smallest unit of knowledge
+                    passed to the robot, it is the statement itself of
+                    what he should do according to the text typed by the
+                    user. Are the teachings that actually prepare the
+                    robot to handle situations created by users.</p>
+                <p>The Teaching is specific to just one Topic, so it
+                    only makes sense for that Topic to which it belongs
+                    to.</p>
+                
+                <b>Normalization</b>
+                <i>Não implementando ainda.</i>
+                <p>It is the process of standardization of the text
+                    typed by the user, adapting the text to certain
+                    rules of writing and grammar used by the robot.
+                    Normalization basically operates in the following
+                    points:</p>
+                <table style="width: 100%">
+                     <thead>
+                      <tr><th width="100px">Type</th><th>Term</th><th>Normalized</th></tr>
+                     </thead>
+                     <tbody>
+                      <tr><td><b>Synonyms</b></td><td>visualize</td><td>see</td></tr>
+                      <tr><td><b>Abbreviations/<br>Slang</b></td><td>u</td><td>you</td></tr>
+                      <tr><td><b>Gender</b></td><td>Obrigada</td><td>Obrigado</td></tr>
+                      <tr><td><b>Orthographic Corrections</b></td><td>voce</td><td>você</td></tr>
+                      <tr><td><b>Grammatical Corrections</b></td><td>Ok bye</td><td>Ok. Bye!</td></tr>
+                     </tbody>
+                 </table>
+            </div>
+        </div>
+    </div><!-- /main -->
+    <!--In end of page (for fast pageload) add the scripts you need--> 
+    <!--[if IE]><script language="javascript" type="text/javascript" src="/javascripts/jit/Extras/excanvas.js"></script><![endif]-->
+    <script type="text/javascript" src="/javascripts/jit/jit.js"></script>
+    <script type="text/javascript" src="/javascripts/app-demo.js"></script>
+    
+    <script type="text/javascript">jQuery(document).ready(initTree);</script>
+    </body>
+</html>
