@@ -98,6 +98,9 @@ function initTree(json){
         		knowledgeExtWrapper.update();
         	});
         	
+        	if(node.name.trim().length >= 10){
+        		label.title = node.name;
+        	}
             label.id          = node.id;            
             label.innerHTML   = node.name;
             

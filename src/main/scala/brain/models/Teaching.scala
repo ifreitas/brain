@@ -170,9 +170,9 @@ class TeachingToCategoryAdapter(teaching: Teaching) {
 	 *  resultado.mkString("")
      */
     
-    val respondingTo  : String 	    = if(teaching.respondingTo != null) teaching.respondingTo else "*"
+    val respondingTo  : String 	    = if(teaching.respondingTo != null && !teaching.respondingTo.trim().isEmpty()) teaching.respondingTo else "*"
     val whatWasSaid   : Set[String] = nonEmptyLinesToSet(teaching.whenTheUserSays)
-    val whatToMemorize: Set[String] = nonEmptyLinesToSet(teaching.memorize)
+    //val whatToMemorize: Set[String] = nonEmptyLinesToSet(teaching.memorize)
     val whatToSay     : Set[String] = nonEmptyLinesToSet(teaching.say)
     
     def toCategory: Set[Category] = {
