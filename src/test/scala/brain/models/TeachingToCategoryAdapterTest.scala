@@ -140,12 +140,12 @@ class TeachingToCategoryAdapterTest extends FunSpec with Matchers with BeforeAnd
             adapter = new TeachingToCategoryAdapter(validTeaching)
         }
         it("when the pattern is equals to the default pattern then returns a category with the fully filled template") {
-            val expectedCategory = Category("hi", Set(Random("hello there")))
-            adapter.createCategory("hi", "hi", "*", Set("hello there")) should be(expectedCategory)
+            val expectedCategory = Category("hi", Random("hello there"))
+            adapter.createCategory("hi", "hi", Set("hello there"), "*") should be(expectedCategory)
         }
         it("when the pattern is not equals to the default pattern then returns a category which template contains only a srai pointing to the default pattern") {
-            val expectedCategory = Category("hello", Set(Srai("hi")))
-            adapter.createCategory("hello", "hi", "*", Set("hello there")) should be(expectedCategory)
+            val expectedCategory = Category("hello", Srai("hi"))
+            adapter.createCategory("hello", "hi", Set("hello there"), "*") should be(expectedCategory)
         }
     }
 

@@ -132,7 +132,7 @@ object Teaching extends PersistentName {
             case id : String => {
             	implicit val db = GraphDb.get
 				try{
-					val teaching = Teaching.findById(id)
+					val teaching = Teaching.findById(id) 
 	        		val respondingTo = if(teaching.respondingTo == null) None else Some(teaching.respondingTo)
 	        		val memorize = if(teaching.memorize == null) None else Some(teaching.memorize)
 	        		Some((teaching.id, teaching.topicId, respondingTo, memorize, teaching.whenTheUserSays, teaching.say))
@@ -178,7 +178,7 @@ class TeachingToCategoryAdapter(teaching: Teaching) {
     def toCategory: Set[Category] = {
         val defaultPattern = selectDefaultPattern(whatWasSaid)
         //whatWasSaid.map(createCategory(_, defaultPattern, respondingTo, whatToMemorize, whatToSay))
-        whatWasSaid.map(createCategory(_, defaultPattern, respondingTo, whatToSay))
+        whatWasSaid.map(createCategory(_, defaultPattern, whatToSay, respondingTo))
     }
     
     private def nonEmptyLinesToSet(aText:String):Set[String] = aText.split("\n").map(_.trim).toSet[String].filter(!_.trim.isEmpty)
@@ -222,9 +222,9 @@ class TeachingToCategoryAdapter(teaching: Teaching) {
     // it should be a calculateThePatternComplexity's local function, but is not for tests purposes.
     def countSpecialChar(c: String, p: String) = { p.split("\\" + c + "+", -1).size - 1 }
 
-    def createCategory(whatWasSaid: String, defaultPattern: String, respondingTo: String, whatToSay: Set[String]):Category = {
-        if (whatWasSaid == defaultPattern) Category(whatWasSaid, respondingTo, createTemplateElements(whatToSay))
-        else Category(whatWasSaid, respondingTo, Set[TemplateElement](Srai(defaultPattern)))
+    def createCategory(whatWasSaid: String, defaultPattern: String, whatToSay: Set[String], respondingTo: String):Category = {
+        if (whatWasSaid == defaultPattern) Category(whatWasSaid, createTemplateElements(whatToSay), respondingTo)
+        else new Category(whatWasSaid, Set(Srai(defaultPattern)), respondingTo)
     }
 
     def createTemplateElements(say: Set[String]): Set[TemplateElement] = Set(new Random(say.map({Text(_)})))

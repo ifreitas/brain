@@ -28,9 +28,6 @@ import brain.db.OrientDbServer
 import com.orientechnologies.orient.client.remote.OServerAdmin
 import brain.config.Config
 import java.io.File
-import aimltoxml.aiml.TemplateElement
-import aimltoxml.aiml.Text
-import aimltoxml.aiml.Get
 
 object Teste2 {
 
@@ -52,10 +49,10 @@ object Teste2 {
         //val phrase = "olá, ${nome}, ${idade}" //  \$\{([a-z]*)\}
 		//val phrase = "olá, ${nome} ${idade}"  //  \$\{([a-z]*)\}
 		//val phrase = "olá, ${nome}${idade}"   //  \$\{([a-z]*)\}
-        "olá, $nome, $idade" //  \$\{([a-z]*)\}
-		"olá, $nome $idade" //  \$\{([a-z]*)\}
-		"olá, $nome$idade" //  \$\{([a-z]*)\}
-        Set(Text("olá, "), new Get("nome"))
+//        "olá, $nome, $idade" //  \$\{([a-z]*)\}
+//		"olá, $nome $idade" //  \$\{([a-z]*)\}
+//		"olá, $nome$idade" //  \$\{([a-z]*)\}
+//        Set(Text("olá, "), new Get("nome"))
     }
 //    def main(args: Array[String]): Unit = {
 //    		OrientDbServer.start

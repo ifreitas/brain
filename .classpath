@@ -3,7 +3,7 @@
   <classpathentry kind="src" path="src/main/java" output="target/scala-2.10/classes"/>
   <classpathentry kind="src" path="src/test/scala" output="target/scala-2.10/test-classes"/>
   <classpathentry kind="src" path="src/test/java" output="target/scala-2.10/test-classes"/>
-  <classpathentry kind="lib" path="./lib/aimltoxml-v0.14.0.jar"/>
+  <classpathentry kind="lib" path="./lib/aiml-to-xml-v0.15.0.jar"/>
   <classpathentry kind="lib" path="./lib/ansvia-commons-0.0.7.jar"/>
   <classpathentry kind="lib" path="./lib/blueprints-core-2.5.0-20131216.163836-23.jar"/>
   <classpathentry kind="lib" path="./lib/blueprints-orient-graph-2.5.0-20131216.164251-22.jar"/>
