@@ -10,8 +10,8 @@
             <div class="lift:App.onLoad"></div>
             <div id="theTree"><div id="infovis" class="infovis"></div></div>
 
-        <div style="display: none">
-            <div id="log"></div>
+<div style="display: none">
+            <div id="log" style="overflow-y: scroll;"></div>
             <div id="about">
               <h2>Brain</h2>
               0.1.0
@@ -27,7 +27,7 @@
                     <li><a href="https://github.com/philogb/jit">JIT</a></li>
                     <li><a href="http://www.sencha.com/products/extjs/">ExtJS</a></li>
                     <li><a href="http://www.famfamfam.com/lab/icons/silk/">Silk</a></li>
-                    <li><a href="https://github.com/ifreitas/AimlToXml">AIML to XML</a></li>
+                    <li><a href="http://ifreitas.github.io/AimlToXml/">AIML to XML</a></li>
                     <!-- <li><a href="https://github.com/noelbush/programd">ProgramD</a> (Entirely optional. Just a convenient way to test the base.)</li> -->
                 </ul>
                 
@@ -38,300 +38,376 @@
             <div id="abstract" align="justify">//TODO</div>
             <div id="modeling" align="justify">
                 <b>Modeling the Knowledge Base</b><br>
-                
-                <p>No Brain, a modelagem é a representação gráfica do conhecimento, 
-                seus relacionamentos com outros conhecimentos (pais e filhos) e os 
-                tópicos nos quais o mesmo se divide, tudo isso através de um  mapa 
-                mental. A modelagem faz parte do processo de criação da base de 
-                conhecimento propriamente dita e está sincronizada com a base real 
-                do robô.</p>
-                
-                <p>Modelar a base de conhecimento de um chatbot não é exatamente uma 
-                tarefa trivial, pois existe um conjunto de variáveis que afetam diretamente
-                a efetividade de uma boa interação humano-robô, como por exemplo a riqueza 
-                do vocabulário de ambos, a clareza e objetividade das mensagens de ambos,
-                 a especialização ou a generalização esperada por um usuário sobre um 
-                 determinado assunto, etc. Além disso determinados assuntos podem ser muito 
-                 complexos ou muito grandes para serem tratados por um robô.</p> 
-                
-                <p>Pensando nisso o Brain foi projetado para facilitar esta tarefa adotando a
-                 estratégia de “dividir para conquistar”. Dividindo o conhecimento ele pode 
-                 ser modelado com finíssima granularidade, sendo reduzido a vários pequenos 
-                 conhecimentos onde cada um é muito específico, pois foca apenas em um 
-                 determinado aspecto de um conhecimento maior. Algumas das vantagens desta 
-                 abordagem é que tem uma visão mais ampla sobre o conhecimento e fica muito 
-                 mais fácil definir todos os tópicos cobertos por um conhecimento. O resultado 
-                 dessa abordagem é uma base com conhecimentos muito mais sólidos e completos.</p>
-                
-                <p>Mas o mais importante para que a base seja bem modelada é que o botmaster 
-                domine cada conhecimento que deseja modelar. É necessário que o botmaster já 
-                tenha muito claro em sua mente o que deseja representar através do mapa mental 
-                do Brain. Segue abaixo uma sugestão de processo de modelagem:</p>
+
+                <p>On <b style="color: #727272">Brain</b>, <i>modeling</i> is the graphical
+                    representation of <i>knowledge</i>, its relationships
+                    with other <i>knowledges</i> ( parents and children ) and
+                    the <i>topics</i> in which it is divided, all through
+                    a mental map. The <i>modeling</i> is part of the process of
+                    creating the <i>knowledge base</i> itself, and it is
+                    synchronized with the robot's real base.</p>
+
+                <p>Modeling the knowledge base of a chatbot is not
+                    exactly a trivial task, since there is a set of
+                    variables that directly affect the effectiveness of
+                    a good human-robot interaction, such as the richness
+                    of the vocabulary of both, or the clarity and
+                    objectivity of messages of either the
+                    specialization or generalization expected by an user
+                    on a particular subject, etc. Also certain subjects
+                    may be too complex or too large to be handled by a
+                    robot.</p>
+
+               <p>Considering that, <b style="color: #727272">Brain</b> was designed to
+                    facilitate this task by adopting the strategy 
+                    "divide and conquer". By dividing, the knowledge can
+                    be modeled with very fine granularity, being reduced
+                    to several small knowledges ( which we call "atomic
+                    knowledge" ) where each one is very specific, since
+                    it focuses only on a particular aspect of a greater
+                    knowledge. Some of the advantages of this approach
+                    is to have a broader view on knowledge and be much
+                    easier to define all the topics covered by it. The
+                    result of this approach is a much more solid base
+                    and complete knowledge.</p>
+
+                <p>But the most important for the base to be well
+                    modeled is that the botmaster master each knowledge
+                    he wants to model. Must already have very clear in
+                    his mind what he wants to represent through of 
+                    <b style="color: #727272">Brain</b>'s mental map. Below is an outline of the
+                    modeling process:</p>
 
                 <ol style="text-align: left;">
-                <li>Definir um público-alvo;</li>
-                <li>Definir os temas de interesse para este público;</li>
-                <li>Definir o escopo dos temas (os conhecimentos a serem modelados);</li>
-                <li>Para cada item do escopo (cada conhecimento):</li>
+                    <li>Define a target audience ;</li>
+                    <li>Define the subjects of interest to this target audience;</li>
+                    <li>Define the scope of subjects ( knowledge to be modeled );</li>
+                    <li>For each item of scope ( all knowledge ):</li>
                     <ol>
-                        <li>Entender bem o conhecimento que será adicionado;</li>
-                        <li>Definir os relacionamentos (ascendentes e descendentes);</li>
-                        <li>Definir os tópicos.</li>
+                        <li>Understand the knowledge that will be added;</li>
+                        <li>Define the relationships ( parents and children );</li>
+                        <li>Define the topics.</li>
                     </ol>
+                </ol>
+
+
+                <p><b>Understanding the behavior of the knowledge base</b></p>
+                The <i>knowledge base</i> has a very dynamic viewing behavior. 
+                This dynamism is specifically
+                designed to increase user productivity when modeling the
+                base or creating lessons, and covers the following
+                behaviors:
+                
+                <p>1. Selective Display</p>
+                <p><i>Knowledges</i> are automatically displayed or
+                    hidden as relevant it is to clicked <i>knowledge</i>. In this way only the
+                    most relevant are displayed, hence that the screen does
+                    not get tiring by display a lot of information and
+                    hence the user can focus only on what really matters.</p>
+
+                <p>2. Visual Contextualization</p>
+                <p>When the user clicks a <i>knowledge</i>, <b style="color: #727272">Brain</b>
+                    automatically selects all its <i>knowledge</i> parents,
+                    leaving all the way from the <i>Root</i> until itself 
+                    with a different color from the others. This
+                    is to facilitate the user's contextualization on
+                    the <i>knowledge</i> that was selected.</p>
+                    
+                <p>3. Automatic Coloring</p>
+                <p>The color of a <i>knowledge</i> changes automatically with
+                    the amount of its internal <i>knowledges</i>,
+                    starting light and going darker depending of increase on the
+                    amount of its internal <i>knowledges</i>.</p>
+                    
+                <p><b>The Knowledge</b></p>
+                <p>On <b style="color: #727272">Brain</b>, <i>knowledge</i> is an object that
+                    encapsulates the descriptions about something. It
+                    can be part of a greater <i>knowledge</i> and can also be
+                    composed of other smaller <i>knowledges</i>. Internally
+                    it is divided into <i>topics</i>.</p>
+                <p>To facilitate the processing of either complex subjects or
+                    larger subjects, <b style="color: #727272">Brain</b> uses the "Divide and Conquer"
+                    strategy. Thus, how much more fragmented and specific a
+                    <i>knowledge</i> is, i.e., how much more <i>topics</i> and
+                    children <i>knowledges</i> it has, better is the domain of 
+                    robot on it.</p>
+
+                <p><b>Adding a Knowledge</b></p>
+                <p>Note: On <b style="color: #727272">Brain</b>, there are no isolated <i>knowledge</i>,
+                    all <i>knowledge</i> is necessarily connected to another,
+                    being <i>Root</i> the most basic, from which all derive.</p>
+                <ol>
+                    <li>Right click on an existing <i>knowledge</i>;</li>
+                    <li>Click on "Add a Knowledge" option;</li>
+                    <li>Enter the name of new <i>knowledge</i>;</li>
+                    <li>Click "Save".</li>
+                </ol>
+
+                <p><b>Renaming a Knowledge</b></p>
+                <ol>
+                    <li>Right click on the <i>knowledge</i> you want to update;</li>
+                    <li>Click on "Rename this Knowledge" option;</li>
+                    <li>Type the new name;</li>
+                    <li>Click "Save".</li>
+                </ol>
+
+                <p><b>Deleting a Knowledge</b></p>
+                Attention: When a <i>knowledge</i> is deleted, it are also deleted
+                in cascade all its children <i>knowledges</i>, its <i>topics</i> and
+                its <i>teachings</i>.
+                <ol>
+                    <li>Right click on the <i>knowledge</i> that you want to delete;
+                    <li>Click the on "Delete this Knowledge" option;
+                    <li>Click "Yes".
+                </ol>
+
+                <p><b>Topics</b></p>
+                <p>Note: <i>Topic</i> is a group of <i>teachings</i>, an internal
+                    division of a <i>knowledge</i>, and it is specific only to
+                    the <i>knowledge</i> which it belongs to. Thus, for creating,
+                    editing or deleting a <i>topic</i> you must access this
+                    screen through the following steps:</p>
+                <ol>
+                    <li>Right click on the <i>knowledge</i> you want divide;</li>
+                    <li>Click on "Topics & Teachings" option;</li>
+                    <li>Wait loading the <i>Topics</i> panel.</li>
                 </ol>
                 
-                <p><b>Entendendo o comportamento da base de conhecimento</b></p>
-                A base de conhecimento possui um comportamento muito dinâmico em relação à sua
-                visualização, mas este dinamismo visa justamente aumentar a produtividade do usuário
-                durante a modelagem da base ou criação de ensinamentos e abrange os seguintes comportamentos:
-                <p>1. Exibição seletiva</p>
-                    <p>
-                    Os conhecimentos são automaticamente exibidos ou ocultados conforme sua relevância para o 
-                    conhecimento clicado, desta forma apenas os conhecimentos relevantes são 
-                    exibidos, para que a tela não fique cansativa por exibir muitas informações 
-                    e para que o usuário possa focar apenas naquilo que realmente interessa. 
-                    </p>
-                    
-                <p>2. Contextualização visual</p>
-                    <p>
-                    Quando o usuário clica em um conhecimento, o Brain seleciona automaticamente
-                    todos os seus conhecimentos pais, deixando todo o caminho desde o
-                    Root até o que foi clicado com uma cor diferente dos demais. Isto acontece para facilitar
-                    a contextualização do usuário em relação ao conhecimento que foi selecionado.
-                    </p>
-                <p>3. Coloração automática</p>
-                    <p>
-                    A cor do conhecimento varia automaticamente em função da quantidade de
-                    conhecimentos internos que ele possuir, começando claro e indo escurecendo 
-                    conforme a quantidade de conhecimentos internos vai aumentando.
-                    </p>
-                <p><b>Knowledge</b></p>
-                <p>No Brain, o conhecimento é um objeto que encapsula as descrições 
-                  sobre alguma coisa. Ele pode fazer parte de um 
-                  conhecimento maior e também pode ser composto por outros conhecimentos 
-                  menores. Internamente o Conhecimento é divido em Tópicos.</p>
-                  <p>Para facilitar o tratamento de assuntos complexos ou abrangentes, 
-                  o Brain utiliza a estratégia de "Dividir para Conquistar". Desta
-                  forma quanto mais fragmentado e mais específico for um Conhecimento, 
-                  ou seja, quanto mais tópicos e conhecimentos filhos um conhecimento 
-                  tiver, melhor será o domínio do robô sobre ele.</p>
-                <p><b>Adding a Knowledge</b></p>
-                    <p>
-                    No Brain, não existem conhecimentos isolados, todo conhecimento está, 
-                    obrigatoriamente, conectado a outro, sendo o Root o mais básico, do qual 
-                    todos derivam.
-                    </p>
-                    <ol>
-                        <li>Clique com o botão direito sobre um conhecimento existente;</li>
-                        <li>Clique na opção "Add a Knowledge";</li>
-                        <li>Informe o nome do novo conhecimento;</li>
-                        <li>Clique em "Save".</li>
-                    </ol>
-                <p><b>Renaming a Knowledge</b></p>
-                    <ol>
-                        <li>Clique com o botão direito sobre o conhecimento que deseja atualizar;</li>
-                        <li>Clique na opção "Rename this Knowledge";</li>
-                        <li>Informe o novo nome;</li>
-                        <li>Clique em "Save".</li>
-                    </ol>
-                <p> <b> Deleting a Knowledge </b> </p>
-                    <ol>
-                        <li>Clique com o botão direito sobre o conhecimento que deseja deletar;</li>
-                        <li>Clique na opção "Delete this Knowledge";</li>
-                        <li>Clique em "Yes".</li>
-                    </ol>
-
-                <p>
-                    <b>Topics</b>
-                </p>
-                <p>O Tópico é um grupo de ensinamentos, uma divisão
-                    interna de um Conhecimento, e é específico apenas do
-                    Conhecimento ao qual pertence. Desta forma, para
-                    criar, editar ou deletar um Topic o usuário
-                    deve acessar esta tela através dos seguintes passos:</p>
+                <p><b>Creating a Topic</b></p>
                 <ol>
-                    <li>Clique com o botão direito sobre o conhecimento que deseja adicionar o Topic;</li>
-                    <li>Clique na opção "Topics & Teachings";</li>
-                    <li>Espere o painel de Tópicos carregar.</li>
-                </ol>
-                <p>
-                    <b>Creating a Topic</b>
-                </p>
-                <ol>
-                    <li>Clique em "Create";</li>
-                    <li>Informe o nome do novo Topic;</li>
-                    <li>Clique em "Save".</li>
+                    <li>Click "Create";</li>
+                    <li>Type the name of the new <i>topic</i>;</li>
+                    <li>Click "Save".</li>
                 </ol>
 
                 <b>Renaming a Topic</b>
-                    <ol>
-                        <li>Clique no Topic que deseja atualizar;</li>
-                        <li>Clique em "Update";</li>
-                        <li>Informe o novo nome;</li>
-                        <li>Clique em "Save".</li>
-                    </ol>
-                    
-                    <p><b>Deleting a Topic</b></p>
-                    <ol>
-                        <li>Clique no Topic que deseja deletar;</li>
-                        <li>Clique em "Delete";</li>
-                        <li>Clique em "Yes".</li>
-                    </ol>
-            </div>
-            <div id="training" align="justify">
-                <p>
-                A princípio, o robô deve ser visto como uma criança: inicialmente não tem
-                qualquer conhecimento, mas passa a adquirí-lo a partir dos ensinamentos
-                que lhes são passados.
-                </p>
-                <p>
-                O ensinamento é a menor unidade de conhecimento passada 
-                  para o robô, é a instrução propriamente dita  do  que  ele 
-                  deve fazer conforme o texto digitado pelo usuário. Ou seja, 
-                  são os ensinamentos que realmente preparam o robô para lidar 
-                  com as situações criadas pelos usuários.
-                </p>
-                <p>
-                O ensinamento é específico de apenas um Tópico, por isso
-                ele só faz sentido para aquele Tópico ao qual pertence. Desta forma,
-                para criar, editar ou deletar um ensinamento o usuário deve acessar 
-                esta tela através dos seguintes passos:
-                </p>
                 <ol>
-                    <li>Clique com o botão direito sobre o conhecimento que deseja criar os ensinamentos;</li>
-                    <li>Clique na opção "Topics & Teachings";</li>
-                    <li>Espere o painel de Tópicos carregar;</li>
-                    <li>Clique no Topic que conterá os ensinamentos;</li>
-                    <li>Espere o painel de Teachings carregar.</li>
+                    <li>Click the <i>topic</i> you want to rename;</li>
+                    <li>Click "Update";</li>
+                    <li>Type the new name;</li>
+                    <li>Click "Save".</li>
                 </ol>
-                
+
+                <p><b>Deleting a Topic</b></p>
+                <p>Attention: When a <i>topic</i> is deleted, it are also deleted all its <i>teachings</i>.</p>
+                <ol>
+                    <li>Click the <i>topic</i> you want to delete;</li>
+                    <li>Click "Delete";</li>
+                    <li>Click "Yes".</li>
+                </ol>
+            </div>
+            
+            
+            <div id="training" align="justify">
+                <p>At first, the robot should be seen like a child:
+                    initially it has no knowledge, but starts to acquire it
+                    from the teachings that are passed to them.</p>
+                    
+                <p><i>Teaching</i> is the smallest unit of <i>knowledge</i>
+                    passed to robot. It is the statement itself of
+                    what the robot should do according to the text typed by the
+                    chat's user. The <i>teachings</i> are that really prepare the
+                    robot to handle the situations created by users.</p>
+
+                <p><i>Teaching</i> is specific to just one <i>topic</i>, so it
+                    only makes sense for that <i>topic</i> to which it belongs
+                    to. Thus, to create, edit or delete a <i>teaching</i>, the
+                    user must access this screen through the following
+                    steps:</p>
+                    
+                <ol>
+                    <li>Right click on the <i>knowledge</i> you want to add the <i>teachings</i>;</li>
+                    <li>Click on "Topics & Teachings" option;</li>
+                    <li>Wait loading the <i>Topics</i> panel;</li>
+                    <li>Click the <i>topic</i> that will contains the <i>teachings</i>;</li>
+                    <li>Wait loading the <i>Teachings</i> panel.</li>
+                </ol>
+
                 <p><b>Creating a Teaching</b></p>
                 <ol>
-                    <li>Clique em "Create";</li>
-                    <li>Informe o conteúdo dos campos solicitados:</li>
+                    <li>Click on "Create";</li>
+                    <li>Enter the content of the requested fields:</li>
                       <ul>
                         <li>
                             <i>When the user says</i>: 
-                            <p>
-                            Informe neste campo as sentenças que os usuários do 
-                            chat provavelmente escreverão sobre este Tópico específico. Podem ser informadas várias
-                            sentenças de uma única vez, sendo apenas uma por linha. Quanto mais sentenças cadastradas
-                            maior é a capacidade de "interpretação" do robô.
-                            </p>
-                            <p>Por exemplo, para o Tópico 
-                            "definicao", podem ser informadas as seguintes sentenças:</p>
-<textarea rows="3" cols="23" readonly="readonly">O que é o brain?
-Não sei o que é.
-Não sei.
-Não.
+                            <p>Enter in this field the sentences
+                                that users of chat probably will write about
+                                this particular <i>topic</i>. May be entered
+                                several sentences at once, only
+                                one per line. How much more sentences
+                                registered, greater is the ability of
+                                "understanding" of the robot.</p>
+                                
+                            <p>For example, for the <i>topic</i> "favorite
+                                movies", an user may type one of the 
+                                following sentences:</p>
+                                
+<textarea rows="4" cols="23" readonly="readonly">My favorite movie is The Matrix
+
+My favorite movie is Iron Man
+
+My favorite movie is Déjà vu
+
 </textarea>
-                            <p>Neste exemplo, o robô é capaz de entender e dar uma resposta 
-                            adequada para qualquer uma destas sentenças.</p>
+                            <p>In this example, the robot will be able to
+                                understand and give the appropriate response to
+                                any of these sentences.</p>
                         </li>
                         
                         <li>
                             <i>Responding to</i>:
-                            <p>Informe neste campo a sentença do robô que motivou esta nova interação do usuário.</p>
-                            <p>Por exemplo, a seguinte mensagem do robô pode ter motivado
-                            o usuário a digitar uma das sentenças dadas no exemplo acima ("<i>When the user says</i>"):</p>
-                            <input type="text" value="você sabe o que é o brain?" readonly="readonly"/>
-                            <p>Este campo mantém o diálogo com o robô contextualizado, de forma que ele "lembre-se" do 
-                            que disse antes do usuário digitar sua última mensagem.</p>
+                            <p>
+                                Enter in this field the robot sentence
+                                that motivated this last new user
+                                interaction. For example, the following
+                                robot message could have motivated the
+                                user to enter one of the sentences given
+                                in the example above ("<i>When the
+                                    user says</i>"):
+                            </p> <input type="text" value="What is your favorite movie?" readonly="readonly" size="27"/>
+                            
+                            <p>This field holds the micro context of
+                                robot dialogue. It allows the robot to
+                                "remember" what it wrote just before the
+                                last user message. Leave this field
+                                empty when the previous robot sentence
+                                is not relevant.</p>
                         </li> 
                         
                         <li>
                             <i>Memorize</i>:
-                            <i>Não implementando ainda.</i>
+                            <i>Not implemented yet.</i>
                         </li>
                         
                         <li>
                             <i>Say</i>:
-                            <p>
-                            Informe neste campo o que o robô deve dizer quando o usuário
-                            digitar alguma das sentenças informadas no campo "<i>When the user says</i>".
-                            Podem ser informadas várias respostas de uma única vez, sendo
-                            apenas uma por linha. Esta abordagem capacita o robô a dar diferentes
-                            respostas para uma mesma sentença, pois esta resposta será o resultado
-                            de uma seleção randômica entre as várias possíveis respostas cadastradas.
-                            Logo, quanto mais respostas cadastradas, maior será a "inteligência" do robô.
-                            </p>
-                            <p>Por exemplo, para mesmo o Tópico 
-                            "definição", podem ser informadas as seguintes sentenças:</p>
-<textarea rows="10" cols="23" readonly="readonly">O Brain é um sistema para modelar, criar e gerenciar a base de conhecimento de chatbots baseados na tecnologia AIML.
+                            <p>Enter in this field what the robot
+                                should say when the user types any of
+                                the sentences entered in the field
+                                "When the user says". May be entered
+                                several responses at once, only one
+                                per line. This approach enables the
+                                robot to give different answers to the
+                                same user sentence, because this response is
+                                the result of a random selection among
+                                several possible answers registered.
+                                Hence, how much more responses
+                                registered, greater is the
+                                "intelligence" of the robot.</p>
+                            <p>For example, even for the <i>topic</i> "favorite
+                                movies", the following sentences may be
+                                entered as an robot answer:</p>
+<textarea rows="4" cols="23" readonly="readonly">It is also my favorite.
 
-É o mais avançado sistema de modelagem e criação da base de conhecimentos para chatbots baseados em AIML.
+This is my favorite too.
 
-É uma ferramenta que facilita a vida dos botmasters AIML, por permitir modelar visualmente a base de conhecimento e encorajar a gerar o máximo conteúdo possível.</textarea>
+Excellent movie!</textarea>
                         </li>
                       </ul>
-                    <li>Clique em "Save".</li>
+                    <li>Click "Save".</li>
                 </ol>
+                <p>Here is the complete example:</p>
+<pre>
+When the user says:
+   My favorite movie is The Matrix
+   <i>(or)</i> My favorite movie is Iron Man
+   <i>(or)</i> My favorite movie is Déjà vu
+
+Responding to:
+   What is your favorite movie?
+
+Say:
+   It is also my favorite.
+   <i>(or)</i> This is my favorite too.
+   <i>(or)</i> Excellent movie!
+</pre>
                 
                 <p><b>Editing a Teaching</b></p>
                 <ol>
-                    <li>Clique em "Update";</li>
-                    <li>Informe o conteúdo dos campos solicitados;</li>
-                    <li>Clique em "Save".</li>
+                    <li>Click the <i>teaching</i> you want to update;</li>
+                    <li>Click "Update";</li>
+                    <li>Enter the content of the requested fields;</li>
+                    <li>Click "Save".</li>
                 </ol>
-                
+
                 <p><b>Deleting a Teaching</b></p>
                 <ol>
-                    <li>Clique no Teaching que deseja deletar;</li>
-                    <li>Clique em "Delete";</li>
-                    <li>Clique em "Yes".</li>
+                    <li>Click the Teaching you want to delete;</li>
+                    <li>Click "Delete";</li>
+                    <li>Click "Yes".</li>
                 </ol>
             </div>
+            
+            
             <div id="applyTheBase" align="justify">
-              <p>Para que as alterações na base de conhecimento se reflitam sobre a base real do robô,
-              basta clicar no botão "Apply", que fica no topo do painel central. Quando as regeração
-              da base for concluída, o sistema informará o status da execução, na barra de status do sistema,
-              bem como o local onde os arquivos AIML foram gerados.</p>
+                <p>
+                    To make the changes in the
+                    <i>knowledge base</i> be reflected over the real
+                    robot's knowledge base, just click on the "Apply"
+                    button, which sits on top of the center panel. When
+                    the generation of the base is finished, the system
+                    will report the status of this execution in the
+                    status bar, and also will report the place where the
+                    AIML files were generated in.
+                </p>
             </div>
+            
+            
             <div id="definitions" align="justify">
-              <b>Knowledge Base</b>
-                  <p>É o local onde todo o conhecimento do robô é armazenado e é representado graficamente através de um mapa mental.</p>
-              <b>Knowledge</b>
-                  <p>No Brain, o conhecimento é um objeto que encapsula as descrições 
-                  sobre alguma coisa. Ele pode fazer parte de um 
-                  conhecimento maior e também pode ser composto por outros conhecimentos 
-                  menores. Internamente o Conhecimento é divido em Tópicos.</p>
-                  <p>Para facilitar o tratamento de assuntos complexos ou abrangentes, 
-                  o Brain utiliza a estratégia de "Dividir para Conquistar". Desta
-                  forma quanto mais fragmentado e mais específico for um Conhecimento, 
-                  ou seja, quanto mais tópicos e conhecimentos filhos um conhecimento 
-                  tiver, melhor será o domínio do robô sobre ele.</p>
-              <b>Topic</b>
-                  <p>O Tópico é um grupo de ensinamentos, uma divisão interna de
-                   um Conhecimento, e é específico apenas do Conhecimento ao qual 
-                   pertence.</p>
-              <b>Teaching</b>
-                  <p>O ensinamento é a menor unidade de conhecimento passada 
-                  para o robô, é a instrução propriamente dita  do  que  ele 
-                  deve fazer conforme o texto digitado pelo usuário. Ou seja, 
-                  são os ensinamentos que realmente preparam o robô para lidar 
-                  com as situações criadas pelos usuários.</p>
-                  <p>O ensinamento é específico de apenas um Tópico, por isso
-                  ele só faz sentido para aquele Tópico ao qual pertence.</p>
-              <b>Normalization</b>
-              <i>Não implementando ainda.</i>
-                  <p>É o processo de padronização do texto digitado pelo usuário, 
-                  adequando este texto a determinadas normas de escrita e
-                  gramática utilizadas pelo robô. A normalização atua basicamente 
-                  nos seguintes pontos:</p>
-                 <table style="width: 100%">
+                <b>Knowledge Base</b>
+                <p>This is where all the robot's <i>knowledge</i> is stored
+                    in and it is represented graphically through a mental
+                    map.</p>
+                
+                <b>Knowledge</b>
+                <p>On <b style="color: #727272">Brain</b>, the <i>knowledge</i> is an object that
+                    encapsulates the descriptions about something. It
+                    can be part of a greater <i>knowledge</i> and can also be
+                    composed of other smaller <i>knowledges</i>. Internally it is divided into <i>topics</i>.</p>
+                <p>To facilitate the processing of either complex subjects or
+                    larger subjects, <b style="color: #727272">Brain</b> uses the "Divide and Conquer"
+                    strategy. Thus, how much more fragmented and specific a
+                    <i>knowledge</i> is, i.e., how much more <i>topics</i> and
+                    children <i>knowledges</i> it has, better is the domain of 
+                    robot on it.</p>
+                    
+                <b>Topic</b>
+                <p><i>Topic</i> is a group of <i>teachings</i>, an internal
+                    division of a <i>knowledge</i>, and it is specific only to
+                    the <i>knowledge</i> which it belongs to.</p>
+                    
+                <b>Teaching</b>
+                <p><i>Teaching</i> is the smallest unit of <i>knowledge</i>
+                    passed to robot. It is the statement itself of
+                    what the robot should do according to the text typed by the
+                    chat's user. The <i>teachings</i> are that really prepare the
+                    robot to handle the situations created by users.</p>
+
+                <p><i>Teaching</i> is specific to just one <i>topic</i>, so it
+                    only makes sense for that <i>topic</i> to which it belongs
+                    to.</p>
+                
+                <b>Normalization</b>
+                <i>( Not implemented yet. )</i>
+                <p>It is the process of standardization of the text
+                    typed by the user, adapting this text to certain
+                    rules of writing and grammar used by the robot.
+                    Normalization basically operates in the following
+                    points:</p>
+                <table style="width: 100%">
                      <thead>
-                      <tr><th width="100px">Tipo</th><th>Termo</th><th>Normalizado</th></tr>
+                      <tr><th width="100px">Type</th><th>Term</th><th>Normalized</th></tr>
                      </thead>
                      <tbody>
-                      <tr><td><b>Sinônimos</b></td><td>visualizar</td><td>ver</td></tr>
-                      <tr><td><b>Abreviações/<br>Gírias</b></td><td>vc</td><td>você</td></tr>
-                      <tr><td><b>Gênero</b></td><td>Obrigada</td><td>Obrigado</td></tr>
-                      <tr><td><b>Correções Ortográficas</b></td><td>voce</td><td>você</td></tr>
-                      <tr><td><b>Correções Gramaticais</b></td><td>oi tudo bem</td><td>Oi. Tudo bem?</td></tr>
+                      <tr><td><b>Synonyms</b></td><td>visualize</td><td>see</td></tr>
+                      <tr><td><b>Abbreviations/<br>Slang</b></td><td>u</td><td>you</td></tr>
+                      <tr><td><b>Gender</b></td><td>she</td><td>he</td></tr>
+                      <tr><td><b>Orthographic Corrections</b></td><td>movi</td><td>movie</td></tr>
+                      <tr><td><b>Grammatical Corrections</b></td><td>Ok bye</td><td>Ok. Bye!</td></tr>
                      </tbody>
                  </table>
             </div>
         </div>
-    </div><!-- /main -->
+        </div><!-- /main -->
     </body>
 </html>
