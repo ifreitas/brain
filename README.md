@@ -23,8 +23,11 @@ The knowledge is represented graphically through a mental map which allows the k
 - It's simpler, more intuitive and more productive than any other AIML content generator;
 - Encourages the creation of as much content as possible.
 
+### Demo
+<p>Brain's demo version is available here: [http://ifreitas.github.io/brain/demo.html](http://ifreitas.github.io/brain/demo.html).</p>
+
 ### Instalation
-- Download the [brain.war](https://github.com/ifreitas/brain/zipball/master) file
+- Download the brain.war file
 - Deploy it to the java web server
 
 ### Version
