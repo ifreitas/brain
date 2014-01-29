@@ -411,7 +411,7 @@ function KnowledgeExtWrapper(){
 	}
 	
 	this.update  = function(){
-		var record = store.findRecord('id',ObjectManager.lastClicked.id)
+		var record = store.findRecord('id',ObjectManager.lastClicked.id, 0, false, true, true)
 		var form = prepareForm(record, {
 			success: function(rec, op) {
 				record.commit();
@@ -431,7 +431,7 @@ function KnowledgeExtWrapper(){
 		else{
 			Ext.MessageBox.confirm('Confirm to delete the knowledge?', 'If yes, all its topicss and nested knowledges will be removed too. Are you sure?', function(answer){
 				if(answer == 'yes'){
-					var record = store.findRecord('id',ObjectManager.lastClicked.id)
+					var record = store.findRecord('id',ObjectManager.lastClicked.id, 0, false, true, true)
 					store.remove(record)
 					store.sync();
 				}
@@ -579,7 +579,7 @@ function TopicExtWrapper(){
 		if(me.grid.getSelectionModel().getLastSelected() == null) return false;
 		
 		var selectedItem = me.grid.getSelectionModel().getLastSelected().data
-		var record = store.findRecord('id', selectedItem.id)
+		var record = store.findRecord('id', selectedItem.id, 0, false, true, true)
 		var form = prepareForm(record, {
 			success: function(rec, op) {
 				record.commit();
@@ -783,7 +783,7 @@ function TeachingExtWrapper(){
 	function update(){
 		if(grid.getSelectionModel().getLastSelected() == null) return false;
 		var selectedItem = grid.getSelectionModel().getLastSelected().data
-		var record = store.findRecord('id', selectedItem.id)
+		var record = store.findRecord('id', selectedItem.id, 0, false, true, true)
 		var form = prepareForm(record, {
 			success: function(rec, op) {
 				record.commit();
