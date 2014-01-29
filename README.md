@@ -24,7 +24,7 @@ The knowledge is represented graphically through a mental map which allows the k
 - Encourages the creation of as much content as possible.
 
 ### Demo
-<p>Brain's demo version is available here: [http://ifreitas.github.io/brain/demo.html](http://ifreitas.github.io/brain/demo.html).</p>
+Brain's demo version is available here: [Demo Page](http://ifreitas.github.io/brain/demo.html).
 
 ### Instalation
 - Download the brain.war file
