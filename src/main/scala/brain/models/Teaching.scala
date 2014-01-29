@@ -231,3 +231,30 @@ class TeachingToCategoryAdapter(teaching: Teaching) {
 
 }
 
+object KeyValueValidator {
+    private val notValidCharactersForKeyNameRegex  = """[^a-zA-Z_0-9\-\_]""".r
+    private val validCharactersForInitKeyNameRegex = """^[a-zA-Z\_]""".r
+    
+    def validateKeyValueString(keyValue:String):Unit={
+        val split = keyValue.split("=")
+        if(split.size == 1) throw new NoAttributionSignException("No equal sign ('=') found in attribution.")
+        if(split.size > 2)  throw new MoreThanOneAttributionSignException("The equal sign ('=') must be used only once per line.")
+        
+        val key   = split(0).trim
+        val value = split(1).trim
+        
+        if(key.isEmpty()) throw new NoVariableNameException("A variable name is required by left hand side of '='. Example: age=30.")
+        validateKeyName(key)
+    }
+    
+    def validateKeyName(key:String):Unit={
+        if(validCharactersForInitKeyNameRegex.findAllIn(key).isEmpty) throw new InvalidVariableNameException(s"The variable name must start with a letter or an underscore ('_'). Invalid character in: $key")
+        if(! notValidCharactersForKeyNameRegex.findAllIn(key).isEmpty) throw new InvalidVariableNameException(s"The variable name must have only letters (without signs or spaces), numbers and symbols '-' and '_'. Invalid character in: $key")
+    }
+}
+
+class NoAttributionSignException(cause:String) extends Exception(cause)
+class MoreThanOneAttributionSignException(cause:String) extends Exception(cause)
+class NoVariableNameException(cause:String) extends Exception(cause)
+class InvalidVariableNameException(cause:String) extends Exception(cause)
+class NoValueContentException(cause:String) extends Exception(cause)

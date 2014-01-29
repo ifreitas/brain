@@ -34,6 +34,7 @@ import aimltoxml.aiml.Text
 import aimltoxml.aiml.Srai
 import aimltoxml.aiml.TemplateElement
 import aimltoxml.aiml.Random
+import org.scalatest.FlatSpec
 
 class TeachingToCategoryAdapterTest extends FunSpec with Matchers with BeforeAndAfter {
 
@@ -158,6 +159,105 @@ class TeachingToCategoryAdapterTest extends FunSpec with Matchers with BeforeAnd
             categories.size should be(3)
             categories.map(_.pattern) should be(Set(Text("hi"), Text("hello"), Text("hello there")))
             categories.toList.map(_.templateElements.head) should be(List(Random("hi"), Srai("hi"), Srai("hi")))
+        }
+    }
+    
+    
+    describe("#validateAttributions"){
+        def setup = {
+        }
+        it("throws an exception if there is no '='"){
+            intercept[NoAttributionSignException](KeyValueValidator.validateKeyValueString(""))
+            intercept[NoAttributionSignException](KeyValueValidator.validateKeyValueString("someKey"))
+        }
+        it("throws an exception if there is more than one '='"){ 
+            intercept[MoreThanOneAttributionSignException](KeyValueValidator.validateKeyValueString("k1=v1 k2=v2"))
+            intercept[MoreThanOneAttributionSignException](KeyValueValidator.validateKeyValueString("k1==v1"))
+        }
+        it("throws an exception if there is no Key"){
+            intercept[NoVariableNameException](KeyValueValidator.validateKeyValueString(" =value"))
+        }
+        it("validates the Key name"){
+            //verify(mock, times(1)).validateKeyName("???")
+            pending
+        }
+        it("throws an exception if empty 'get' (${}) is present in Value"){ pending }
+        it("throws an exception if Value part contains space ' ' between the variable name ('age=${some value})"){ pending } 
+        it("throws an exception if unclosed 'get' (${) is present in right hand side"){ pending }
+    }
+    
+    describe("validateKeyName"){
+    	it("throws an exception if there is no Var"){
+            intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName(""))
+        }
+//        it("throws an exception if Key does not starts with a letter"){
+//            //certo
+//            KeyValueValidator.validateKeyName("_userName=value")
+//            KeyValueValidator.validateKeyName("userName=value")
+//            KeyValueValidator.validateKeyName("UserName=value")
+//            
+//            //errado
+//            intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("$=value"))
+//            intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("@=value"))
+//            intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("1a=value"))
+//            intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName(".a=value"))
+//            intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName(" á=value"))
+//        }
+        it("throws an exception if Key does not starts with a letter"){
+        	//certo
+        	KeyValueValidator.validateKeyName("_userName")
+        	KeyValueValidator.validateKeyName("userName")
+        	KeyValueValidator.validateKeyName("UserName")
+        	
+        	//errado
+        	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("$name"))
+        	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("@name"))
+        	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("1name"))
+        	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName(".name"))
+        	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("áname"))
+        }
+        it("throws an exception if Key part contains space ' ' between the variable name"){
+            intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("user name"))
+        } 
+//        it("throws an exception if Key part contains something differ from [a-zA-Z_0-9\\_\\-]"){
+//        	//correto:
+//        	KeyValueValidator.validateKeyName("username=value")
+//        	KeyValueValidator.validateKeyName("userName=value")
+//        	KeyValueValidator.validateKeyName("UserName=value")
+//        	KeyValueValidator.validateKeyName("user_name=value")
+//        	KeyValueValidator.validateKeyName("user-name=value")
+//        	KeyValueValidator.validateKeyName("_userName=value")
+//        	
+//        	//errado:
+//        	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("user name=value"))
+//        	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("user.name=value"))
+//        	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("user@name=value"))
+//        	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("#name=value"))
+//        	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("%name=value"))
+//        	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("&name=value"))
+//        	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("(name=value"))
+//        	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("tést=value"))
+//        	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("n@me=value"))
+//        }
+        it("throws an exception if Key part contains something differ from [a-zA-Z_0-9\\_\\-]"){
+            //correto:
+        	KeyValueValidator.validateKeyName("username")
+        	KeyValueValidator.validateKeyName("userName")
+        	KeyValueValidator.validateKeyName("UserName")
+        	KeyValueValidator.validateKeyName("user_name")
+        	KeyValueValidator.validateKeyName("user-name")
+        	KeyValueValidator.validateKeyName("_userName")
+            
+            //errado:
+        	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("user name"))
+        	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("user.name"))
+        	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("user@name"))
+        	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("n#me"))
+        	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("n%me"))
+        	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("nam&"))
+        	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("na(me"))
+        	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("tést"))
+        	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("n@me"))
         }
     }
 
