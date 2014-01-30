@@ -53,9 +53,8 @@ function initTree(json){
           },
         
         Node: {
-            height: 20,
+            height: 40,
             width: 80,
-            //color: '#6D89D5',
             type: 'rectangle',
             align: "center",  
             overridable: true,
@@ -98,22 +97,21 @@ function initTree(json){
         		knowledgeExtWrapper.update();
         	});
         	
-        	if(node.name.trim().length >= 10){
-        		label.title = node.name;
-        	}
-            label.id          = node.id;            
-            label.innerHTML   = node.name;
-            
+        	label.id          = node.id;
+        	setKnowledgeLabel(label, node.name)
+        	
             var style         = label.style;
             style.width       = 80 + 'px';
-            style.height      = 20 + 'px';
+            style.height      = 40 + 'px';
             style.color       = 'white';
             style.textAlign   = 'center';
+            style.verticalAlign  = 'middle';
             style.fontWeight  = 'bold';
             style.fontFamily  = 'tahoma,arial,verdana,sans-serif';
             style.fontSize    = '11px';
             style.overflow    = "hidden";
             style.cursor      = 'pointer';
+            style.lineHeight  = 40+'px';
         },
         
         Events: {  
@@ -186,14 +184,26 @@ function initTree(json){
     
     st.rename = function(knowledge, newName){
     	try{
+    		oldName = knowledge.name;
     		ObjectManager.lastClicked.name = newName;
-    		document.getElementById(knowledge.id).innerHTML = newName;
-    		Log.info("Knowledege '"+knowledge.name+"' renamed to '" + newName + "' successfully.");
+    		setKnowledgeLabel(document.getElementById(knowledge.id), newName)
+    		Log.info("Knowledege '"+oldName+"' renamed to '" + newName + "' successfully.");
     	}
     	catch(e){
     		Log.error("Unable to rename Knowledege '"+knowledge.name+"'. Cause: "+e);
     	}
     }
+    
+    function setKnowledgeLabel(knowledgeLabel, name){
+    	if(name.length > 8){
+    		knowledgeLabel.title = name
+    		knowledgeLabel.innerHTML = name.substring(0,8)+'...'
+    	}
+    	else{
+    		knowledgeLabel.innerHTML = name;
+    	}
+    }
+    
     
     try{
     	st.loadJSON(json);
