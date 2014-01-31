@@ -35,6 +35,8 @@ import aimltoxml.aiml.Srai
 import aimltoxml.aiml.TemplateElement
 import aimltoxml.aiml.Random
 import org.scalatest.FlatSpec
+import aimltoxml.aiml.Think
+import aimltoxml.aiml.Star
 
 class TeachingToCategoryAdapterTest extends FunSpec with Matchers with BeforeAndAfter {
 
@@ -141,13 +143,49 @@ class TeachingToCategoryAdapterTest extends FunSpec with Matchers with BeforeAnd
             adapter = new TeachingToCategoryAdapter(validTeaching)
         }
         it("when the pattern is equals to the default pattern then returns a category with the fully filled template") {
-            val expectedCategory = Category("hi", Random("hello there"))
-            adapter.createCategory("hi", "hi", Set("hello there"), "*") should be(expectedCategory)
+            val expectedCategory = new Category("hi", Set(Think(List.empty[TemplateElement]), Random("hello there")))
+            adapter.createCategory("hi", "hi", "*", List.empty[String], Set("hello there")) should be(expectedCategory)
         }
         it("when the pattern is not equals to the default pattern then returns a category which template contains only a srai pointing to the default pattern") {
             val expectedCategory = Category("hello", Srai("hi"))
-            adapter.createCategory("hello", "hi", Set("hello there"), "*") should be(expectedCategory)
+            adapter.createCategory("hello", "hi", "*", List.empty[String], Set("hello there")) should be(expectedCategory)
         }
+    }
+    
+    describe("#createTemplateElements"){ pending }
+    describe("#parseMemorize"){ pending }
+    describe("#parseSay"){ pending }
+    describe("#parseKeyValue"){ pending }
+    describe("#parseValue"){ pending }
+    
+    describe("#parseGet"){
+    	def setup = {
+    		adapter = new TeachingToCategoryAdapter(validTeaching)
+    	}
+    	it("return List(Text) if there is no getSyntax"){
+    		adapter.parseValue("only text") should be (List(Text("only text")))
+    	}
+    	it("return Star(1) if equals to '${*}'"){
+    		adapter.parseGet("${*1}") should be (Star(1))
+    	}
+    	it("return Star(i) if equals to '${*i}' (i=1)"){
+    		adapter.parseGet("${*1}") should be (Star(1))
+    	}
+    	it("return Star(i) if equals to '${*i}' (i=20)"){
+    		adapter.parseGet("${*20}") should be (Star(20))
+    	}
+    	it("throws an exception if i is not a Number"){
+    		intercept[InvalidStarIndexException](adapter.parseGet("${*aaa}"))
+    	}
+    	it("throws an exception if i < 1"){
+    		intercept[InvalidStarIndexException](adapter.parseGet("${*0}"))
+    	}
+    	it("throws an exception if the get is empty ('${}')"){
+    		intercept[InvalidGetSyntaxException](adapter.parseGet("${}"))
+    	}
+    	it("throws an exception if getSyntax does not match"){
+    		intercept[InvalidGetSyntaxException](adapter.parseGet("*1"))
+    	}
     }
 
     describe("#toCategory") {
@@ -158,7 +196,9 @@ class TeachingToCategoryAdapterTest extends FunSpec with Matchers with BeforeAnd
             val categories = adapter.toCategory
             categories.size should be(3)
             categories.map(_.pattern) should be(Set(Text("hi"), Text("hello"), Text("hello there")))
-            categories.toList.map(_.templateElements.head) should be(List(Random("hi"), Srai("hi"), Srai("hi")))
+            categories.toList(0).templateElements should be( Set(Think(List()), new Random(Set(List(Text("hi"))))))
+            categories.toList(1).templateElements should be( Set(Srai("hi")))
+            categories.toList(2).templateElements should be( Set(Srai("hi")) )
         }
     }
     
@@ -182,27 +222,14 @@ class TeachingToCategoryAdapterTest extends FunSpec with Matchers with BeforeAnd
             pending
         }
         it("throws an exception if empty 'get' (${}) is present in Value"){ pending }
-        it("throws an exception if Value part contains space ' ' between the variable name ('age=${some value})"){ pending } 
-        it("throws an exception if unclosed 'get' (${) is present in right hand side"){ pending }
+        it("throws an exception if Value part contains space ' ' ('age=${some value})"){ pending } 
+        it("throws an exception if unclosed 'get' (${) is present"){ pending }
     }
     
     describe("validateKeyName"){
-    	it("throws an exception if there is no Var"){
+    	it("throws an exception if there is no Key"){
             intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName(""))
         }
-//        it("throws an exception if Key does not starts with a letter"){
-//            //certo
-//            KeyValueValidator.validateKeyName("_userName=value")
-//            KeyValueValidator.validateKeyName("userName=value")
-//            KeyValueValidator.validateKeyName("UserName=value")
-//            
-//            //errado
-//            intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("$=value"))
-//            intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("@=value"))
-//            intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("1a=value"))
-//            intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName(".a=value"))
-//            intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName(" á=value"))
-//        }
         it("throws an exception if Key does not starts with a letter"){
         	//certo
         	KeyValueValidator.validateKeyName("_userName")
@@ -215,31 +242,12 @@ class TeachingToCategoryAdapterTest extends FunSpec with Matchers with BeforeAnd
         	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("1name"))
         	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName(".name"))
         	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("áname"))
+        	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("*name"))
         }
-        it("throws an exception if Key part contains space ' ' between the variable name"){
+        it("throws an exception if Key contains space (' ') in its name"){
             intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("user name"))
         } 
-//        it("throws an exception if Key part contains something differ from [a-zA-Z_0-9\\_\\-]"){
-//        	//correto:
-//        	KeyValueValidator.validateKeyName("username=value")
-//        	KeyValueValidator.validateKeyName("userName=value")
-//        	KeyValueValidator.validateKeyName("UserName=value")
-//        	KeyValueValidator.validateKeyName("user_name=value")
-//        	KeyValueValidator.validateKeyName("user-name=value")
-//        	KeyValueValidator.validateKeyName("_userName=value")
-//        	
-//        	//errado:
-//        	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("user name=value"))
-//        	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("user.name=value"))
-//        	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("user@name=value"))
-//        	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("#name=value"))
-//        	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("%name=value"))
-//        	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("&name=value"))
-//        	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("(name=value"))
-//        	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("tést=value"))
-//        	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("n@me=value"))
-//        }
-        it("throws an exception if Key part contains something differ from [a-zA-Z_0-9\\_\\-]"){
+        it("throws an exception if Key contains something differ from [a-zA-Z_0-9\\_\\-]"){
             //correto:
         	KeyValueValidator.validateKeyName("username")
         	KeyValueValidator.validateKeyName("userName")
@@ -258,6 +266,7 @@ class TeachingToCategoryAdapterTest extends FunSpec with Matchers with BeforeAnd
         	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("na(me"))
         	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("tést"))
         	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("n@me"))
+        	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("n*me"))
         }
     }
 

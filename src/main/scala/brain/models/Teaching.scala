@@ -33,6 +33,12 @@ import aimltoxml.aiml.Srai
 import aimltoxml.aiml.Random
 import aimltoxml.aiml.Get
 import aimltoxml.aiml.AimlSet
+import aimltoxml.aiml.AimlSet
+import scala.collection.mutable.ListBuffer
+import aimltoxml.aiml.Get
+import aimltoxml.aiml.Think
+import aimltoxml.aiml.RandomElement
+import aimltoxml.aiml.Star
 
 case class Teaching(whenTheUserSays:String, say:String) extends DbObject{
     require(!whenTheUserSays.isEmpty, "Field 'when the user says', can not be empty.")
@@ -157,41 +163,108 @@ object Teaching extends PersistentName {
 }
 
 class TeachingToCategoryAdapter(teaching: Teaching) {
+    
+    /**
+     * 
+     * var frase = "${var1} Ola, ${var2}, ${var3}"
+     * val regex = """\$\{([a-z0-9]*)\}""".r
+     * val matches = regex.findAllIn(frase)
+     * val split   = frase.split(regex.toString)
+     * val resultado = new scala.collection.mutable.ListBuffer[String]
+     * split.foreach{f=> resultado += s"${f}${matches.next}" }
+     * resultado.mkString("")
+     * 
+     */
 	
     require(teaching != null)
     
-	/* Para processar o say:
-	 *  var frase = "${var1} Ola, ${var2}, ${var3}"
-	 *  val regex = """\$\{([a-z0-9]*)\}""".r
-	 *  val matches = regex.findAllIn(frase)
-	 *  val split   = frase.split(regex.toString)
-	 *  val resultado = new scala.collection.mutable.ListBuffer[String]
-	 *  split.foreach{f=> resultado += s"${f}${matches.next}" }
-	 *  resultado.mkString("")
-     */
-    
     val respondingTo  : String 	    = if(teaching.respondingTo != null && !teaching.respondingTo.trim().isEmpty()) teaching.respondingTo else "*"
-    val whatWasSaid   : Set[String] = nonEmptyLinesToSet(teaching.whenTheUserSays)
-    //val whatToMemorize: Set[String] = nonEmptyLinesToSet(teaching.memorize)
-    val whatToSay     : Set[String] = nonEmptyLinesToSet(teaching.say)
+    val whatWasSaid   : Set[String] = linesToSet(teaching.whenTheUserSays)
+    val whatToMemorize: List[String] = linesToList(teaching.memorize)
+    val whatToSay     : Set[String] = linesToSet(teaching.say)
+    
+    val GetSyntaxRegex = """\$\{([a-zA-Z_0-9\-\_\*]*)\}""".r
+    val IndexRegex = """(\d+)""".r
     
     def toCategory: Set[Category] = {
         val defaultPattern = selectDefaultPattern(whatWasSaid)
-        //whatWasSaid.map(createCategory(_, defaultPattern, respondingTo, whatToMemorize, whatToSay))
-        whatWasSaid.map(createCategory(_, defaultPattern, whatToSay, respondingTo))
+        whatWasSaid.map(createCategory(_, defaultPattern, respondingTo, whatToMemorize, whatToSay))
     }
     
-    private def nonEmptyLinesToSet(aText:String):Set[String] = aText.split("\n").map(_.trim).toSet[String].filter(!_.trim.isEmpty)
+   	def createCategory(whatWasSaid: String, defaultPattern: String, respondingTo: String, whatToMemorize: List[String], whatToSay: Set[String]):Category = {
+        if (whatWasSaid == defaultPattern) Category(whatWasSaid, createTemplateElements(whatToMemorize, whatToSay), respondingTo)
+        else new Category(whatWasSaid, Set(Srai(defaultPattern)), respondingTo)
+    }
+   	
+    def createTemplateElements(memorize: List[String], say: Set[String]): Set[TemplateElement] = {
+        val think:Think = Think(parseMemorize(memorize))
+        val listOfWhatToSay:Set[List[RandomElement]] = parseSay(say.toList)
+        Set(think, new Random(listOfWhatToSay))
+    }
+    
+    def parseMemorize(whatToMemorize: List[String]):List[AimlSet]  = whatToMemorize.map{parseKeyValue(_)}
+    def parseSay(whatToSay: List[String]):Set[List[RandomElement]] = whatToSay.map{parseValue(_)}.toSet.asInstanceOf[Set[List[RandomElement]]]
+    
+    def parseKeyValue(keyValueString:String):AimlSet = {
+        KeyValueValidator.validateKeyValueString(keyValueString)
+        val keyValue   = keyValueString.split("=")
+        AimlSet(keyValue(0).trim(), parseValue(keyValue(1)))
+    }
+    
+    /**
+     * 
+     * - "test"          => Text('test')
+     * - "${test}"       => Get("test")
+     * - "hello ${name}" => Text("hello "), Get("name")
+     */
+    def parseValue(valueString:String):List[TemplateElement] = {
+		val iteratorOfGet = GetSyntaxRegex.findAllIn(valueString).map(g=>parseGet(g))
+        val result: ListBuffer[TemplateElement] = new ListBuffer
+        val splitedValue = valueString.split(GetSyntaxRegex.toString)
         
-    def extractAimlSets(memorize:String):Set[AimlSet] = {
-        val keyValues = nonEmptyLinesToSet(memorize)
-        if(keyValues.isEmpty){ return Set.empty[AimlSet] }
-        keyValues.map{ keyValue =>
-            var kv = keyValue.split("=")
-            new AimlSet(kv(0).trim,Text(kv(1).trim))
+        if(splitedValue.isEmpty){
+            while(iteratorOfGet.hasNext)result.add(iteratorOfGet.next)
+        }
+        else{
+        	splitedValue.foreach{txt=>
+	            result.add(Text(txt));
+	            if(iteratorOfGet.hasNext)result.add(iteratorOfGet.next)
+	    	}
+        }
+    	result.toList
+    }
+    
+    /**
+     * ${} 		=> exception
+     * ${*}		=> Star(1)
+     * ${*i}	=> Star(i) // 'i' as integer
+     * ${someName}	=> Get(someName)
+     */
+    def parseGet(getSyntaxString:String):TemplateElement = {
+        val get = GetSyntaxRegex.findFirstMatchIn(getSyntaxString)
+		var starIndexRegex = """[^\*]+""".r
+        
+        if(get.isEmpty) throw new InvalidGetSyntaxException(s"No get syntax match in $getSyntaxString")
+        
+        get.get.group(1) match{
+            case star if star.trim.startsWith("*") => {
+                try {
+        			var index = starIndexRegex.findFirstIn(star).getOrElse("1").toInt
+                	if(index < 1) throw new InvalidStarIndexException(s"The star's index must be greater than 0. Please fix '$star'")
+        			Star(index)
+                }
+                catch{
+                    case numberFormatException: NumberFormatException => throw new InvalidStarIndexException(s"Only numbers can be used to access star's index. Please fix '$star' ('${"""[^\*]+""".r.findFirstIn(star).get}')")
+                }
+            }
+            case name if(!name.trim.contains(" "))=> Get(name.trim)
+            case other => throw new InvalidGetSyntaxException(s"Invalid get syntax excetion in '${other}'")
         }
     }
-
+    
+    private def linesToSet(aText:String):Set[String]   = if(aText == null)Set.empty[String]  else aText.split("\n").map(_.trim).filter(!_.isEmpty).toSet
+	private def linesToList(aText:String):List[String] = if(aText == null)List.empty[String] else aText.split("\n").map(_.trim).filter(!_.isEmpty).toList
+        
     def selectDefaultPattern(setOfWhatWasSaid: Set[String]) = {
         var defaultPattern         = ""
         var lowerPatternComplexity = 100.0
@@ -222,13 +295,6 @@ class TeachingToCategoryAdapter(teaching: Teaching) {
     // it should be a calculateThePatternComplexity's local function, but is not for tests purposes.
     def countSpecialChar(c: String, p: String) = { p.split("\\" + c + "+", -1).size - 1 }
 
-    def createCategory(whatWasSaid: String, defaultPattern: String, whatToSay: Set[String], respondingTo: String):Category = {
-        if (whatWasSaid == defaultPattern) Category(whatWasSaid, createTemplateElements(whatToSay), respondingTo)
-        else new Category(whatWasSaid, Set(Srai(defaultPattern)), respondingTo)
-    }
-
-    def createTemplateElements(say: Set[String]): Set[TemplateElement] = Set(new Random(say.map({Text(_)})))
-
 }
 
 object KeyValueValidator {
@@ -243,13 +309,13 @@ object KeyValueValidator {
         val key   = split(0).trim
         val value = split(1).trim
         
-        if(key.isEmpty()) throw new NoVariableNameException("A variable name is required by left hand side of '='. Example: age=30.")
+        if(key.isEmpty()) throw new NoVariableNameException("A variable name is required by left hand side of '='. Example: age = ...")
         validateKeyName(key)
     }
     
     def validateKeyName(key:String):Unit={
         if(validCharactersForInitKeyNameRegex.findAllIn(key).isEmpty) throw new InvalidVariableNameException(s"The variable name must start with a letter or an underscore ('_'). Invalid character in: $key")
-        if(! notValidCharactersForKeyNameRegex.findAllIn(key).isEmpty) throw new InvalidVariableNameException(s"The variable name must have only letters (without signs or spaces), numbers and symbols '-' and '_'. Invalid character in: $key")
+        if(!notValidCharactersForKeyNameRegex.findAllIn(key).isEmpty) throw new InvalidVariableNameException(s"The variable name must have only letters (without signs or spaces), numbers and symbols '-' and '_'. Invalid character in: $key")
     }
 }
 
@@ -258,3 +324,5 @@ class MoreThanOneAttributionSignException(cause:String) extends Exception(cause)
 class NoVariableNameException(cause:String) extends Exception(cause)
 class InvalidVariableNameException(cause:String) extends Exception(cause)
 class NoValueContentException(cause:String) extends Exception(cause)
+class InvalidStarIndexException(cause:String) extends Exception(cause)
+class InvalidGetSyntaxException(cause:String) extends Exception(cause)
