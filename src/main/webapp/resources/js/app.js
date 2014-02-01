@@ -367,12 +367,14 @@ Ext.application({
 								tooltip:'Apply the new Knowledge Base to the bot.',
 								iconCls:'accept',
 								  handler:function(){
-									  this.setDisabled(true)
+									  var applyButton = this
+									  applyButton.setDisabled(true)
 									  Log.info("Applying the new Knowledge Base. Please wait...")
 									  Ext.Ajax.request({
 										   url: 'rest/knowledges/apply.json',
 										   success: function(response, opts) {
 											   var obj = Ext.decode(response.responseText);
+											   applyButton.setDisabled(false)
 											   if(obj.success=="true"){
 												   Log.info("Knowledge Base applied succesfully. New files in: " + obj.path+".")
 											   }
@@ -382,11 +384,11 @@ Ext.application({
 											   }
 										   },
 										   failure: function(response, opts) {// network error
+											   applyButton.setDisabled(false)
 											   var obj = Ext.decode(response.responseText);
 											   Log.error("Unable to apply the new Knowledge base. " + obj.msg)
 										   }
 										})
-										this.setDisabled(false)
 								  }
 							},
 							'->',
