@@ -163,28 +163,14 @@ object Teaching extends PersistentName {
 }
 
 class TeachingToCategoryAdapter(teaching: Teaching) {
-    
-    /**
-     * 
-     * var frase = "${var1} Ola, ${var2}, ${var3}"
-     * val regex = """\$\{([a-z0-9]*)\}""".r
-     * val matches = regex.findAllIn(frase)
-     * val split   = frase.split(regex.toString)
-     * val resultado = new scala.collection.mutable.ListBuffer[String]
-     * split.foreach{f=> resultado += s"${f}${matches.next}" }
-     * resultado.mkString("")
-     * 
-     */
-	
     require(teaching != null)
     
-    val respondingTo  : String 	    = if(teaching.respondingTo != null && !teaching.respondingTo.trim().isEmpty()) teaching.respondingTo else "*"
-    val whatWasSaid   : Set[String] = linesToSet(teaching.whenTheUserSays)
+    val respondingTo  : String 	     = if(teaching.respondingTo != null && !teaching.respondingTo.trim().isEmpty()) teaching.respondingTo else "*"
+    val whatWasSaid   : Set[String]  = linesToSet(teaching.whenTheUserSays)
     val whatToMemorize: List[String] = linesToList(teaching.memorize)
-    val whatToSay     : Set[String] = linesToSet(teaching.say)
+    val whatToSay     : Set[String]  = linesToSet(teaching.say)
     
     val GetSyntaxRegex = """\$\{([a-zA-Z_0-9\-\_\*]*)\}""".r
-    val IndexRegex = """(\d+)""".r
     
     def toCategory: Set[Category] = {
         val defaultPattern = selectDefaultPattern(whatWasSaid)
@@ -192,21 +178,19 @@ class TeachingToCategoryAdapter(teaching: Teaching) {
     }
     
    	def createCategory(whatWasSaid: String, defaultPattern: String, respondingTo: String, whatToMemorize: List[String], whatToSay: Set[String]):Category = {
-        if (whatWasSaid == defaultPattern) Category(whatWasSaid, createTemplateElements(whatToMemorize, whatToSay), respondingTo)
-        else new Category(whatWasSaid, Set(Srai(defaultPattern)), respondingTo)
+        if (whatWasSaid == defaultPattern)	Category(whatWasSaid, createTemplateElements(whatToMemorize, whatToSay), respondingTo)
+        else 								Category(whatWasSaid, Set[TemplateElement](Srai(defaultPattern)), respondingTo)
     }
    	
     def createTemplateElements(memorize: List[String], say: Set[String]): Set[TemplateElement] = {
-        val think:Think = Think(parseMemorize(memorize))
-        val listOfWhatToSay:Set[List[RandomElement]] = parseSay(say.toList)
-        Set(think, new Random(listOfWhatToSay))
+        Set(Think(parseMemorize(memorize)), new Random(parseSay(say.toList)))
     }
     
-    def parseMemorize(whatToMemorize: List[String]):List[AimlSet]  = whatToMemorize.map{parseKeyValue(_)}
+    def parseMemorize(listOfThingsToMemorize: List[String]):List[AimlSet]  = listOfThingsToMemorize.map{parseKeyValue(_)}
     def parseSay(whatToSay: List[String]):Set[List[RandomElement]] = whatToSay.map{parseValue(_)}.toSet.asInstanceOf[Set[List[RandomElement]]]
     
     def parseKeyValue(keyValueString:String):AimlSet = {
-        KeyValueValidator.validateKeyValueString(keyValueString)
+        KeyValueValidator.validateKeyValue(keyValueString)
         val keyValue   = keyValueString.split("=")
         AimlSet(keyValue(0).trim(), parseValue(keyValue(1)))
     }
@@ -219,26 +203,19 @@ class TeachingToCategoryAdapter(teaching: Teaching) {
      */
     def parseValue(valueString:String):List[TemplateElement] = {
 		val iteratorOfGet = GetSyntaxRegex.findAllIn(valueString).map(g=>parseGet(g))
+        val splitedValue  = valueString.split(GetSyntaxRegex.toString)
         val result: ListBuffer[TemplateElement] = new ListBuffer
-        val splitedValue = valueString.split(GetSyntaxRegex.toString)
         
-        if(splitedValue.isEmpty){
-            while(iteratorOfGet.hasNext)result.add(iteratorOfGet.next)
-        }
-        else{
-        	splitedValue.foreach{txt=>
-	            result.add(Text(txt));
-	            if(iteratorOfGet.hasNext)result.add(iteratorOfGet.next)
-	    	}
-        }
+        if ( splitedValue.isEmpty ) while(iteratorOfGet.hasNext)result.add(iteratorOfGet.next)
+        else splitedValue.foreach{txt=> result.add(Text(txt)); if(iteratorOfGet.hasNext) result.add(iteratorOfGet.next)}
     	result.toList
     }
     
     /**
-     * ${} 		=> exception
-     * ${*}		=> Star(1)
-     * ${*i}	=> Star(i) // 'i' as integer
-     * ${someName}	=> Get(someName)
+     * ${} 		   => exception
+     * ${*}		   => Star(1)
+     * ${*i}	   => Star(i) // 'i' as integer
+     * ${someName} => Get(someName)
      */
     def parseGet(getSyntaxString:String):TemplateElement = {
         val get = GetSyntaxRegex.findFirstMatchIn(getSyntaxString)
@@ -247,18 +224,20 @@ class TeachingToCategoryAdapter(teaching: Teaching) {
         if(get.isEmpty) throw new InvalidGetSyntaxException(s"No get syntax match in $getSyntaxString")
         
         get.get.group(1) match{
+	        case emptyGet if(emptyGet.trim.isEmpty)=> throw new InvalidGetSyntaxException("Invalid get syntax excetion in '${}'.")
             case star if star.trim.startsWith("*") => {
                 try {
-        			var index = starIndexRegex.findFirstIn(star).getOrElse("1").toInt
-                	if(index < 1) throw new InvalidStarIndexException(s"The star's index must be greater than 0. Please fix '$star'")
-        			Star(index)
+        			starIndexRegex.findFirstIn(star).getOrElse("1").toInt match{
+        			    case index if index > 0 => Star(index)
+        			    case _ => throw new InvalidStarIndexException(s"The star's index must be greater than 0. Please fix it in '$star'.")
+        			}
                 }
                 catch{
-                    case numberFormatException: NumberFormatException => throw new InvalidStarIndexException(s"Only numbers can be used to access star's index. Please fix '$star' ('${"""[^\*]+""".r.findFirstIn(star).get}')")
+                    case nan: NumberFormatException => throw new InvalidStarIndexException(s"Only numbers can be used to access star's index. Please fix '$star' ('${"""[^\*]+""".r.findFirstIn(star).get}')")
                 }
             }
             case name if(!name.trim.contains(" "))=> Get(name.trim)
-            case other => throw new InvalidGetSyntaxException(s"Invalid get syntax excetion in '${other}'")
+            case badGetName => throw new InvalidGetSyntaxException(s"Invalid get syntax excetion in '${badGetName}'")
         }
     }
     
@@ -298,24 +277,34 @@ class TeachingToCategoryAdapter(teaching: Teaching) {
 }
 
 object KeyValueValidator {
-    private val notValidCharactersForKeyNameRegex  = """[^a-zA-Z_0-9\-\_]""".r
-    private val validCharactersForInitKeyNameRegex = """^[a-zA-Z\_]""".r
+    private val invalidCharactersForKeyNameRegex           = """([^a-zA-Z_0-9\-\_])""".r
+	private val invalidCharactersForInitializeKeyNameRegex = """^([^a-zA-Z\_])""".r
+    private val keyRegex                                   = """[^\s](.+)\=""".r
+    private val valueRegex                                 = """\=(.*)""".r
+    private val attributionSignRegex                       = """(\=){1}""".r
     
-    def validateKeyValueString(keyValue:String):Unit={
-        val split = keyValue.split("=")
-        if(split.size == 1) throw new NoAttributionSignException("No equal sign ('=') found in attribution.")
-        if(split.size > 2)  throw new MoreThanOneAttributionSignException("The equal sign ('=') must be used only once per line.")
+    def validateKeyValue(keyValue:String):Unit={
+        val attributionOption = attributionSignRegex.findAllMatchIn(keyValue)
+        val keyOption         = keyRegex.findFirstMatchIn(keyValue)
+        val valueOption       = valueRegex.findFirstMatchIn(keyValue)
         
-        val key   = split(0).trim
-        val value = split(1).trim
+        if(attributionOption.isEmpty) throw new NoAttributionSignException(s"No equal sign ('=') found in attribution: '$keyValue'.")
+        if(attributionOption.size>1 ) throw new MoreThanOneAttributionSignException(s"The equal sign ('=') must be used only once per line. Please, break '$keyValue' into more than one line.") 
         
-        if(key.isEmpty()) throw new NoVariableNameException("A variable name is required by left hand side of '='. Example: age = ...")
-        validateKeyName(key)
+        if(keyOption.isEmpty) throw new NoVariableNameException("A variable name is required by left hand side of '='. Example: name = ...")        
+        validateKey(keyOption.get.group(1))
     }
     
-    def validateKeyName(key:String):Unit={
-        if(validCharactersForInitKeyNameRegex.findAllIn(key).isEmpty) throw new InvalidVariableNameException(s"The variable name must start with a letter or an underscore ('_'). Invalid character in: $key")
-        if(!notValidCharactersForKeyNameRegex.findAllIn(key).isEmpty) throw new InvalidVariableNameException(s"The variable name must have only letters (without signs or spaces), numbers and symbols '-' and '_'. Invalid character in: $key")
+    def validateKey(key:String):Unit={
+        val invalidCharacterForInitialize = invalidCharactersForInitializeKeyNameRegex.findFirstMatchIn(key)
+        val invalidCharacterForName       = invalidCharactersForKeyNameRegex.findFirstMatchIn(key)
+        if(invalidCharacterForInitialize.isDefined) throw new InvalidVariableNameException(s"The variable name must start with a letter or an underscore ('_'). Invalid character '${invalidCharacterForInitialize.get.group(1)}' in '$key'")
+        if(invalidCharacterForName.isDefined)       throw new InvalidVariableNameException(s"The variable name must have only letters (without signs or spaces), numbers and symbols '-' and '_'. Invalid character '${invalidCharacterForName.get.group(1)}' in '$key'")
+        if(key.trim.isEmpty) throw new NoVariableNameException("A variable name is required by left hand side of '='. Example: name = ...")
+    }
+    
+    def validateValue(value:String):Unit={
+        // throw exception if possui emptyGet ('${\s*}')
     }
 }
 

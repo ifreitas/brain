@@ -203,19 +203,21 @@ class TeachingToCategoryAdapterTest extends FunSpec with Matchers with BeforeAnd
     }
     
     
-    describe("#validateAttributions"){
+    describe("#validateKeyValue"){
         def setup = {
         }
         it("throws an exception if there is no '='"){
-            intercept[NoAttributionSignException](KeyValueValidator.validateKeyValueString(""))
-            intercept[NoAttributionSignException](KeyValueValidator.validateKeyValueString("someKey"))
+            // should not raise an error!
+            KeyValueValidator.validateKeyValue("test=")
+            intercept[NoAttributionSignException](KeyValueValidator.validateKeyValue(""))
+            intercept[NoAttributionSignException](KeyValueValidator.validateKeyValue("someKey"))
         }
         it("throws an exception if there is more than one '='"){ 
-            intercept[MoreThanOneAttributionSignException](KeyValueValidator.validateKeyValueString("k1=v1 k2=v2"))
-            intercept[MoreThanOneAttributionSignException](KeyValueValidator.validateKeyValueString("k1==v1"))
+            intercept[MoreThanOneAttributionSignException](KeyValueValidator.validateKeyValue("k1=v1 k2=v2"))
+            intercept[MoreThanOneAttributionSignException](KeyValueValidator.validateKeyValue("k1==v1"))
         }
         it("throws an exception if there is no Key"){
-            intercept[NoVariableNameException](KeyValueValidator.validateKeyValueString(" =value"))
+            intercept[NoVariableNameException](KeyValueValidator.validateKeyValue(" =value"))
         }
         it("validates the Key name"){
             //verify(mock, times(1)).validateKeyName("???")
@@ -226,47 +228,47 @@ class TeachingToCategoryAdapterTest extends FunSpec with Matchers with BeforeAnd
         it("throws an exception if unclosed 'get' (${) is present"){ pending }
     }
     
-    describe("validateKeyName"){
+    describe("validateKey"){
     	it("throws an exception if there is no Key"){
-            intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName(""))
+            intercept[NoVariableNameException](KeyValueValidator.validateKey(""))
         }
         it("throws an exception if Key does not starts with a letter"){
         	//certo
-        	KeyValueValidator.validateKeyName("_userName")
-        	KeyValueValidator.validateKeyName("userName")
-        	KeyValueValidator.validateKeyName("UserName")
+        	KeyValueValidator.validateKey("_userName")
+        	KeyValueValidator.validateKey("userName")
+        	KeyValueValidator.validateKey("UserName")
         	
         	//errado
-        	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("$name"))
-        	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("@name"))
-        	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("1name"))
-        	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName(".name"))
-        	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("áname"))
-        	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("*name"))
+        	intercept[InvalidVariableNameException](KeyValueValidator.validateKey("$name"))
+        	intercept[InvalidVariableNameException](KeyValueValidator.validateKey("@name"))
+        	intercept[InvalidVariableNameException](KeyValueValidator.validateKey("1name"))
+        	intercept[InvalidVariableNameException](KeyValueValidator.validateKey(".name"))
+        	intercept[InvalidVariableNameException](KeyValueValidator.validateKey("áname"))
+        	intercept[InvalidVariableNameException](KeyValueValidator.validateKey("*name"))
         }
         it("throws an exception if Key contains space (' ') in its name"){
-            intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("user name"))
+            intercept[InvalidVariableNameException](KeyValueValidator.validateKey("user name"))
         } 
         it("throws an exception if Key contains something differ from [a-zA-Z_0-9\\_\\-]"){
             //correto:
-        	KeyValueValidator.validateKeyName("username")
-        	KeyValueValidator.validateKeyName("userName")
-        	KeyValueValidator.validateKeyName("UserName")
-        	KeyValueValidator.validateKeyName("user_name")
-        	KeyValueValidator.validateKeyName("user-name")
-        	KeyValueValidator.validateKeyName("_userName")
+        	KeyValueValidator.validateKey("username")
+        	KeyValueValidator.validateKey("userName")
+        	KeyValueValidator.validateKey("UserName")
+        	KeyValueValidator.validateKey("user_name")
+        	KeyValueValidator.validateKey("user-name")
+        	KeyValueValidator.validateKey("_userName")
             
             //errado:
-        	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("user name"))
-        	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("user.name"))
-        	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("user@name"))
-        	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("n#me"))
-        	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("n%me"))
-        	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("nam&"))
-        	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("na(me"))
-        	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("tést"))
-        	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("n@me"))
-        	intercept[InvalidVariableNameException](KeyValueValidator.validateKeyName("n*me"))
+        	intercept[InvalidVariableNameException](KeyValueValidator.validateKey("user name"))
+        	intercept[InvalidVariableNameException](KeyValueValidator.validateKey("user.name"))
+        	intercept[InvalidVariableNameException](KeyValueValidator.validateKey("user@name"))
+        	intercept[InvalidVariableNameException](KeyValueValidator.validateKey("n#me"))
+        	intercept[InvalidVariableNameException](KeyValueValidator.validateKey("n%me"))
+        	intercept[InvalidVariableNameException](KeyValueValidator.validateKey("nam&"))
+        	intercept[InvalidVariableNameException](KeyValueValidator.validateKey("na(me"))
+        	intercept[InvalidVariableNameException](KeyValueValidator.validateKey("tést"))
+        	intercept[InvalidVariableNameException](KeyValueValidator.validateKey("n@me"))
+        	intercept[InvalidVariableNameException](KeyValueValidator.validateKey("n*me"))
         }
     }
 
