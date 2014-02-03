@@ -39,6 +39,7 @@ import aimltoxml.aiml.Get
 import aimltoxml.aiml.Think
 import aimltoxml.aiml.RandomElement
 import aimltoxml.aiml.Star
+import aimltoxml.aiml.Get
 
 case class Teaching(whenTheUserSays:String, say:String) extends DbObject{
     require(!whenTheUserSays.isEmpty, "Field 'when the user says', can not be empty.")
@@ -52,13 +53,40 @@ case class Teaching(whenTheUserSays:String, say:String) extends DbObject{
     
     def toAiml:Set[Category] = new TeachingToCategoryAdapter(this).toCategory
     
-    def save()(implicit db:TransactionalGraph) = transact{
+    def save()(implicit db:TransactionalGraph):Vertex = transact{
         if(this.respondingTo == null || this.respondingTo.trim().equals("")) this.respondingTo = null
         if(this.memorize == null || this.memorize.trim().equals("")) this.memorize = null
         
-        val that = super.save()
-        db.getVertex(topicId.get) --> "include" --> that
-        that
+        if(this.memorize != null){
+            this.memorize.split("\n").map(_.trim).filter(!_.isEmpty).toList.foreach({keyValue=>
+                try{
+                    //MemorizeUtil.validate(keyValue)
+                    KeyValueValidator.validateKeyValue(keyValue) 
+                }
+                catch{
+                    case e:Throwable => throw new Exception(s"Invalid syntax in 'Memorize' field. ${e.getMessage}")
+                }
+            })
+        }
+        
+        if(this.id.isDefined){
+            this.update
+        }
+        else{
+        	val that = super.save()
+			db.getVertex(topicId.get) --> "include" --> that
+			that
+        }
+        
+    }
+    
+    def update()(implicit db:TransactionalGraph) = transact{
+        val vertex = db.getVertex(this.id.get)
+		vertex.setProperty("whenTheUserSays", this.whenTheUserSays)
+		if(this.respondingTo!=null) vertex.setProperty("respondingTo", this.respondingTo)
+		if(this.memorize!=null)     vertex.setProperty("memorize",     this.memorize)
+		vertex.setProperty("say", this.say)
+		vertex
     }
     
     def destroy() (implicit db:TransactionalGraph) = transact { 
@@ -182,12 +210,10 @@ class TeachingToCategoryAdapter(teaching: Teaching) {
         else 								Category(whatWasSaid, Set[TemplateElement](Srai(defaultPattern)), respondingTo)
     }
    	
-    def createTemplateElements(memorize: List[String], say: Set[String]): Set[TemplateElement] = {
-        Set(Think(parseMemorize(memorize)), new Random(parseSay(say.toList)))
-    }
-    
-    def parseMemorize(listOfThingsToMemorize: List[String]):List[AimlSet]  = listOfThingsToMemorize.map{parseKeyValue(_)}
-    def parseSay(whatToSay: List[String]):Set[List[RandomElement]] = whatToSay.map{parseValue(_)}.toSet.asInstanceOf[Set[List[RandomElement]]]
+    def createTemplateElements(memorize: List[String], say: Set[String]):Set[TemplateElement] = Set(parseMemorize(memorize), parseSay(say.toList))
+
+    def parseMemorize(listOfThingsToMemorize: List[String]):Think  = Think(listOfThingsToMemorize.map{parseKeyValue(_)})
+    def parseSay(whatToSay: List[String]):Random = new Random(whatToSay.map{parseValue(_)}.toSet.asInstanceOf[Set[List[RandomElement]]])
     
     def parseKeyValue(keyValueString:String):AimlSet = {
         KeyValueValidator.validateKeyValue(keyValueString)
@@ -224,7 +250,7 @@ class TeachingToCategoryAdapter(teaching: Teaching) {
         if(get.isEmpty) throw new InvalidGetSyntaxException(s"No get syntax match in $getSyntaxString")
         
         get.get.group(1) match{
-	        case emptyGet if(emptyGet.trim.isEmpty)=> throw new InvalidGetSyntaxException("Invalid get syntax excetion in '${}'.")
+	        case emptyGet if(emptyGet.trim.isEmpty)=> throw new InvalidGetSyntaxException("Invalid get syntax in '${}'. A name is required between '{}'. Example: ${someVarName}")
             case star if star.trim.startsWith("*") => {
                 try {
         			starIndexRegex.findFirstIn(star).getOrElse("1").toInt match{
@@ -281,7 +307,7 @@ object KeyValueValidator {
     
     private val invalidCharactersForKeyNameRegex           = """([^a-zA-Z_0-9\-\_])""".r
 	private val invalidCharactersForInitializeKeyNameRegex = """^([^a-zA-Z\_])""".r
-    private val keyRegex                                   = """\s*([^\s].+?)\s*=""".r
+    private val keyRegex                                   = """\s*([^\s].*?)\s*=""".r
     private val valueRegex                                 = """=(.*)""".r
     private val attributionSignRegex                       = """(=){1}""".r
     
@@ -293,7 +319,7 @@ object KeyValueValidator {
         if(attributionOption.isEmpty) throw new NoAttributionSignException(s"No equal sign ('=') found in attribution: '$keyValue'.")
         if(attributionOption.size>1 ) throw new MoreThanOneAttributionSignException(s"The equal sign ('=') must be used only once per line. Please, break '$keyValue' into more than one line.") 
         
-        if(keyOption.isEmpty) throw new NoVariableNameException("A variable name is required by left hand side of '='. Example: name = ...")        
+        if(keyOption.isEmpty) throw new NoVariableNameException(s"A variable name is required by left hand side of '=' in '$keyValue'. Example: someVarName$keyValue")        
         validateKey(keyOption.get)
     }
     

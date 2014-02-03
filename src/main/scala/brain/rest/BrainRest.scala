@@ -219,12 +219,8 @@ object BrainRest extends RestHelper {
         	implicit val db = GraphDb.get
 			try{
 				//TODO: retornar 404 caso este knowlege nao tenha esta information
-				val vertex = db.getVertex(id)
-				vertex.setProperty("whenTheUserSays", teaching.whenTheUserSays)
-				vertex.setProperty("respondingTo", teaching.respondingTo)
-				vertex.setProperty("memorize", teaching.memorize)
-				vertex.setProperty("say", teaching.say)
-				db.commit
+			    teaching.update
+				
 				teaching : JValue
 			}
         	catch{
