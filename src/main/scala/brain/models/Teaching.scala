@@ -57,17 +57,7 @@ case class Teaching(whenTheUserSays:String, say:String) extends DbObject{
         if(this.respondingTo == null || this.respondingTo.trim().equals("")) this.respondingTo = null
         if(this.memorize == null || this.memorize.trim().equals("")) this.memorize = null
         
-        if(this.memorize != null){
-            this.memorize.split("\n").map(_.trim).filter(!_.isEmpty).toList.foreach({keyValue=>
-                try{
-                    //MemorizeUtil.validate(keyValue)
-                    KeyValueValidator.validateKeyValue(keyValue) 
-                }
-                catch{
-                    case e:Throwable => throw new Exception(s"Invalid syntax in 'Memorize' field. ${e.getMessage}")
-                }
-            })
-        }
+        validateMemorize
         
         if(this.id.isDefined){
             this.update
@@ -80,7 +70,22 @@ case class Teaching(whenTheUserSays:String, say:String) extends DbObject{
         
     }
     
+    private def validateMemorize() = {
+        if(this.memorize != null){
+            this.memorize.split("\n").map(_.trim).filter(!_.isEmpty).toList.foreach({ keyValue =>
+                try {
+                    MemorizeUtil.validate(keyValue)
+                }
+                catch {
+                    case e: Throwable => throw new Exception(s"Invalid syntax in 'Memorize' field. ${e.getMessage}")
+                }
+            })
+        }
+    }
+    
     def update()(implicit db:TransactionalGraph) = transact{
+        validateMemorize
+        
         val vertex = db.getVertex(this.id.get)
 		vertex.setProperty("whenTheUserSays", this.whenTheUserSays)
 		if(this.respondingTo!=null) vertex.setProperty("respondingTo", this.respondingTo)
@@ -194,11 +199,9 @@ class TeachingToCategoryAdapter(teaching: Teaching) {
     require(teaching != null)
     
     val respondingTo  : String 	     = if(teaching.respondingTo != null && !teaching.respondingTo.trim().isEmpty()) teaching.respondingTo else "*"
-    val whatWasSaid   : Set[String]  = linesToSet(teaching.whenTheUserSays)
-    val whatToMemorize: List[String] = linesToList(teaching.memorize)
-    val whatToSay     : Set[String]  = linesToSet(teaching.say)
-    
-    val GetSyntaxRegex = """\$\{([a-zA-Z_0-9\-\_\*]*)\}""".r
+    val whatWasSaid   : Set[String]  = StringUtil.linesToSet(teaching.whenTheUserSays)
+    val whatToMemorize: List[String] = StringUtil.linesToList(teaching.memorize)
+    val whatToSay     : Set[String]  = StringUtil.linesToSet(teaching.say)
     
     def toCategory: Set[Category] = {
         val defaultPattern = selectDefaultPattern(whatWasSaid)
@@ -212,14 +215,15 @@ class TeachingToCategoryAdapter(teaching: Teaching) {
    	
     def createTemplateElements(memorize: List[String], say: Set[String]):Set[TemplateElement] = Set(parseMemorize(memorize), parseSay(say.toList))
 
-    def parseMemorize(listOfThingsToMemorize: List[String]):Think  = Think(listOfThingsToMemorize.map{parseKeyValue(_)})
-    def parseSay(whatToSay: List[String]):Random = new Random(whatToSay.map{parseValue(_)}.toSet.asInstanceOf[Set[List[RandomElement]]])
-    
-    def parseKeyValue(keyValueString:String):AimlSet = {
-        KeyValueValidator.validateKeyValue(keyValueString)
-        val keyValue   = keyValueString.split("=")
-        AimlSet(keyValue(0).trim(), parseValue(keyValue(1)))
+    def parseMemorize(listOfThingsToMemorize: List[String]): Think = {
+        Think(listOfThingsToMemorize.map { keyValue =>
+            KeyValueValidator.validateKeyValue(keyValue)
+            val key   = KeyValueUtil.findKey(keyValue).get
+            val value = KeyValueUtil.findValue(keyValue).get
+            AimlSet(key, parseText(value))
+        })
     }
+    def parseSay(whatToSay: List[String]): Random = new Random(whatToSay.map { parseText(_) }.toSet.asInstanceOf[Set[List[RandomElement]]])
     
     /**
      * 
@@ -227,9 +231,9 @@ class TeachingToCategoryAdapter(teaching: Teaching) {
      * - "${test}"       => Get("test")
      * - "hello ${name}" => Text("hello "), Get("name")
      */
-    def parseValue(valueString:String):List[TemplateElement] = {
-		val iteratorOfGet = GetSyntaxRegex.findAllIn(valueString).map(g=>parseGet(g))
-        val splitedValue  = valueString.split(GetSyntaxRegex.toString)
+    def parseText(valueString:String):List[TemplateElement] = {
+		val iteratorOfGet = GetUtil.findAllAndParse(valueString)
+        val splitedValue  = valueString.split(GetUtil.GetSyntaxRegex.toString)
         val result: ListBuffer[TemplateElement] = new ListBuffer
         
         if ( splitedValue.isEmpty ) while(iteratorOfGet.hasNext)result.add(iteratorOfGet.next)
@@ -237,39 +241,6 @@ class TeachingToCategoryAdapter(teaching: Teaching) {
     	result.toList
     }
     
-    /**
-     * ${} 		   => exception
-     * ${*}		   => Star(1)
-     * ${*i}	   => Star(i) // 'i' as integer
-     * ${someName} => Get(someName)
-     */
-    def parseGet(getSyntaxString:String):TemplateElement = {
-        val get = GetSyntaxRegex.findFirstMatchIn(getSyntaxString)
-		var starIndexRegex = """[^\*]+""".r
-        
-        if(get.isEmpty) throw new InvalidGetSyntaxException(s"No get syntax match in $getSyntaxString")
-        
-        get.get.group(1) match{
-	        case emptyGet if(emptyGet.trim.isEmpty)=> throw new InvalidGetSyntaxException("Invalid get syntax in '${}'. A name is required between '{}'. Example: ${someVarName}")
-            case star if star.trim.startsWith("*") => {
-                try {
-        			starIndexRegex.findFirstIn(star).getOrElse("1").toInt match{
-        			    case index if index > 0 => Star(index)
-        			    case _ => throw new InvalidStarIndexException(s"The star's index must be greater than 0. Please fix it in '$star'.")
-        			}
-                }
-                catch{
-                    case nan: NumberFormatException => throw new InvalidStarIndexException(s"Only numbers can be used to access star's index. Please fix '$star' ('${"""[^\*]+""".r.findFirstIn(star).get}')")
-                }
-            }
-            case name if(!name.trim.contains(" "))=> Get(name.trim)
-            case badGetName => throw new InvalidGetSyntaxException(s"Invalid get syntax excetion in '${badGetName}'")
-        }
-    }
-    
-    private def linesToSet(aText:String):Set[String]   = if(aText == null)Set.empty[String]  else aText.split("\n").map(_.trim).filter(!_.isEmpty).toSet
-	private def linesToList(aText:String):List[String] = if(aText == null)List.empty[String] else aText.split("\n").map(_.trim).filter(!_.isEmpty).toList
-        
     def selectDefaultPattern(setOfWhatWasSaid: Set[String]) = {
         var defaultPattern         = ""
         var lowerPatternComplexity = 100.0
@@ -302,19 +273,73 @@ class TeachingToCategoryAdapter(teaching: Teaching) {
 
 }
 
+object StringUtil {
+    def linesToSet(aText:String):Set[String]   = if(aText == null)Set.empty[String]  else aText.split("\n").map(_.trim).filter(!_.isEmpty).toSet
+	def linesToList(aText:String):List[String] = if(aText == null)List.empty[String] else aText.split("\n").map(_.trim).filter(!_.isEmpty).toList
+}
+
+object MemorizeUtil {
+    def validate(memorizeFieldContent:String):Unit = validate(StringUtil.linesToList(memorizeFieldContent))
+    def validate(listOfKeyValue:List[String]):Unit = listOfKeyValue.foreach(KeyValueValidator.validateKeyValue(_))
+}
+
+
+object GetUtil {
+    final val GetSyntaxRegex = """\$\{([a-zA-Z_0-9\-\_\*]+)\}""".r
+    
+    def findAllAndParse(string:String):Iterator[TemplateElement] = GetSyntaxRegex.findAllIn(string).map(parse(_))
+    def findAllAndValidate(string:String):Unit = {}
+    
+    /**
+     * ${} 		   => exception
+     * ${*}		   => Star(1)
+     * ${*i}	   => Star(i) // 'i' as integer
+     * ${someName} => Get(someName)
+     */
+    def parse(getSyntaxString:String):TemplateElement = {
+        val get = GetUtil.GetSyntaxRegex.findFirstMatchIn(getSyntaxString)
+		var starIndexRegex = """[^\*]+""".r
+        
+        if(get.isEmpty) throw new InvalidGetSyntaxException(s"No get syntax match in $getSyntaxString")
+        
+        get.get.group(1) match{
+	        case emptyGet if(emptyGet.trim.isEmpty)=> throw new InvalidGetSyntaxException("Invalid get syntax in '${}'. A name is required between '{}'. Example: ${someVarName}")
+            case star if star.trim.startsWith("*") => {
+                try {
+        			starIndexRegex.findFirstIn(star).getOrElse("1").toInt match{
+        			    case index if index > 0 => Star(index)
+        			    case _ => throw new InvalidStarIndexException(s"The star's index must be greater than 0. Please fix it in '$star'.")
+        			}
+                }
+                catch{
+                    case nan: NumberFormatException => throw new InvalidStarIndexException(s"Only numbers can be used to access star's index. Please fix '$star' ('${"""[^\*]+""".r.findFirstIn(star).get}')")
+                }
+            }
+            case name if(!name.trim.contains(" "))=> Get(name.trim)
+            case badGetName => throw new InvalidGetSyntaxException(s"Invalid get syntax excetion in '${badGetName}'")
+        }
+    }
+}
+
+object KeyValueUtil {
+    final val InvalidCharactersForKeyNameRegex           = """([^a-zA-Z_0-9\-\_])""".r
+	final val InvalidCharactersForInitializeKeyNameRegex = """^([^a-zA-Z\_])""".r
+    final val KeyRegex                                   = """\s*([^\s].*?)\s*=""".r
+    final val ValueRegex                                 = """=(.*)""".r
+    final val AttributionSignRegex                       = """(=){1}""".r
+    
+    def validate(keyValue:String) = KeyValueValidator.validateKeyValue(keyValue)
+    def findKey(keyValue:String):Option[String]   = KeyRegex  .findFirstMatchIn(keyValue).map(_.group(1))
+    def findValue(keyValue:String):Option[String] = ValueRegex.findFirstMatchIn(keyValue).map(_.group(1))
+    
+}
 object KeyValueValidator {
     import scala.util.matching.Regex.Match
     
-    private val invalidCharactersForKeyNameRegex           = """([^a-zA-Z_0-9\-\_])""".r
-	private val invalidCharactersForInitializeKeyNameRegex = """^([^a-zA-Z\_])""".r
-    private val keyRegex                                   = """\s*([^\s].*?)\s*=""".r
-    private val valueRegex                                 = """=(.*)""".r
-    private val attributionSignRegex                       = """(=){1}""".r
-    
     def validateKeyValue(keyValue:String):Unit={
-        val attributionOption = attributionSignRegex.findAllMatchIn(keyValue)
-        val keyOption         = findKey(keyValue:String)
-        val valueOption       = valueRegex.findFirstMatchIn(keyValue)
+        val attributionOption = KeyValueUtil.AttributionSignRegex.findAllMatchIn(keyValue)
+        val keyOption         = KeyValueUtil.findKey(keyValue:String)
+        val valueOption       = KeyValueUtil.ValueRegex.findFirstMatchIn(keyValue)
         
         if(attributionOption.isEmpty) throw new NoAttributionSignException(s"No equal sign ('=') found in attribution: '$keyValue'.")
         if(attributionOption.size>1 ) throw new MoreThanOneAttributionSignException(s"The equal sign ('=') must be used only once per line. Please, break '$keyValue' into more than one line.") 
@@ -323,9 +348,8 @@ object KeyValueValidator {
         validateKey(keyOption.get)
     }
     
-    def findKey(keyValue:String):Option[String] = keyRegex.findFirstMatchIn(keyValue).map(_.group(1))
-    def findInvalidCharacterForInitializeKeyName(key:String):Option[String] = invalidCharactersForInitializeKeyNameRegex.findFirstMatchIn(key).map(_.group(1))
-    def findInvalidCharacterForName(key:String)=invalidCharactersForKeyNameRegex.findFirstMatchIn(key).map(_.group(1))
+    def findInvalidCharacterForInitializeKeyName(key:String):Option[String] = KeyValueUtil.InvalidCharactersForInitializeKeyNameRegex.findFirstMatchIn(key).map(_.group(1))
+    def findInvalidCharacterForName(key:String)=KeyValueUtil.InvalidCharactersForKeyNameRegex.findFirstMatchIn(key).map(_.group(1))
     
     def validateKey(key:String):Unit={
     	if(key.trim.isEmpty) throw new NoVariableNameException("A variable name is required by left hand side of '='. Example: name = ...")

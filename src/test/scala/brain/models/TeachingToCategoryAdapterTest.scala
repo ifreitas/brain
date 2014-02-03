@@ -37,6 +37,7 @@ import aimltoxml.aiml.Random
 import org.scalatest.FlatSpec
 import aimltoxml.aiml.Think
 import aimltoxml.aiml.Star
+import aimltoxml.aiml.Get
 
 class TeachingToCategoryAdapterTest extends FunSpec with Matchers with BeforeAndAfter {
 
@@ -158,33 +159,49 @@ class TeachingToCategoryAdapterTest extends FunSpec with Matchers with BeforeAnd
     describe("#parseKeyValue"){ pending }
     describe("#parseValue"){ pending }
     
-    describe("#parseGet"){
-    	def setup = {
+    describe("parseText"){
+        def setup = {
     		adapter = new TeachingToCategoryAdapter(validTeaching)
     	}
     	it("return List(Text) if there is no getSyntax"){
-    		adapter.parseValue("only text") should be (List(Text("only text")))
+    		adapter.parseText("only text") should be (List(Text("only text")))
     	}
+        it("return List(Text, Get) if there is getSyntax"){
+        	adapter.parseText("text and ${get}") should be (List(Text("text and "), Get("get")))
+        }
+        it("return List(Text, Star) if there is getSyntax(*)"){
+        	adapter.parseText("text and ${*}") should be (List(Text("text and "), Star(1)))
+        }
+        it("return List(Text, Get, Star) if there is getSyntax(*)"){
+        	adapter.parseText("text, ${get} and ${*}") should be (List(Text("text, "), Get("get"), Text(" and "), Star(1)))
+        }
+        it("return List(Get, Star) if there is getSyntax(*)"){
+        	adapter.parseText("${get}${*}") should be (List(Get("get"), Star(1)))
+        }
+    }
+    
+    //GetUtil ####
+    describe("#parse"){
     	it("return Star(1) if equals to '${*}'"){
-    		adapter.parseGet("${*1}") should be (Star(1))
+    		GetUtil.parse("${*1}") should be (Star(1))
     	}
     	it("return Star(i) if equals to '${*i}' (i=1)"){
-    		adapter.parseGet("${*1}") should be (Star(1))
+    		GetUtil.parse("${*1}") should be (Star(1))
     	}
     	it("return Star(i) if equals to '${*i}' (i=20)"){
-    		adapter.parseGet("${*20}") should be (Star(20))
+    		GetUtil.parse("${*20}") should be (Star(20))
     	}
     	it("throws an exception if i is not a Number"){
-    		intercept[InvalidStarIndexException](adapter.parseGet("${*aaa}"))
+    		intercept[InvalidStarIndexException](GetUtil.parse("${*aaa}"))
     	}
     	it("throws an exception if i < 1"){
-    		intercept[InvalidStarIndexException](adapter.parseGet("${*0}"))
+    		intercept[InvalidStarIndexException](GetUtil.parse("${*0}"))
     	}
     	it("throws an exception if the get is empty ('${}')"){
-    		intercept[InvalidGetSyntaxException](adapter.parseGet("${}"))
+    		intercept[InvalidGetSyntaxException](GetUtil.parse("${}"))
     	}
     	it("throws an exception if getSyntax does not match"){
-    		intercept[InvalidGetSyntaxException](adapter.parseGet("*1"))
+    		intercept[InvalidGetSyntaxException](GetUtil.parse("*1"))
     	}
     }
 
@@ -228,40 +245,46 @@ class TeachingToCategoryAdapterTest extends FunSpec with Matchers with BeforeAnd
         it("throws an exception if unclosed 'get' (${) is present"){ pending }
     }
     
+    //KeyValueUtil
     describe("findKey"){
+    	it("return Some('k') (without space) in 'k=value'"){
+    		val key = KeyValueUtil.findKey("k=value")
+			if(key.isEmpty) throw new Exception("key not found!")
+    		key.get should be ("k")
+    	}
         it("return Some('key') (without space) in ' key =value'"){
-            val key = KeyValueValidator.findKey(" key = value")
+            val key = KeyValueUtil.findKey(" key = value")
             if(key.isEmpty) throw new Exception("key not found!")
             key.get should be ("key")
         }
         it("return Some('key') (without space) in '   key =value'"){
-        	val key = KeyValueValidator.findKey(" key = value")
+        	val key = KeyValueUtil.findKey(" key = value")
 			if(key.isEmpty) throw new Exception("key not found!")
         	key.get should be ("key")
         }
         it("return Some('key') (without space) in '   key   =value'"){
-        	val key = KeyValueValidator.findKey(" key = value")
+        	val key = KeyValueUtil.findKey(" key = value")
 			if(key.isEmpty) throw new Exception("key not found!")
         	key.get should be ("key")
         }
         it("return Some('a key') (without space) in ' a key =value'"){
             // \s is an invalid character, but it does not matter in this moment.
-        	val key = KeyValueValidator.findKey("@key = value")
+        	val key = KeyValueUtil.findKey("@key = value")
         	if(key.isEmpty) throw new Exception("key not found!")
         	key.get should be ("@key")
         }
         it("return Some('@key') (without space) in ' key =value'"){
         	// @ is an invalid start character name, but it does not matter in this moment.
-        	val key = KeyValueValidator.findKey("@key = value")
+        	val key = KeyValueUtil.findKey("@key = value")
 			if(key.isEmpty) throw new Exception("key not found!")
         	key.get should be ("@key")
         }
         
         it("return None in '        =value'"){
-            KeyValueValidator.findKey("        = value") should be (None)
+            KeyValueUtil.findKey("        = value") should be (None)
         }
         it("return None in '=value'"){
-        	KeyValueValidator.findKey("= value") should be (None)
+        	KeyValueUtil.findKey("= value") should be (None)
         }
     }
     
@@ -334,6 +357,10 @@ class TeachingToCategoryAdapterTest extends FunSpec with Matchers with BeforeAnd
         	intercept[InvalidVariableNameException](KeyValueValidator.validateKey("n@me"))
         	intercept[InvalidVariableNameException](KeyValueValidator.validateKey("n*me"))
         }
+    }
+    
+    describe("Memorize.validate"){
+        
     }
 
 }
