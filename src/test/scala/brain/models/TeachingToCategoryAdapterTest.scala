@@ -228,6 +228,70 @@ class TeachingToCategoryAdapterTest extends FunSpec with Matchers with BeforeAnd
         it("throws an exception if unclosed 'get' (${) is present"){ pending }
     }
     
+    describe("findKey"){
+        it("return Some('key') (without space) in ' key =value'"){
+            val key = KeyValueValidator.findKey(" key = value")
+            if(key.isEmpty) throw new Exception("key not found!")
+            key.get should be ("key")
+        }
+        it("return Some('key') (without space) in '   key =value'"){
+        	val key = KeyValueValidator.findKey(" key = value")
+			if(key.isEmpty) throw new Exception("key not found!")
+        	key.get should be ("key")
+        }
+        it("return Some('key') (without space) in '   key   =value'"){
+        	val key = KeyValueValidator.findKey(" key = value")
+			if(key.isEmpty) throw new Exception("key not found!")
+        	key.get should be ("key")
+        }
+        it("return Some('a key') (without space) in ' a key =value'"){
+            // \s is an invalid character, but it does not matter in this moment.
+        	val key = KeyValueValidator.findKey("@key = value")
+        	if(key.isEmpty) throw new Exception("key not found!")
+        	key.get should be ("@key")
+        }
+        it("return Some('@key') (without space) in ' key =value'"){
+        	// @ is an invalid start character name, but it does not matter in this moment.
+        	val key = KeyValueValidator.findKey("@key = value")
+			if(key.isEmpty) throw new Exception("key not found!")
+        	key.get should be ("@key")
+        }
+        
+        it("return None in '        =value'"){
+            KeyValueValidator.findKey("        = value") should be (None)
+        }
+        it("return None in '=value'"){
+        	KeyValueValidator.findKey("= value") should be (None)
+        }
+    }
+    
+    describe("#findInvalidCharacterForInitializeKeyName"){
+        it("return all char that differ from [a-zA-Z_0-9\\_\\-]"){
+            KeyValueValidator.findInvalidCharacterForInitializeKeyName("-key") should be (Some("-"))
+            KeyValueValidator.findInvalidCharacterForInitializeKeyName("$name")should be (Some("$"))
+        	KeyValueValidator.findInvalidCharacterForInitializeKeyName("@name")should be (Some("@"))
+        	KeyValueValidator.findInvalidCharacterForInitializeKeyName("1name")should be (Some("1"))
+        	KeyValueValidator.findInvalidCharacterForInitializeKeyName(".name")should be (Some("."))
+        	KeyValueValidator.findInvalidCharacterForInitializeKeyName("áname")should be (Some("á"))
+        	KeyValueValidator.findInvalidCharacterForInitializeKeyName("*name")should be (Some("*"))
+        }
+    }
+    
+    describe("#findInvalidCharacterForName"){
+    	it("return all char that differ from [a-zA-Z_0-9\\_\\-]"){
+        	KeyValueValidator.findInvalidCharacterForName("user name") should be (Some(" "))
+        	KeyValueValidator.findInvalidCharacterForName("user.name") should be (Some("."))
+        	KeyValueValidator.findInvalidCharacterForName("user@name") should be (Some("@"))
+        	KeyValueValidator.findInvalidCharacterForName("n#me") should be (Some("#"))
+        	KeyValueValidator.findInvalidCharacterForName("n%me") should be (Some("%"))
+        	KeyValueValidator.findInvalidCharacterForName("nam&") should be (Some("&"))
+        	KeyValueValidator.findInvalidCharacterForName("na(me") should be (Some("("))
+        	KeyValueValidator.findInvalidCharacterForName("tést") should be (Some("é"))
+        	KeyValueValidator.findInvalidCharacterForName("n@me") should be (Some("@"))
+        	KeyValueValidator.findInvalidCharacterForName("n*me") should be (Some("*"))
+    	}
+    }
+    
     describe("validateKey"){
     	it("throws an exception if there is no Key"){
             intercept[NoVariableNameException](KeyValueValidator.validateKey(""))

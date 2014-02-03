@@ -277,30 +277,34 @@ class TeachingToCategoryAdapter(teaching: Teaching) {
 }
 
 object KeyValueValidator {
+    import scala.util.matching.Regex.Match
+    
     private val invalidCharactersForKeyNameRegex           = """([^a-zA-Z_0-9\-\_])""".r
 	private val invalidCharactersForInitializeKeyNameRegex = """^([^a-zA-Z\_])""".r
-    private val keyRegex                                   = """[^\s](.+)\=""".r
-    private val valueRegex                                 = """\=(.*)""".r
-    private val attributionSignRegex                       = """(\=){1}""".r
+    private val keyRegex                                   = """\s*([^\s].+?)\s*=""".r
+    private val valueRegex                                 = """=(.*)""".r
+    private val attributionSignRegex                       = """(=){1}""".r
     
     def validateKeyValue(keyValue:String):Unit={
         val attributionOption = attributionSignRegex.findAllMatchIn(keyValue)
-        val keyOption         = keyRegex.findFirstMatchIn(keyValue)
+        val keyOption         = findKey(keyValue:String)
         val valueOption       = valueRegex.findFirstMatchIn(keyValue)
         
         if(attributionOption.isEmpty) throw new NoAttributionSignException(s"No equal sign ('=') found in attribution: '$keyValue'.")
         if(attributionOption.size>1 ) throw new MoreThanOneAttributionSignException(s"The equal sign ('=') must be used only once per line. Please, break '$keyValue' into more than one line.") 
         
         if(keyOption.isEmpty) throw new NoVariableNameException("A variable name is required by left hand side of '='. Example: name = ...")        
-        validateKey(keyOption.get.group(1))
+        validateKey(keyOption.get)
     }
     
+    def findKey(keyValue:String):Option[String] = keyRegex.findFirstMatchIn(keyValue).map(_.group(1))
+    def findInvalidCharacterForInitializeKeyName(key:String):Option[String] = invalidCharactersForInitializeKeyNameRegex.findFirstMatchIn(key).map(_.group(1))
+    def findInvalidCharacterForName(key:String)=invalidCharactersForKeyNameRegex.findFirstMatchIn(key).map(_.group(1))
+    
     def validateKey(key:String):Unit={
-        val invalidCharacterForInitialize = invalidCharactersForInitializeKeyNameRegex.findFirstMatchIn(key)
-        val invalidCharacterForName       = invalidCharactersForKeyNameRegex.findFirstMatchIn(key)
-        if(invalidCharacterForInitialize.isDefined) throw new InvalidVariableNameException(s"The variable name must start with a letter or an underscore ('_'). Invalid character '${invalidCharacterForInitialize.get.group(1)}' in '$key'")
-        if(invalidCharacterForName.isDefined)       throw new InvalidVariableNameException(s"The variable name must have only letters (without signs or spaces), numbers and symbols '-' and '_'. Invalid character '${invalidCharacterForName.get.group(1)}' in '$key'")
-        if(key.trim.isEmpty) throw new NoVariableNameException("A variable name is required by left hand side of '='. Example: name = ...")
+    	if(key.trim.isEmpty) throw new NoVariableNameException("A variable name is required by left hand side of '='. Example: name = ...")
+    	findInvalidCharacterForInitializeKeyName(key).map(invalidChar=>throw new InvalidVariableNameException(s"The variable name must start with a letter or an underscore ('_'). Invalid character '$invalidChar' in '$key'"))
+    	findInvalidCharacterForName(key).map(invalidChar=>throw new InvalidVariableNameException(s"The variable name must have only letters (without signs or spaces), numbers and symbols '-' and '_'. Invalid character '$invalidChar' in '$key'"))
     }
     
     def validateValue(value:String):Unit={
