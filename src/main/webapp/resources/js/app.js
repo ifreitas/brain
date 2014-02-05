@@ -864,7 +864,7 @@ function TeachingExtWrapper(){
 			       },
 			       {
 			    	   xtype: 'textareafield', fieldLabel: 'Memorize', name: 'memorize',
-			    	   emptyText:'Some key=value pair like: name=Israel (only one per line)',
+			    	   emptyText:'Some key=value pair like: name=Israel or name=${*1} (only one per line)',
 			    	   disabled:false, allowBlank: true, minLength: 3, maxLength: 200, height:85
 			       },
 			       {
