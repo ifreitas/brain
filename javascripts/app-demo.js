@@ -834,7 +834,7 @@ function TeachingExtWrapper(){
 			       {
 			    	   xtype: 'textareafield', fieldLabel: 'Memorize', name: 'memorize',
 			    	   emptyText:'Some key=value pair like: name=\'Israel\' (one per line)',
-			    	   disabled:true, allowBlank: true, minLength: 3, maxLength: 200, height:85, validator:validateEmptyString,
+			    	   allowBlank: true, minLength: 3, maxLength: 200, height:85
 			       },
 			       {
 			    	   xtype: 'textareafield', fieldLabel: 'Then say', name: 'say',
