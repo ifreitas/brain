@@ -251,17 +251,29 @@
                                 registered, greater is the ability of
                                 "understanding" of the robot.</p>
                                 
-                            <p>For example, for the <i>topic</i> "favorite
+                            <p>May be used the star wildcard (*) for
+                                "capture" a portion of the user's
+                                sentence that match in the registered
+                                sentence (each line in this field, also known as <i>pattern</i>). Once
+                                captured this portion, it can be
+                                retrieved by <i>get star syntax</i>: ${*<i>index</i>},
+                                where <i>index</i> is an integer value greater
+                                than 0. For example, the sentence "My
+                                name is Israel and I live in Brazil"
+                                against the <i>pattern</i> "My name is * and I
+                                live in *" will store "Israel" in the
+                                first star and "Brazil" in the second
+                                star. Do ${*1} to retrieve the name, or
+                                just ${*} (the index is optional to
+                                first star). Do ${*2} (the index is required since
+                                second star) to retrieve the country.</p>
+                                
+                            <p>For example, for <i>topic</i> "favorite
                                 movies", an user may type one of the 
                                 following sentences:</p>
                                 
-<textarea rows="4" cols="23" readonly="readonly">My favorite movie is The Matrix
-
-My favorite movie is Iron Man
-
-My favorite movie is Déjà vu
-
-</textarea>
+<textarea rows="4" cols="22" readonly="readonly">My favorite movie is *
+My favorite is *</textarea>
                             <p>In this example, the robot will be able to
                                 understand and give the appropriate response to
                                 any of these sentences.</p>
@@ -277,7 +289,7 @@ My favorite movie is Déjà vu
                                 user to enter one of the sentences given
                                 in the example above ("<i>When the
                                     user says</i>"):
-                            </p> <input type="text" value="What is your favorite movie?" readonly="readonly" size="27"/>
+                            </p> <input type="text" value="What is your favorite movie?" readonly="readonly" size="26"/>
                             
                             <p>This field holds the micro context of
                                 robot dialogue. It allows the robot to
@@ -289,7 +301,31 @@ My favorite movie is Déjà vu
                         
                         <li>
                             <i>Memorize</i>:
-                            <i>Not implemented yet.</i>
+                            <p>Enter in this field the key
+                                informations that the robot should keep
+                                in memory during the chat session. Such
+                                key informations are composed of three
+                                parts, all required and in this order:</p>
+                            <ol>
+                                <li>a name that represents the
+                                    information that will be
+                                    memorized (also known as <i>'variable'</i>)
+                                </li>
+                                <li>the equal sign (=)</li>
+                                <li>the information itself that
+                                    must be memorized.</li>
+                            </ol>
+                            <p>
+                                It is allowed only one memorize
+                                instruction per line. To retrieve the
+                                content of a variable, use the <i>get syntax</i>: <i>${variableName}</i>.
+                            </p>
+<textarea rows="4" cols="22" readonly="readonly">favoriteMovie = ${*1}
+
+botFavoriteMovies = ${favoriteMovie} and Matrix</textarea>
+                            <p>
+                                The <i>get syntax</i> is available both in <i>Memorize</i>
+                                field and in <i>Say</i> field.
                         </li>
                         
                         <li>
@@ -307,31 +343,37 @@ My favorite movie is Déjà vu
                                 Hence, how much more responses
                                 registered, greater is the
                                 "intelligence" of the robot.</p>
+                            <p>
+                                May be used the <i>get syntax</i> (both
+                                ${variableName} and ${*index}).</p>
                             <p>For example, even for the <i>topic</i> "favorite
                                 movies", the following sentences may be
                                 entered as an robot answer:</p>
-<textarea rows="4" cols="23" readonly="readonly">It is also my favorite.
+<textarea rows="4" cols="22" readonly="readonly">${favoriteMovie}?? It is my favorite too!
 
-This is my favorite too.
+${favoriteMovie}?? I love it!
 
 Excellent movie!</textarea>
                         </li>
                       </ul>
                     <li>Click "Save".</li>
                 </ol>
-                <p>Here is the complete example:</p>
+                <p>Here is a complete example:</p>
 <pre>
 When the user says:
-   My favorite movie is The Matrix
-   <i>(or)</i> My favorite movie is Iron Man
-   <i>(or)</i> My favorite movie is Déjà vu
+  My favorite movie is *
+  <i>(or)</i> My favorite is *
 
 Responding to:
    What is your favorite movie?
 
+Memorize:
+  favMovie = ${*1}
+  botFavMovies=${favMovie} and Matrix 
+
 Say:
-   It is also my favorite.
-   <i>(or)</i> This is my favorite too.
+   ${favMovie}? Excellent movie!
+   <i>(or)</i> ${favMovie}?? I love it!
    <i>(or)</i> Excellent movie!
 </pre>
                 
