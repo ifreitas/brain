@@ -854,7 +854,7 @@ function TeachingExtWrapper(){
 			items:[
 			       {
 			    	   xtype: 'textareafield', fieldLabel: 'When the user says', name: 'whenTheUserSays',
-			    	   emptyText:'Likely user\'s sentences (one per line)',
+			    	   emptyText:'Likely user\'s sentences (only one per line)',
 			    	   allowBlank: false, minLength: 1, maxLength: 200, height:85, validator:validateEmptyString
 			       },
 			       {
@@ -864,12 +864,12 @@ function TeachingExtWrapper(){
 			       },
 			       {
 			    	   xtype: 'textareafield', fieldLabel: 'Memorize', name: 'memorize',
-			    	   emptyText:'Some key=value pair like: name=\'Israel\' (one per line)',
-			    	   disabled:true, allowBlank: true, minLength: 3, maxLength: 200, height:85, validator:validateEmptyString,
+			    	   emptyText:'Some key=value pair like: name=Israel (only one per line)',
+			    	   disabled:false, allowBlank: true, minLength: 3, maxLength: 200, height:85
 			       },
 			       {
 			    	   xtype: 'textareafield', fieldLabel: 'Then say', name: 'say',
-			    	   emptyText:'The bot\'s responses to the user input. Can access memorized variables. Example: Hello, ${name}. (one per line)',
+			    	   emptyText:'The bot\'s responses to the user input. Can access memorized variables. Example: Hello, ${name}. (only one per line)',
 			    	   allowBlank: false, minLength: 1, maxLength: 200, height:85, validator:validateEmptyString,
 			       }
 		       ],
