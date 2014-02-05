@@ -181,7 +181,13 @@ class TeachingToCategoryAdapterTest extends FunSpec with Matchers with BeforeAnd
     }
     
     //GetUtil ####
-    describe("#parse"){
+    describe("GetUtil.parse"){
+    	it("return Get(test) in '${ test }'"){
+    		GetUtil.parse("${   test   }") should be (Get("test"))
+    	}
+    	it("return Star(1) in '${ *1 }'"){
+    		GetUtil.parse("${ *1 }") should be (Star(1))
+    	}
     	it("return Star(1) if equals to '${*}'"){
     		GetUtil.parse("${*1}") should be (Star(1))
     	}
@@ -191,19 +197,109 @@ class TeachingToCategoryAdapterTest extends FunSpec with Matchers with BeforeAnd
     	it("return Star(i) if equals to '${*i}' (i=20)"){
     		GetUtil.parse("${*20}") should be (Star(20))
     	}
-    	it("throws an exception if i is not a Number"){
-    		intercept[InvalidStarIndexException](GetUtil.parse("${*aaa}"))
-    	}
-    	it("throws an exception if i < 1"){
-    		intercept[InvalidStarIndexException](GetUtil.parse("${*0}"))
-    	}
     	it("throws an exception if the get is empty ('${}')"){
     		intercept[InvalidGetSyntaxException](GetUtil.parse("${}"))
     	}
+    }
+    describe("GetUtil.validate"){
+    	it("throws an exception if i is not a Number in ${*i}"){
+    		intercept[InvalidStarIndexException](GetUtil.validate("${*aaa}"))
+    	}
+    	it("throws an exception if i < 1"){
+    		intercept[InvalidStarIndexException](GetUtil.validate("${*0}"))
+    	}
+    	it("throws an exception if the get is empty ('${}')"){
+    		intercept[InvalidGetSyntaxException](GetUtil.validate("${}"))
+    	}
+    	it("throws an exception if the get is empty ('${   }')"){
+    		intercept[InvalidGetSyntaxException](GetUtil.validate("${   }"))
+    	}
+    	it("throws an exception if getSyntax has a name with empty space (${some name})"){
+    		intercept[InvalidGetSyntaxException](GetUtil.validate("${some name}"))
+    	}
+    	it("throws an exception if getSyntax has a name with empty space (${* 1})"){
+    		intercept[InvalidGetSyntaxException](GetUtil.validate("${* 1}"))
+    	}
     	it("throws an exception if getSyntax does not match"){
-    		intercept[InvalidGetSyntaxException](GetUtil.parse("*1"))
+    		intercept[InvalidGetSyntaxException](GetUtil.validate("*1"))
+    	}
+    	it("throws an exception if getSyntax does not match (2)"){
+    		intercept[InvalidGetSyntaxException](GetUtil.validate("some text"))
+    	}
+    	it("throws an exception get's Name starts with an invalid char"){
+	        intercept[InvalidVariableNameException](GetUtil.validate("${-name}"))
+	        intercept[InvalidVariableNameException](GetUtil.validate("${$name}"))
+	    	intercept[InvalidVariableNameException](GetUtil.validate("${@name}"))
+	    	intercept[InvalidVariableNameException](GetUtil.validate("${1name}"))
+	    	intercept[InvalidVariableNameException](GetUtil.validate("${.name}"))
+	    	intercept[InvalidVariableNameException](GetUtil.validate("${áname}"))
+    	}
+    	it("throws an exception get's Name contains any invalid char"){
+        	intercept[InvalidVariableNameException](GetUtil.validate("${user.name}"))
+        	intercept[InvalidVariableNameException](GetUtil.validate("${user@name}"))
+        	intercept[InvalidVariableNameException](GetUtil.validate("${n#me}"))
+        	intercept[InvalidVariableNameException](GetUtil.validate("${n%me}"))
+        	intercept[InvalidVariableNameException](GetUtil.validate("${nam&}"))
+        	intercept[InvalidVariableNameException](GetUtil.validate("${na(e}"))
+        	intercept[InvalidVariableNameException](GetUtil.validate("${tést}"))
+        	intercept[InvalidVariableNameException](GetUtil.validate("${n@me}"))
+    	}
+    	it("pass ok if syntax ok"){
+    		GetUtil.validate("${*1}")
+    		GetUtil.validate("${ *1 }")
+    		GetUtil.validate("${name}")
+    		GetUtil.validate("${ name }")
     	}
     }
+    describe("GetUtil.findInvalidCharacterForInitializeGetName"){
+        it("return all char that differ from [a-zA-Z_0-9\\_\\*]"){
+        	GetUtil.findInvalidCharacterForInitializeGetName("name") should be (None)
+        	GetUtil.findInvalidCharacterForInitializeGetName("*name")should be (None)
+        	
+	        GetUtil.findInvalidCharacterForInitializeGetName("-name")should be (Some("-"))
+	        GetUtil.findInvalidCharacterForInitializeGetName("$name")should be (Some("$"))
+	    	GetUtil.findInvalidCharacterForInitializeGetName("@name")should be (Some("@"))
+	    	GetUtil.findInvalidCharacterForInitializeGetName("1name")should be (Some("1"))
+	    	GetUtil.findInvalidCharacterForInitializeGetName(".name")should be (Some("."))
+	    	GetUtil.findInvalidCharacterForInitializeGetName("áname")should be (Some("á"))
+        }
+    }
+   describe("GetUtil.findInvalidCharacterForGetName"){
+    	it("return all char that differ from [a-zA-Z_0-9\\_\\-\\*]"){
+        	GetUtil.findInvalidCharacterForGetName("user name") should be (Some(" "))
+        	GetUtil.findInvalidCharacterForGetName("user.name") should be (Some("."))
+        	GetUtil.findInvalidCharacterForGetName("user@name") should be (Some("@"))
+        	GetUtil.findInvalidCharacterForGetName("n#me") should be (Some("#"))
+        	GetUtil.findInvalidCharacterForGetName("n%me") should be (Some("%"))
+        	GetUtil.findInvalidCharacterForGetName("nam&") should be (Some("&"))
+        	GetUtil.findInvalidCharacterForGetName("na(me") should be (Some("("))
+        	GetUtil.findInvalidCharacterForGetName("tést") should be (Some("é"))
+        	GetUtil.findInvalidCharacterForGetName("n@me") should be (Some("@"))
+    	}
+    }
+   describe("GetUtil.find"){
+       it("return Some(${}) in 'this is an empty get ${}'"){
+           GetUtil.findIn("this is an empty get ${}") should be (Some("${}"))
+       }
+       it("return Some(${   }) in 'this is an empty get ${   }'"){
+    	   GetUtil.findIn("this is an empty get ${   }") should be (Some("${   }"))
+       }
+       it("return Some(${a}) in 'this is an non-empty get ${a}'"){
+    	   GetUtil.findIn("this is an empty get ${a}") should be (Some("${a}"))
+       }
+       it("return Some(${a}) in 'this is an non-empty get ${ a }'"){
+    	   GetUtil.findIn("this is an empty get ${a}") should be (Some("${a}"))
+       }
+       it("return Some(${#a}) in 'this is an non-empty get ${ #a }'"){
+    	   GetUtil.findIn("this is an empty get ${#a}") should be (Some("${#a}"))
+       }
+       it("return Some(${${a}) in 'this is an non-empty get ${ ${a} }'"){
+    	   GetUtil.findIn("this is an empty get ${${a}}") should be (Some("${${a}"))
+       }
+       it("return None in 'this is an text with get syntax'"){
+    	   GetUtil.findIn("this is an text with get syntax") should be (None)
+       }
+   }
 
     describe("#toCategory") {
         def setup = {

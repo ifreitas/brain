@@ -40,6 +40,7 @@ import aimltoxml.aiml.Think
 import aimltoxml.aiml.RandomElement
 import aimltoxml.aiml.Star
 import aimltoxml.aiml.Get
+import scala.util.matching.Regex.MatchIterator
 
 case class Teaching(whenTheUserSays:String, say:String) extends DbObject{
     require(!whenTheUserSays.isEmpty, "Field 'when the user says', can not be empty.")
@@ -285,38 +286,56 @@ object MemorizeUtil {
 
 
 object GetUtil {
-    final val GetSyntaxRegex = """\$\{([a-zA-Z_0-9\-\_\*]+)\}""".r
+	final val GetSyntaxRegex                             = """\$\{([^\}]*)\}""".r
+    final val InvalidCharactersForGetNameRegex           = """([^a-zA-Z_0-9\-\_\*])""".r
+	final val InvalidCharactersForInitializeGetNameRegex = """^([^a-zA-Z\_\*])""".r
+    private val starIndexRegex                           = """[^\*]+""".r
     
-    def findAllAndParse(string:String):Iterator[TemplateElement] = GetSyntaxRegex.findAllIn(string).map(parse(_))
-    def findAllAndValidate(string:String):Unit = {}
+    def findAllAndParse(string:String):Iterator[TemplateElement] = findAllIn(string).map(parse(_))
+    
+    def findIn(string:String):Option[String]   = GetSyntaxRegex.findFirstIn(string)
+    def findAllIn(string:String):MatchIterator = GetSyntaxRegex.findAllIn(string)
+    def findInvalidCharacterForInitializeGetName(getName:String):Option[String] = InvalidCharactersForInitializeGetNameRegex.findFirstMatchIn(getName).map(_.group(1))
+    def findInvalidCharacterForGetName(getName:String) = InvalidCharactersForGetNameRegex.findFirstMatchIn(getName).map(_.group(1))
+
+    /**
+     * @param getSyntaxString - an string in get syntax format "${...}"
+     */
+    def validate(getSyntaxString:String)={
+        val get = GetSyntaxRegex.findFirstMatchIn(getSyntaxString)
+        if(get.isEmpty) throw new InvalidGetSyntaxException(s"Invalid get syntax in '$getSyntaxString'")
+        get.get.group(1) match{
+	        case emptyGet if(emptyGet.trim.isEmpty)                 => throw new InvalidGetSyntaxException("Invalid get syntax in '"+getSyntaxString+"'. A name is required between '{}'. Example: ${someVarName}")
+	        case nameWithSpace if(nameWithSpace.trim.contains(" ")) => throw new InvalidGetSyntaxException(s"Empty space not allowed in '$getSyntaxString'")
+            case star if star.trim.startsWith("*") => {
+                try {
+        			starIndexRegex.findFirstIn(star.trim).getOrElse("1").toInt match{
+        			    case index if index <= 0 => throw new InvalidStarIndexException(s"The star's index must be greater than 0. Please fix it in '$getSyntaxString'.")
+        			    case _ =>
+        			}
+                }
+                catch{
+                    case nan: NumberFormatException => throw new InvalidStarIndexException(s"Only numbers can be used to access star's index. Please fix '$star' in '$getSyntaxString')")
+                }
+            }
+            case other => {
+            	findInvalidCharacterForGetName(other.trim).map(invalidChar=>throw new InvalidVariableNameException(s"The variable name must have only letters (without signs or spaces), numbers and symbols '-' and '_'. Invalid character '$invalidChar' in '$other'"))
+                findInvalidCharacterForInitializeGetName(other.trim).map(invalidChar=>throw new InvalidVariableNameException(s"The variable name must start with a letter or an underscore ('_'). Invalid character '$invalidChar' in '$other'"))
+            }
+        }
+    }
     
     /**
      * ${} 		   => exception
      * ${*}		   => Star(1)
-     * ${*i}	   => Star(i) // 'i' as integer
+     * ${*i}	   => Star(i) // 'i' as integer > 0
      * ${someName} => Get(someName)
      */
     def parse(getSyntaxString:String):TemplateElement = {
-        val get = GetUtil.GetSyntaxRegex.findFirstMatchIn(getSyntaxString)
-		var starIndexRegex = """[^\*]+""".r
-        
-        if(get.isEmpty) throw new InvalidGetSyntaxException(s"No get syntax match in $getSyntaxString")
-        
-        get.get.group(1) match{
-	        case emptyGet if(emptyGet.trim.isEmpty)=> throw new InvalidGetSyntaxException("Invalid get syntax in '${}'. A name is required between '{}'. Example: ${someVarName}")
-            case star if star.trim.startsWith("*") => {
-                try {
-        			starIndexRegex.findFirstIn(star).getOrElse("1").toInt match{
-        			    case index if index > 0 => Star(index)
-        			    case _ => throw new InvalidStarIndexException(s"The star's index must be greater than 0. Please fix it in '$star'.")
-        			}
-                }
-                catch{
-                    case nan: NumberFormatException => throw new InvalidStarIndexException(s"Only numbers can be used to access star's index. Please fix '$star' ('${"""[^\*]+""".r.findFirstIn(star).get}')")
-                }
-            }
-            case name if(!name.trim.contains(" "))=> Get(name.trim)
-            case badGetName => throw new InvalidGetSyntaxException(s"Invalid get syntax excetion in '${badGetName}'")
+        validate(getSyntaxString)
+        GetSyntaxRegex.findFirstMatchIn(getSyntaxString).get.group(1) match{
+            case star if star.trim.startsWith("*") => Star(starIndexRegex.findFirstIn(star.trim).getOrElse("1").toInt)
+            case name => Get(name.trim)
         }
     }
 }
@@ -333,19 +352,20 @@ object KeyValueUtil {
     def findValue(keyValue:String):Option[String] = ValueRegex.findFirstMatchIn(keyValue).map(_.group(1))
     
 }
+
 object KeyValueValidator {
-    import scala.util.matching.Regex.Match
     
     def validateKeyValue(keyValue:String):Unit={
         val attributionOption = KeyValueUtil.AttributionSignRegex.findAllMatchIn(keyValue)
         val keyOption         = KeyValueUtil.findKey(keyValue:String)
-        val valueOption       = KeyValueUtil.ValueRegex.findFirstMatchIn(keyValue)
+        val valueOption       = KeyValueUtil.findValue(keyValue)
         
         if(attributionOption.isEmpty) throw new NoAttributionSignException(s"No equal sign ('=') found in attribution: '$keyValue'.")
         if(attributionOption.size>1 ) throw new MoreThanOneAttributionSignException(s"The equal sign ('=') must be used only once per line. Please, break '$keyValue' into more than one line.") 
         
         if(keyOption.isEmpty) throw new NoVariableNameException(s"A variable name is required by left hand side of '=' in '$keyValue'. Example: someVarName$keyValue")        
         validateKey(keyOption.get)
+        validateValue(valueOption.get)
     }
     
     def findInvalidCharacterForInitializeKeyName(key:String):Option[String] = KeyValueUtil.InvalidCharactersForInitializeKeyNameRegex.findFirstMatchIn(key).map(_.group(1))
@@ -358,7 +378,7 @@ object KeyValueValidator {
     }
     
     def validateValue(value:String):Unit={
-        // throw exception if possui emptyGet ('${\s*}')
+        GetUtil.findAllIn(value).foreach(get=>GetUtil.validate(get))
     }
 }
 

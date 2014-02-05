@@ -980,13 +980,81 @@ function TeachingExtWrapper(){
 			       },
 			       {
 			    	   xtype: 'textareafield', fieldLabel: 'Memorize', name: 'memorize',
-			    	   emptyText:'Some key=value pair like: name=\'Israel\' (one per line)',
-			    	   allowBlank: true, minLength: 3, maxLength: 200, height:85, validator:validateEmptyString,
+			    	   emptyText:'Some key=value pair like: name=Israel (one per line)',
+			    	   maxLength: 200, height:85, allowBlank: true,  
+			    	   //http://stackoverflow.com/questions/8120852/extjs4-remote-validation
+			    	   textValid: true, validator: function(){return this.textValid;},
+			    	   listeners : {
+			    		     'change': function(textfield,newValue,oldValue) {
+			    		    	 if(newValue && newValue.trim() != ""){
+			    		    		 Ext.Ajax.request({ // file:///Library/WebServer/Documents/extjs4/docs/index.html#!/api/Ext.Ajax-method-request
+			    		    			 url: 'rest/validate/memorize.json',
+			    		    			 jsonData: {fieldContent:newValue},
+			    		    			 headers: {"Content-Type":"application/json; charset=UTF-8"},
+			    		    			 method:"POST",
+			    		    			 scope: textfield,
+			    		    			 success: function(response){
+			    		    				 var obj = Ext.decode(response.responseText);
+			    		    				 if(obj.success){
+			    		    					 this.clearInvalid();
+			    		    					 this.textValid = true;
+			    		    				 }
+			    		    				 else{
+			    		    					 this.markInvalid(obj.msg);
+			    		    					 this.textValid = obj.msg;
+			    		    				 }
+			    		    			 },
+			    		    			 failure: function(response, opts) {// network error
+			    		    				 this.markInvalid("Unable to validate 'Memorize' field");
+			    		    				 this.textValid = false;
+			    		    			 }
+			    		    		 });
+			    		    	 }
+			    		    	 else{
+			    		    		 this.clearInvalid();
+			    		    		 this.textValid = true;
+			    		    	 }
+			    		     }
+			    	   }
 			       },
 			       {
 			    	   xtype: 'textareafield', fieldLabel: 'Then say', name: 'say',
 			    	   emptyText:'The bot\'s responses to the user input. Can access memorized variables. Example: Hello, ${name}. (one per line)',
-			    	   allowBlank: false, minLength: 1, maxLength: 200, height:85, validator:validateEmptyString,
+			    	   allowBlank: false, minLength: 1, maxLength: 200, height:85, 
+			    	   //http://stackoverflow.com/questions/8120852/extjs4-remote-validation
+			    	   textValid: false, validator: function(){return this.textValid;},
+			    	   listeners : {
+			    		     'change': function(textfield,newValue,oldValue) {
+			    		    	 if(newValue && newValue.trim() != ""){
+				    		        Ext.Ajax.request({ //file:///Library/WebServer/Documents/extjs4/docs/index.html#!/api/Ext.Ajax-method-request
+				    		          url: 'rest/validate/say.json',
+				    		          jsonData: {fieldContent:newValue},
+				    		          headers: {"Content-Type":"application/json; charset=UTF-8"},
+				    		          method:"POST",
+				    		          scope: textfield,
+				    		          success: function(response){
+				    		        	  var obj = Ext.decode(response.responseText);
+				    		        	  if(obj.success){
+				    		        		  this.clearInvalid();
+				    		        		  this.textValid = true;
+				    		        	  }
+				    		        	  else{
+				    		        		  this.markInvalid(obj.msg);
+				    		        		  this.textValid = obj.msg;
+				    		        	  }
+				    		          },
+				    		          failure: function(response, opts) {// network error
+				    		        	  this.markInvalid("Unable to validate 'Say' field");
+			    		        		  this.textValid = false;
+				    		          }
+				    		        });
+				    		      }
+			    		    	 else{
+			    		    		 this.clearInvalid();
+		    		        		  this.textValid = true;
+			    		    	 }
+			    		     	}
+			    		   }
 			       }
 		       ],
 		       bbar: [
@@ -1101,5 +1169,29 @@ var contextMenu = Ext.create('Ext.menu.Menu', {
 function validateEmptyString(str){    
 	if(str && str.trim() != "") return true;    
 	return "This field can not be empty"
+}
+
+function validateMemorizeField(str){
+	
+	if(str && str.trim() != ""){
+		Ext.Ajax.request({
+			url: 'rest/validate/memorize/'+str,
+			success: function(response, opts) {
+				var obj = Ext.decode(response.responseText);
+				//alert("obj.success: "+ (obj.success=="true"))
+				if(obj.success.toString()=="true"){
+					// do nothing!
+				}
+				else
+				{
+					alert(obj.msg)
+					return obj.msg
+				}
+			},
+			failure: function(response, opts) {// network error
+				return "Unable to validate 'Memorize' field"
+			}
+		});
+	}
 }
 

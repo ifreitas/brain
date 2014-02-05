@@ -25,8 +25,49 @@ import net.liftweb.http.rest.RestHelper
 import net.liftweb.json.JsonDSL._
 import net.liftweb.json.JsonAST._
 import brain.config.Config
+import brain.models.MemorizeUtil
+import net.liftweb.util.Helpers
+import net.liftweb.common.Box
+import brain.models.GetUtil
+
+case class ContentToValidade(content:String)
+object ContentToValidade{
+    def apply(in: JValue):Box[ContentToValidade] = Helpers.tryo{ new ContentToValidade((in \ "fieldContent").values.toString) }
+    def unapply(in:JValue):Option[ContentToValidade] = apply(in)
+    def unapply(in:Any):Option[(String)] = { //Default
+        in match {
+            case contentToValidate : ContentToValidade => return Some(contentToValidate.content)
+            case content : String => Some(content)
+            case _ => None
+        }
+    }
+}
+
 
 object BrainRest extends RestHelper {
+    
+    def jsonMessage(success:Boolean, msg:String, httpStatus:Int) = JsonResponse((("success"->success) ~ ("msg"->msg)), httpStatus)
+	
+    serve("rest"/"validate" prefix {
+        case "memorize" :: Nil JsonPost ContentToValidade(fieldContent) -> _ => {
+            try{
+                MemorizeUtil.validate(fieldContent.content)
+                jsonMessage(true, "Ok", 200)
+            }
+            catch{
+        	    case t: Throwable => t.printStackTrace; jsonMessage(false, t.getMessage, 200)
+        	}
+        }
+        case "say" :: Nil JsonPost ContentToValidade(fieldContent) -> _ => {
+        	try{
+        		GetUtil.findAllIn(fieldContent.content).foreach(get=>GetUtil.validate(get))
+        		jsonMessage(true, "Ok", 200)
+        	}
+        	catch{
+        	case t: Throwable => t.printStackTrace; jsonMessage(false, t.getMessage, 200)
+        	}
+        }
+    })
     
     serve("rest"/"knowledges" prefix{
         
