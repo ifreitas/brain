@@ -823,12 +823,12 @@ function TeachingExtWrapper(){
 			items:[
 			       {
 			    	   xtype: 'textareafield', fieldLabel: 'When the user says', name: 'whenTheUserSays',
-			    	   emptyText:'Likely user\'s sentences (only one per line)',
+			    	   emptyText:'Likely user\'s sentences (only one per line). Example: My name is *',
 			    	   allowBlank: false, minLength: 1, maxLength: 200, height:85, validator:validateEmptyString
 			       },
 			       {
 			    	   xtype: 'textfield', fieldLabel: 'Responding to', name: 'respondingTo',
-			    	   emptyText:'Some bot phrase',
+			    	   emptyText:'Some bot phrase. Example: what is your name',
 			    	   allowBlank: true, minLength: 1, maxLength: 40
 			       },
 			       {
