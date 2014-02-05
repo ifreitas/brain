@@ -970,17 +970,17 @@ function TeachingExtWrapper(){
 			items:[
 			       {
 			    	   xtype: 'textareafield', fieldLabel: 'When the user says', name: 'whenTheUserSays',
-			    	   emptyText:'Likely user\'s sentences (one per line)',
+			    	   emptyText:'Likely user\'s sentences (only one per line). Example: My name is *',
 			    	   allowBlank: false, minLength: 1, maxLength: 200, height:85, validator:validateEmptyString
 			       },
 			       {
 			    	   xtype: 'textfield', fieldLabel: 'Responding to', name: 'respondingTo',
-			    	   emptyText:'Some bot phrase',
+			    	   emptyText:'Some bot phrase. Example: What is your name',
 			    	   allowBlank: true, minLength: 1, maxLength: 40
 			       },
 			       {
 			    	   xtype: 'textareafield', fieldLabel: 'Memorize', name: 'memorize',
-			    	   emptyText:'Some key=value pair like: name=Israel (one per line)',
+			    	   emptyText:'Some key=value pair (only one per line). Example name=Israel or name=${*1}',
 			    	   maxLength: 200, height:85, allowBlank: true,  
 			    	   //http://stackoverflow.com/questions/8120852/extjs4-remote-validation
 			    	   textValid: true, validator: function(){return this.textValid;},
@@ -1019,7 +1019,7 @@ function TeachingExtWrapper(){
 			       },
 			       {
 			    	   xtype: 'textareafield', fieldLabel: 'Then say', name: 'say',
-			    	   emptyText:'The bot\'s responses to the user input. Can access memorized variables. Example: Hello, ${name}. (one per line)',
+			    	   emptyText:'The bot\'s responses to the user input (only one per line). Can access memorized variables. Example: Hello, ${name}.',
 			    	   allowBlank: false, minLength: 1, maxLength: 200, height:85, 
 			    	   //http://stackoverflow.com/questions/8120852/extjs4-remote-validation
 			    	   textValid: false, validator: function(){return this.textValid;},
