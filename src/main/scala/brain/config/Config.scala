@@ -57,4 +57,6 @@ object Config {
     def getGraphDatabasePath = getBrainDataPath+"/databases"
     def getKnowledgeBasePath = getBrainDataPath+"/knowledge_base"
     def getKnowledgeBaseDir  = knowledgeBaseDir
+    def getProgramDDirPath   = getBrainDataPath + "/programd/"
+    def getProgramDConfPath  = getBrainDataPath + "/programd/conf/core.xml"
 }

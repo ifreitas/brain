@@ -12,6 +12,7 @@ project/project
 console.devmode.log
 .DS_Store
 profiles
+log/
 .cache
 .settings
 databases

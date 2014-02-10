@@ -18,16 +18,42 @@ package brain.web
 import javax.servlet.ServletContextListener
 import javax.servlet.ServletContextEvent
 import brain.db.OrientDbServer
+import brain.models.ProgramD
+import java.net.URL
+import org.aitools.programd.Core
+import java.net.MalformedURLException
+import org.aitools.util.resource.URLTools
+import brain.config.Config
 
 class WebAppListener extends ServletContextListener {
 	
 	def contextInitialized(servletContextEvent:ServletContextEvent) {
 	    //System.setProperty("run.mode", "production")
 	    OrientDbServer.start
+	    
+	    ProgramD.prepare
+		val theURL = getBaseURL(servletContextEvent);
+	    println("CORE URL"+ theURL.toString())
+		val core = new Core(theURL, URLTools.contextualize(theURL, Config.getProgramDConfPath));
+		ProgramD.start(core);
 	}
 
 	def contextDestroyed(servletContextEvent:ServletContextEvent) {
+	    ProgramD.shutdown
 	    OrientDbServer.stop
+	}
+	
+	def getBaseURL(servletContextEvent:ServletContextEvent):URL = {
+		try {
+		  return servletContextEvent.getServletContext().getResource("/");
+		}
+		catch {
+		    case e:MalformedURLException => {
+		        servletContextEvent.getServletContext().log("Unable to get the base url.", e);
+		    }
+			
+		  return null;
+		}
 	}
   
 }

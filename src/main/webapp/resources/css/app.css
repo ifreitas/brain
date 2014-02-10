@@ -40,6 +40,12 @@
 .comments {
     background-image: url(../images/icons/comments.png) !important;
 }
+.comments_add {
+    background-image: url(../images/icons/comments_add.png) !important;
+}
+.comments_delete {
+    background-image: url(../images/icons/comments_delete.png) !important;
+}
 .delete {
     background-image: url(../images/icons/delete.png) !important;
 }

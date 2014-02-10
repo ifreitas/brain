@@ -222,6 +222,8 @@ Ext.application({
     launch: function() {
         Ext.create('Ext.container.Viewport', {
             layout: 'border',
+            maxWidth: 1300,
+            maxHeight: 685,
             items: [
                 {
 			        region: 'north',
@@ -236,15 +238,6 @@ Ext.application({
 			        margins: '0 5 0 5',
 			        layout: 'accordion',
 			        items:[
-//						{
-//							xtype:'panel',
-//							title: 'Abstract',
-//							bodyPadding: 5,
-//							layout:'fit',
-//							border:false,
-//							autoScroll:true,
-//							contentEl:'abstract'
-//						},
 						{
 							xtype:'panel',
 							title: 'Modeling',
@@ -297,13 +290,6 @@ Ext.application({
 					    	region: 'center',
 					    	border:false,
 					        items: [
-								{
-									title: 'About',
-									border: false,
-									iconCls:'information',
-									bodyPadding: 5,
-									contentEl: 'about'
-								},
 //				                {
 //				                	title: 'Properties',
 //				                	disabled: true,
@@ -313,26 +299,76 @@ Ext.application({
 //						                tooltip: 'The properties of the selected element.'
 //						            }
 //						        }, 
-//						        {
-//						            title: 'Chat',
-//						            iconCls:'comments',
-//						            disabled: true,
-//						            border:false,
-//						            tabConfig: {
-//						                tooltip: 'A chat for testing the knowledge base.'
-//						            },
-//						            items:[
-//						                   {
-//						                	    //height: 500,
-//						                	    width: 500,
-//						                	    border: false,
-//						                	    layout: 'fit',
-//						                	    autoScroll: false,
-//						                	    html: "<iframe src='http://thechatdomain.com' height=100% width=100% border='0'></iframe>",
-//						                	    autoShow: true
-//						                	}
-//						            ]
-//						        },
+						        {
+						            title: 'Chat',
+						            iconCls:'comments',
+						            border:false,
+						            tabConfig: {
+						                tooltip: 'A chat for testing the knowledge base.'
+						            },
+						            items:[
+						                	   Ext.create('Ext.form.Panel', {
+						               			border:false, layout:'form', bodyPadding: 5, layout: {type: 'hbox',align: 'middle'},
+						               			items:[
+						               			       {
+													        xtype: 'label',
+													        forId: 'userMessageInput',
+													        text: 'Message',
+													        margin: '0 5 0 0'
+													    },
+						               			       {
+						               			    	   xtype: 'textfield', name: 'message', hideLabel: true,flex:1,
+						               			    	   allowBlank: false, id: 'userMessageInput',
+						               			    	validateOnBlur:false,
+						               			    	   listeners:{
+							               			    		specialkey: function(field, e){
+							               		                    if (e.getKey() == e.ENTER) {
+							               		                    	sendMessage(field)
+							               		                    }
+							               		                }
+						               			    	   }
+						               			       }
+						               		       ],
+						               		    buttons: [
+						               					{
+						               						text     : 'Send',
+						               						formBind : true,
+						               						iconCls:'comments_add',
+						               						handler  : function(){
+						               							sendMessage(Ext.getCmp('userMessageInput'));
+						               						}
+						               					}
+						               		       ]
+						               		}),
+						               		 {
+												title: 'Bot Dialog',
+												bodyPadding: 5,
+												id:'botDialogPanel',
+												flex:1,
+												border:false,
+												autoScroll:true,
+												height:480,
+												contentEl:'botDialog',
+												tbar:[
+												      '->',
+												      {
+												    	  text: 'Clear Dialog Box',
+												    	  iconCls:'comments_delete',
+												    	  handler:function(){
+												    		  Ext.get('botDialog').setHTML("");
+												    	  }
+												      }
+												]
+						                   },
+						            ]
+						        },
+						        {
+									title: 'About',
+									border: false,
+									iconCls:'information',
+									bodyPadding: 5,
+									contentEl: 'about'
+								}
 //						        {
 //						            title: 'Utilities',
 //						            iconCls:'wrench',
@@ -971,7 +1007,7 @@ function TeachingExtWrapper(){
 			       {
 			    	   xtype: 'textareafield', fieldLabel: 'When the user says', name: 'whenTheUserSays',
 			    	   emptyText:'Likely user\'s sentences (only one per line). Example: My name is *',
-			    	   allowBlank: false, minLength: 1, maxLength: 200, height:85, validator:validateEmptyString
+			    	   allowBlank: false, minLength: 1, maxLength: 500, height:85, validator:validateEmptyString
 			       },
 			       {
 			    	   xtype: 'textfield', fieldLabel: 'Responding to', name: 'respondingTo',
@@ -1020,7 +1056,7 @@ function TeachingExtWrapper(){
 			       {
 			    	   xtype: 'textareafield', fieldLabel: 'Then say', name: 'say',
 			    	   emptyText:'The bot\'s responses to the user input (only one per line). Can access memorized variables. Example: Hello, ${name}.',
-			    	   allowBlank: false, minLength: 1, maxLength: 200, height:85, 
+			    	   allowBlank: false, minLength: 1, maxLength: 500, height:85, 
 			    	   //http://stackoverflow.com/questions/8120852/extjs4-remote-validation
 			    	   textValid: false, validator: function(){return this.textValid;},
 			    	   listeners : {
@@ -1195,3 +1231,38 @@ function validateMemorizeField(str){
 	}
 }
 
+function appendMessage(who, msg){
+	var p = document.createElement('p');
+	var w = document.createElement('span')
+	w.innerHTML=who+": ";
+	var m = document.createElement('span')
+	m.innerHTML=msg
+	p.appendChild(w)
+	p.appendChild(m)
+	document.getElementById("botDialog").appendChild(p)
+	Ext.get(p).scrollIntoView('botDialogPanel', false, true, true)
+}
+
+function sendMessage(field){
+	if(field.value.trim != ""){
+		var message = field.value;
+		field.reset();
+		appendMessage("User", message)
+		Ext.Ajax.request({
+			url: 'rest/chat/'+message,
+			success: function(response, opts) {
+				var obj = Ext.decode(response.responseText);
+				if(obj.success){
+					appendMessage("<b>Robot</b>", obj.msg)
+					field.focus();
+				}
+				else{
+				}
+			},
+			failure: function(response, opts) {// network error
+				var obj = Ext.decode(response.responseText);
+				Log.error("Unable to continue chat. " + obj.msg)
+			}
+		});
+	}
+}

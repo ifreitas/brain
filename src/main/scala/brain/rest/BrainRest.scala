@@ -29,6 +29,7 @@ import brain.models.MemorizeUtil
 import net.liftweb.util.Helpers
 import net.liftweb.common.Box
 import brain.models.GetUtil
+import brain.models.ProgramD
 
 case class ContentToValidade(content:String)
 object ContentToValidade{
@@ -69,6 +70,12 @@ object BrainRest extends RestHelper {
         }
     })
     
+    serve("rest"/"chat" prefix{
+        case message :: Nil JsonGet _ => {
+            jsonMessage(true, ProgramD.response(message), 200)
+        }
+    })
+    
     serve("rest"/"knowledges" prefix{
         
         /*
@@ -92,6 +99,7 @@ object BrainRest extends RestHelper {
         	implicit val db = GraphDb.get
 			try{
 				Topic.createTheKnowledgeBase
+				ProgramD.restart
 				JObject(JField("success", JString("true")) :: JField("path", JString(Config.getKnowledgeBasePath)) :: Nil)
 			}
         	catch{
