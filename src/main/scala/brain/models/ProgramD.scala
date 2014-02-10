@@ -117,7 +117,7 @@ object ProgramD {
 	private def writeBots()={
 	    writeFile(Config.getProgramDDirPath+"conf/bots.xml", """<?xml version="1.0" encoding="ISO-8859-1"?>
 <bots xmlns="http://aitools.org/programd/4.7/bot-configuration">
-    <bot id="Bot de Teste" enabled="true">
+    <bot id="Brain Bot" enabled="true">
         <properties href="properties.xml"/>
         <predicates href="predicates.xml"/>
         <substitutions href="substitutions.xml"/>
