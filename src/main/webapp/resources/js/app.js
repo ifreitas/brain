@@ -1240,7 +1240,8 @@ function appendMessage(who, msg){
 	p.appendChild(w)
 	p.appendChild(m)
 	document.getElementById("botDialog").appendChild(p)
-	Ext.get(p).scrollIntoView('botDialogPanel', false, true, true)
+	Ext.get(p).highlight();
+	Ext.get(p).scrollIntoView('botDialogPanel', false, true, false)
 }
 
 function sendMessage(field){
