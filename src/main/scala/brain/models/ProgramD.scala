@@ -18,7 +18,8 @@ object ProgramD {
         val programDDir = new File(Config.getProgramDDirPath)
         if(!programDDir.exists()){
             programDDir.mkdir()
-            new File(Config.getProgramDDirPath+"/conf").mkdir
+            new File(Config.getProgramDConfPath).mkdir
+            new File(Config.getProgramDDirPath+"/output").mkdir
             writeFiles
         }
     }
@@ -30,7 +31,7 @@ object ProgramD {
 	def shutdown:Unit= this.core.shutdown
 	def restart():Unit={
 	    core.shutdown()
-	    core = new Core(core.getBaseURL(), URLTools.contextualize(core.getBaseURL(), Config.getProgramDConfPath));
+	    core = new Core(core.getBaseURL(), URLTools.contextualize(core.getBaseURL(), Config.getProgramDCoreFilePath));
 	}
 	
 	private def writeFiles()={
@@ -45,13 +46,13 @@ object ProgramD {
 	    writeSubstitutions
 	}
 	private def writeCore()={
-	    writeFile(Config.getProgramDConfPath, """<?xml version="1.0" encoding="UTF-8"?>
+	    writeFile(Config.getProgramDCoreFilePath, s"""<?xml version="1.0" encoding="UTF-8"?>
 <programd xmlns="http://aitools.org/programd/4.7/programd-configuration"> 
   <aiml.namespace-uri>http://alicebot.org/2001/AIML-1.0.1</aiml.namespace-uri>
   <paths>
     <bot-config>bots.xml</bot-config>
     <plugin-config>plugins.xml</plugin-config>
-    <gossip>file:/var/log/programd/gossip.txt</gossip>
+    <gossip>file:${Config.getProgramDOutputPath}/gossip.txt</gossip>
   </paths>
   <predicates>
     <empty-default>undefined</empty-default>
@@ -61,7 +62,7 @@ object ProgramD {
   </predicates>
   <predicate-manager>
     <implementation>org.aitools.programd.predicates.InMemoryPredicateManager</implementation>
-    <ffpm-dir>file:/var/programd/ffpm</ffpm-dir>
+    <ffpm-dir>file:${Config.getProgramDOutputPath}/ffpm</ffpm-dir>
   </predicate-manager>
   <database>
     <driver>com.mysql.jdbc.Driver</driver>
@@ -115,7 +116,7 @@ object ProgramD {
 </programd>""")
 	}
 	private def writeBots()={
-	    writeFile(Config.getProgramDDirPath+"conf/bots.xml", """<?xml version="1.0" encoding="ISO-8859-1"?>
+	    writeFile(Config.getProgramDConfPath+"/bots.xml", s"""<?xml version="1.0" encoding="UTF-8"?>
 <bots xmlns="http://aitools.org/programd/4.7/bot-configuration">
     <bot id="Brain Bot" enabled="true">
         <properties href="properties.xml"/>
@@ -123,25 +124,18 @@ object ProgramD {
         <substitutions href="substitutions.xml"/>
         <sentence-splitters href="sentence-splitters.xml"/>
         <listeners href="listeners.xml"/>
-        <!--
-        <testing>
-            <test-suite-path>../resources/testing/AIML.xml</test-suite-path>
-            <report-directory>../log/programd/test-reports</report-directory>
-        </testing>
-        -->
-        <learn>/Users/israelfreitas/brain/knowledge_base/*.aiml</learn>
-        <!-- <learn>/tmp/brain/knowledge_base/*.aiml</learn> -->
+        <learn>${Config.getKnowledgeBasePath}/*.aiml</learn>
     </bot>
 </bots>""")
 	}
 	private def writePlugins()={
-		writeFile(Config.getProgramDDirPath+"conf/plugins.xml", """<?xml version="1.0" encoding="ISO-8859-1"?>
+		writeFile(Config.getProgramDConfPath+"/plugins.xml", """<?xml version="1.0" encoding="UTF-8"?>
 <plugins xmlns="http://aitools.org/programd/4.7/plugins"
     xmlns:d="http://aitools.org/programd/4.7">
 </plugins>""")
 	}
 	private def writePredicates()={
-		writeFile(Config.getProgramDDirPath+"conf/predicates.xml", """<?xml version="1.0" encoding="ISO-8859-1"?>
+		writeFile(Config.getProgramDConfPath+"/predicates.xml", """<?xml version="1.0" encoding="UTF-8"?>
 <!--This is an example predicates set definition.  Here you can
     define default values for predicates, as well as mark those
     which are return-name-when-set.-->
@@ -157,7 +151,7 @@ object ProgramD {
 </predicates>""")
 	}
 	private def writeProperties()={
-		writeFile(Config.getProgramDDirPath+"conf/properties.xml", """<?xml version="1.0"?>
+		writeFile(Config.getProgramDConfPath+"/properties.xml", """<?xml version="1.0"?>
 <!-- <properties xmlns="http://aitools.org/programd/4.7/bot-configuration"> -->
 <properties>
       <!--This is an example properties set definition.-->
@@ -189,7 +183,7 @@ object ProgramD {
 </properties>""")
 	}
 	private def writeSentenceSplitters()={
-		writeFile(Config.getProgramDDirPath+"conf/sentence-splitters.xml", """<?xml version="1.0" encoding="ISO-8859-1"?>
+		writeFile(Config.getProgramDConfPath+"/sentence-splitters.xml", """<?xml version="1.0" encoding="UTF-8"?>
 <!--Sentence splitters define strings that mark the end of a sentence,
     after input substitutions have been performed.-->
 <sentence-splitters xmlns="http://aitools.org/programd/4.7/bot-configuration">
@@ -201,7 +195,7 @@ object ProgramD {
 </sentence-splitters>""")
 	}
 	private def writeSubstitutions()={
-		writeFile(Config.getProgramDDirPath+"conf/substitutions.xml", """<?xml version="1.0" encoding="ISO-8859-1"?>
+		writeFile(Config.getProgramDConfPath+"/substitutions.xml", """<?xml version="1.0" encoding="UTF-8"?>
 <!--Substitutions are grouped according to several AIML interpreter functions.-->
 <substitutions xmlns="http://aitools.org/programd/4.7/bot-configuration">
     <!--Input substitutions correct spelling mistakes and convert
@@ -594,7 +588,7 @@ object ProgramD {
 </substitutions>""")
 	}
 	private def writeListeners()={
-		writeFile(Config.getProgramDDirPath+"conf/listeners.xml", """<?xml version="1.0" encoding="ISO-8859-1"?>
+		writeFile(Config.getProgramDConfPath+"/listeners.xml", """<?xml version="1.0" encoding="UTF-8"?>
 <listeners xmlns="http://aitools.org/programd/4.7/bot-configuration"
     xmlns:d="http://aitools.org/programd/4.7">
     <listener class="org.aitools.programd.listener.AIMListener" enabled="false">

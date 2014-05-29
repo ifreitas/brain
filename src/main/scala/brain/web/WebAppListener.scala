@@ -28,13 +28,15 @@ import brain.config.Config
 class WebAppListener extends ServletContextListener {
 	
 	def contextInitialized(servletContextEvent:ServletContextEvent) {
-	    //System.setProperty("run.mode", "production")
-	    OrientDbServer.start
+		//System.setProperty("run.mode", "production")
+
+		Config.load
 	    
+		OrientDbServer.start
+        
 	    ProgramD.prepare
 		val theURL = getBaseURL(servletContextEvent);
-	    println("CORE URL"+ theURL.toString())
-		val core = new Core(theURL, URLTools.contextualize(theURL, Config.getProgramDConfPath));
+		val core = new Core(theURL, URLTools.contextualize(theURL, Config.getProgramDCoreFilePath));
 		ProgramD.start(core);
 	}
 

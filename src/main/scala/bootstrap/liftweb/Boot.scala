@@ -59,9 +59,6 @@ class Boot {
         LiftRules.resourceNames = "i18n/messages" :: LiftRules.resourceNames
         LiftRules.resourceNames = "props" :: LiftRules.resourceNames
 
-        // Brain Config Object
-        Config.load
-        
         createDbUnlessAlreadyExists
         
     }
