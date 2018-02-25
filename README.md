@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/ifreitas/brain/tree/master.svg?style=shield&circle-token=brain)](https://circleci.com/gh/ifreitas/brain)
+
 Brain
 =====
 
