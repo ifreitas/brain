@@ -1,12 +1,12 @@
 /**
  * Copyright 2013 Israel Freitas (israel.araujo.freitas@gmail.com)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,7 +25,7 @@ var Log = {
 	  if (!this.elem) this.elem = document.getElementById('log');
 	  this.elem.style.color	='red';
 	  this.elem.innerHTML   = text;
-	  this.elem.style.left  = (550 - this.elem.offsetWidth / 2) + 'px';  
+	  this.elem.style.left  = (550 - this.elem.offsetWidth / 2) + 'px';
   }
 };
 
@@ -41,49 +41,49 @@ function initTree(json){
     st = new $jit.ST({
    		injectInto: 'infovis',
    		background:false,
-   		orientation: 'top',
+   		orientation: 'left',
    	    duration: 800,
         transition: $jit.Trans.Quart.easeInOut,
         levelsToShow: 5,
-        levelDistance: 50,
-        Navigation: {  
-            enable: true,  
-            panning: 'avoid nodes',  
-            zooming: false  
+        levelDistance: 10,
+        Navigation: {
+            enable: true,
+            panning: 'avoid nodes',
+            zooming: false
           },
-        
+
         Node: {
             height: 40,
-            width: 80,
+            width: 120,
             type: 'rectangle',
-            align: "center",  
+            align: "center",
             overridable: true,
             CanvasStyles:{
             	shadowColor: 'gray',
-                shadowBlur: 10,
-                shadowOffsetY: 3
+                shadowBlur: 5,
+                shadowOffsetY: 5
             }
         },
-        
+
         Edge: {
             //type: 'bezier',
             color: '#A7B6FF',
             overridable: true,
             CanvasStyles:{
             	shadowColor: 'gray',
-                shadowBlur: 10,
-                shadowOffsetY: 3
+                shadowBlur: 5,
+                shadowOffsetY: 5
             }
         },
-        
+
         onBeforeCompute: function(node){
         	if(node) Log.info("loading " + node.name);
         },
-        
+
         onAfterCompute: function(){
             Log.info("done");
         },
-        
+
         onCreateLabel: function(label, node){
         	Ext.EventManager.on(label, 'contextmenu', function(e,t){
         		e.preventDefault();
@@ -96,10 +96,10 @@ function initTree(json){
         		window.getSelection().removeAllRanges();
         		knowledgeExtWrapper.update();
         	});
-        	
+
         	label.id          = node.id;
         	setKnowledgeLabel(label, node.name)
-        	
+
             var style         = label.style;
             style.width       = 80 + 'px';
             style.height      = 40 + 'px';
@@ -113,19 +113,19 @@ function initTree(json){
             style.cursor      = 'pointer';
             style.lineHeight  = 40+'px';
         },
-        
-        Events: {  
+
+        Events: {
             enable: true,
-            
+
             onClick: function(node, eventInfo, e){
             	if(node){
             		ObjectManager.setLastClicked(node);
             		st.onClick(node.id);
             	}
             },
-        
+
         },
-        
+
         onBeforePlotNode: function(node){
             //add some color to the nodes in the path between the
             //root node and the selected node.
@@ -137,11 +137,11 @@ function initTree(json){
                 var count = 0;
                 node.eachSubnode(function(n) { count++; });
                 //assign a node color based on how many children it has
-                node.data.$color = ['#6D89D5', '#476DD5', '#133CAC', '#2B4281', '#062270', '#090974'][count];                    
-                //node.data.$color = ['#0069D1', '#1069D1', '#2069D1', '#3069D1', '#4069D1', '#5069D1', '#6069D1', '#7069D1', '#8069D1', '#9069D1'][count];                    
+                node.data.$color = ['#6D89D5', '#476DD5', '#133CAC', '#2B4281', '#062270', '#090974'][count];
+                //node.data.$color = ['#0069D1', '#1069D1', '#2069D1', '#3069D1', '#4069D1', '#5069D1', '#6069D1', '#7069D1', '#8069D1', '#9069D1'][count];
             }
         },
-        
+
         onBeforePlotLine: function(adj){
             if (adj.nodeFrom.selected && adj.nodeTo.selected) {
                 adj.data.$color = '#23A4FF';
@@ -153,11 +153,11 @@ function initTree(json){
             }
         }
     });
-    
+
     st.add = function(newKnowledge){
     	lastClikedNode = ObjectManager.lastClicked;
 		st.addSubtree(
-				{ id : lastClikedNode.id, children : [ newKnowledge ] }, 
+				{ id : lastClikedNode.id, children : [ newKnowledge ] },
 				'replot',
 				{ hideLabels : false, duration : 700 }
 		);
@@ -166,7 +166,7 @@ function initTree(json){
 		}
 		Log.info("Knowledege named '" + newKnowledge.name + "' added successfully.")
     };
-    
+
     st.remove = function(knowledge){
     	lastClickedNode = ObjectManager.lastClicked;
     	st.removeSubtree(
@@ -181,7 +181,7 @@ function initTree(json){
 					}
 				})
     };
-    
+
     st.rename = function(knowledge, newName){
     	try{
     		oldName = knowledge.name;
@@ -193,7 +193,7 @@ function initTree(json){
     		Log.error("Unable to rename Knowledege '"+knowledge.name+"'. Cause: "+e);
     	}
     }
-    
+
     function setKnowledgeLabel(knowledgeLabel, name){
     	if(name.length > 8){
     		knowledgeLabel.title = name
@@ -203,8 +203,8 @@ function initTree(json){
     		knowledgeLabel.innerHTML = name;
     	}
     }
-    
-    
+
+
     try{
     	st.loadJSON(json);
     	st.compute();
@@ -214,7 +214,7 @@ function initTree(json){
     catch(e){
     	Log.error("Unable to load the tree. Cause: " + e)
     }
-    
+
 }
 
 Ext.application({
@@ -298,7 +298,7 @@ Ext.application({
 //			                		tabConfig: {
 //						                tooltip: 'The properties of the selected element.'
 //						            }
-//						        }, 
+//						        },
 						        {
 						            title: 'Chat',
 						            iconCls:'comments',
@@ -375,7 +375,7 @@ Ext.application({
 //						            disabled: true,
 //						            border:false,
 //						        }
-						        
+
 					        ]
 					    })
 				    ]
@@ -387,7 +387,7 @@ Ext.application({
 		                	title: 'Knowledge Base',
 		                	iconCls:'book',
 		                	contentEl: 'theTree'
-				        }, 
+				        },
 //				        {
 //				            title: 'Bots',
 //				            disabled: true,
@@ -443,12 +443,12 @@ Ext.application({
 
 
 function KnowledgeExtWrapper(){
-	
+
 	var store = null;
 	defineProxy();
 	defineModel();
 	defineStore();
-	
+
 	this.create = function(){
 		var record = Ext.create('Brain.model.Knowledge', {name:'', parentId:ObjectManager.getLastClicked().id})
 		var form = prepareForm(record, {
@@ -458,7 +458,7 @@ function KnowledgeExtWrapper(){
 				},
 				failure: function(rec, op){
 					store.rejectChanges();
-					Log.error(rec.proxy.getReader().jsonData.msg); 
+					Log.error(rec.proxy.getReader().jsonData.msg);
 				}
 			},
 			false
@@ -467,27 +467,27 @@ function KnowledgeExtWrapper(){
 		panel.show();
 		return panel;
 	};
-	
+
 	this.update  = function(){
 		var record = store.findRecord('id',ObjectManager.lastClicked.id, 0, false, true, true)
 		var form = prepareForm(record, {
 				success: function(rec, op) {
 					record.commit();
-					st.rename(ObjectManager.lastClicked, rec.data.name); 
+					st.rename(ObjectManager.lastClicked, rec.data.name);
 				},
-				failure: function(rec, op){ 
+				failure: function(rec, op){
 					store.rejectChanges();
 					Log.error(rec.proxy.getReader().jsonData.msg);
 				}
 			},
 			true
 		);
-		
+
 		var panel = basicWindow('Update the Knowledge', [ form ])
 		panel.show();
 		return panel;
 	}
-	
+
 	this.destroy = function(){
 		if(ObjectManager.lastClicked.getParents().length == 0){
 			Ext.MessageBox.alert("","Unable to delete the tree's root knowledge")
@@ -512,24 +512,24 @@ function KnowledgeExtWrapper(){
 			});
 		};
 	}
-	
-	
+
+
 	function prepareForm(record, callbacks, disableSaveAndNew){
 		function saveAndNew(){
 			save();
 			knowledgeExtWrapper.create();
 		}
-		
+
 		function save(){
 			theForm.getForm().getRecord().save({
-				success: function(rec, op) { 
-					theForm.up().close(); 
-					if (callbacks != null) callbacks.success(rec, op); 
+				success: function(rec, op) {
+					theForm.up().close();
+					if (callbacks != null) callbacks.success(rec, op);
 				},
 				failure: function(rec, op) { if (callbacks != null) callbacks.failure(rec, op); }
 			});
 		}
-		
+
 		var theForm = Ext.create('Ext.form.Panel', {
 			border:false, layout:'form', bodyPadding: 5,
 			model: 'Brain.model.Knowledge',
@@ -546,7 +546,7 @@ function KnowledgeExtWrapper(){
 		       ],
 		       bbar: [
 					{
-						xtype    : 'button', 
+						xtype    : 'button',
 						text     : 'Save and new',
 						disabled : disableSaveAndNew,
 						iconCls  :'add',
@@ -555,7 +555,7 @@ function KnowledgeExtWrapper(){
 						scope    : this
 					},
 					{
-						xtype    : 'button', 
+						xtype    : 'button',
 						text     : 'Save',
 						iconCls  :'accept',
 						formBind : true,
@@ -563,7 +563,7 @@ function KnowledgeExtWrapper(){
 						scope    : this
 					},
 					{
-						xtype   : 'button', 
+						xtype   : 'button',
 						text    : 'Cancel',
 						iconCls :'cancel',
 						handler : function() { theForm.up().close(); },
@@ -574,7 +574,7 @@ function KnowledgeExtWrapper(){
 		theForm.getForm().loadRecord(record);
 		return theForm;
 	}
-	
+
 	function basicWindow(title, items){
 		return Ext.create('Ext.window.Window', {
 			title:       title,
@@ -592,7 +592,7 @@ function KnowledgeExtWrapper(){
 			}
 		});
 	}
-	
+
 	function defineProxy(){
 		this.proxy = {
 	        type:     'rest',
@@ -602,7 +602,7 @@ function KnowledgeExtWrapper(){
 	        appendId: true
 	    };
 	}
-	
+
 	function defineModel(){
 		Ext.define('Brain.model.Knowledge', {
 		    extend: 'Ext.data.Model',
@@ -610,9 +610,9 @@ function KnowledgeExtWrapper(){
 		    proxy: this.proxy
 		});
 	}
-	
+
 	this.getStore = function(){return store;}
-		
+
 	function defineStore(){
 		store = Ext.create('Ext.data.Store', {
 		     model: 'Brain.model.Knowledge',
@@ -633,14 +633,14 @@ var knowledgeExtWrapper = new KnowledgeExtWrapper();
 
 
 function TopicExtWrapper(){
-	
+
 	var store = null;
 	defineModel();
 	defineStore();
 	this.grid = initGrid(); //temp implementation
 	this.teachingExtWrapper = new TeachingExtWrapper();
 	var me = this
-	
+
 	function create(){
 		var record = Ext.create('Brain.model.Topic', {name:'', knowledgeId:ObjectManager.getLastClicked().id})
 		var form = prepareForm(record, {
@@ -648,7 +648,7 @@ function TopicExtWrapper(){
 					store.add(rec.data)
 					Log.info("Topic named '" + rec.data.name + "' created successfully.");
 				},
-				failure: function(rec, op) { 
+				failure: function(rec, op) {
 					store.rejectChanges();
 					Log.error(rec.proxy.getReader().jsonData.msg);
 				}
@@ -659,7 +659,7 @@ function TopicExtWrapper(){
 		p.show();
 		return p;
 	}
-	
+
 	function update(){
 		if(me.grid.getSelectionModel().getLastSelected() == null) return false;
 		var selectedItem = me.grid.getSelectionModel().getLastSelected().data
@@ -667,9 +667,9 @@ function TopicExtWrapper(){
 		var form = prepareForm(record, {
 				success: function(rec, op) {
 					record.commit();
-					Log.info("Topic renamed to '" + rec.data.name + "' successfully."); 
+					Log.info("Topic renamed to '" + rec.data.name + "' successfully.");
 				},
-				failure: function(rec, op){ 
+				failure: function(rec, op){
 					store.rejectChanges();
 					Log.error(rec.proxy.getReader().jsonData.msg);
 				}
@@ -680,7 +680,7 @@ function TopicExtWrapper(){
 		panel.show();
 		return panel;
 	}
-	
+
 	function destroy(){
 		var selectedItem = me.grid.getView().getSelectionModel().getSelection()[0];
 		if(selectedItem == null) return false;
@@ -701,23 +701,23 @@ function TopicExtWrapper(){
 			}
 		});
 	}
-	
+
 	function prepareForm(record, callbacks, disableSaveAndNew){
 		function saveAndNew(){
 			save();
 			create();
 		}
-		
+
 		function save(){
 			theForm.getForm().getRecord().save({
-				success: function(rec, op) { 
-					theForm.up().close(); 
-					if (callbacks != null) callbacks.success(rec, op); 
+				success: function(rec, op) {
+					theForm.up().close();
+					if (callbacks != null) callbacks.success(rec, op);
 				},
 				failure: function(rec, op) { if (callbacks != null) callbacks.failure(rec, op); }
 			});
 		}
-		
+
 		var theForm = Ext.create('Ext.form.Panel', {
 			border:false, layout:'form', bodyPadding: 5,
 			model: 'Brain.model.Topic',
@@ -734,7 +734,7 @@ function TopicExtWrapper(){
 		       ],
 		       bbar: [
 					{
-						xtype    : 'button', 
+						xtype    : 'button',
 						text     : 'Save and new',
 						disabled : disableSaveAndNew,
 						iconCls  :'add',
@@ -760,7 +760,7 @@ function TopicExtWrapper(){
 		theForm.getForm().loadRecord(record);
 		return theForm;
 	}
-	
+
 	function initGrid(){
 		return Ext.create('Ext.grid.Panel', {
 		   region  : 'north',
@@ -799,7 +799,7 @@ function TopicExtWrapper(){
 		    }
 		});
 	}
-	
+
 	function basicWindow(title, items){
 		return Ext.create('Ext.window.Window', {
 			title:       title,
@@ -817,7 +817,7 @@ function TopicExtWrapper(){
 			}
 		});
 	}
-	
+
 	function defineModel(){
 		Ext.define( 'Brain.model.Topic', {
 		    extend : 'Ext.data.Model',
@@ -848,7 +848,7 @@ function TopicExtWrapper(){
 
 
 /**
- * 
+ *
  * @returns
  */
 function TeachingExtWrapper(){
@@ -858,11 +858,11 @@ function TeachingExtWrapper(){
 	defineModel();
 	var store = initStore();
 	var grid = this.grid = initGrid();
-	
-	
+
+
 	this.setTopic = function(newTopic){
 		topic = newTopic;
-		
+
 		if(newTopic == null){
 			grid.setDisabled(true);
 			this.grid.getSelectionModel().clearSelections();
@@ -876,13 +876,13 @@ function TeachingExtWrapper(){
 			store.reload();
 		}
 	}
-	
+
 	function changeProxyUrlTo(url){
 		initProxy(url);
 		defineModel();
 		store.proxy.url = url;
 	}
-	
+
 	function create(){
 		var record = Ext.create('Brain.model.Teaching', {topicId:topic.id, whenTheUserSays:'', respondingTo:'', memorize:'', say:''})
 		var form = prepareForm(record, {
@@ -891,7 +891,7 @@ function TeachingExtWrapper(){
 				record.commit();
 				Log.info("Teaching created successfully.");
 			},
-			failure: function(rec, op){ 
+			failure: function(rec, op){
 				store.rejectChanges();
 				Log.error(rec.proxy.getReader().jsonData.msg);
 			}
@@ -900,7 +900,7 @@ function TeachingExtWrapper(){
 		p.show();
 		return p;
 	}
-	
+
 	function update(){
 		if(grid.getSelectionModel().getLastSelected() == null) return false;
 		var selectedItem = grid.getSelectionModel().getLastSelected().data
@@ -908,9 +908,9 @@ function TeachingExtWrapper(){
 		var form = prepareForm(record, {
 			success: function(rec, op) {
 				record.commit();
-				Log.info("Teaching updated successfully."); 
+				Log.info("Teaching updated successfully.");
 			},
-			failure: function(rec, op){ 
+			failure: function(rec, op){
 				store.rejectChanges();
 				Log.error(rec.proxy.getReader().jsonData.msg);
 			}
@@ -919,7 +919,7 @@ function TeachingExtWrapper(){
 		panel.show();
 		return panel;
 	}
-	
+
 	function destroy(){
 		var selectedItem = grid.getView().getSelectionModel().getSelection()[0];
 		if(selectedItem == null) return false;
@@ -939,10 +939,10 @@ function TeachingExtWrapper(){
 			}
 		});
 	}
-	
+
 	function initGrid(){
 		return Ext.create('Ext.grid.Panel', {
-			disabled:true, 
+			disabled:true,
 			region: 'center',
 			layout: 'fit',
 			margins: '0 5 5 5',
@@ -979,27 +979,27 @@ function TeachingExtWrapper(){
            height: 200
 	   });
 	}
-	
+
 	function prepareForm(record, callbacks, disableSaveAndNew){
 		function saveAndNew(){
 			save();
 			create();
 		}
-		
+
 		function save(){
 			var record = theForm.getForm().getRecord()
 			theForm.getForm().getFields().each( copyValueToRecord );
 			function copyValueToRecord(field){ record.set(field.name, field.value) }
-			   
+
 			theForm.getForm().getRecord().save({
-				success: function(rec, op) { 
-					theForm.up().close(); 
-					if (callbacks != null) callbacks.success(rec, op); 
+				success: function(rec, op) {
+					theForm.up().close();
+					if (callbacks != null) callbacks.success(rec, op);
 				},
 				failure: function(rec, op) { if (callbacks != null) callbacks.failure(rec, op); }
 			});
 		}
-		
+
 		var theForm = Ext.create('Ext.form.Panel', {
 			border:false, layout:'form', bodyPadding: 5,
 			model: 'Brain.model.Teaching',
@@ -1017,7 +1017,7 @@ function TeachingExtWrapper(){
 			       {
 			    	   xtype: 'textareafield', fieldLabel: 'Memorize', name: 'memorize',
 			    	   emptyText:'Some key=value pair (only one per line). Example name=Israel or name=${*1}',
-			    	   maxLength: 200, height:85, allowBlank: true,  
+			    	   maxLength: 200, height:85, allowBlank: true,
 			    	   //http://stackoverflow.com/questions/8120852/extjs4-remote-validation
 			    	   textValid: true, validator: function(){return this.textValid;},
 			    	   listeners : {
@@ -1056,7 +1056,7 @@ function TeachingExtWrapper(){
 			       {
 			    	   xtype: 'textareafield', fieldLabel: 'Then say', name: 'say',
 			    	   emptyText:'The bot\'s responses to the user input (only one per line). Can access memorized variables. Example: Hello, ${name}.',
-			    	   allowBlank: false, minLength: 1, maxLength: 500, height:85, 
+			    	   allowBlank: false, minLength: 1, maxLength: 500, height:85,
 			    	   //http://stackoverflow.com/questions/8120852/extjs4-remote-validation
 			    	   textValid: false, validator: function(){return this.textValid;},
 			    	   listeners : {
@@ -1095,7 +1095,7 @@ function TeachingExtWrapper(){
 		       ],
 		       bbar: [
 					{
-						xtype    : 'button', 
+						xtype    : 'button',
 						text     : 'Save and new',
 						disabled : disableSaveAndNew,
 						iconCls  :'add',
@@ -1121,7 +1121,7 @@ function TeachingExtWrapper(){
 		theForm.getForm().loadRecord(record);
 		return theForm;
 	}
-	
+
 	function basicWindow(title, items){
 		return Ext.create('Ext.window.Window', {
 			title:       title,
@@ -1139,7 +1139,7 @@ function TeachingExtWrapper(){
 			}
 		});
 	}
-	
+
 	function initProxy(url){
 		this.proxy = {
 	        type:     'rest',
@@ -1149,7 +1149,7 @@ function TeachingExtWrapper(){
 	        appendId: true
 	    };
 	}
-	
+
 	function defineModel(){
 		Ext.define('Brain.model.Teaching', {
 		    extend: 'Ext.data.Model',
@@ -1157,7 +1157,7 @@ function TeachingExtWrapper(){
 		    proxy: this.proxy
 		});
 	}
-		
+
 	function initStore(){
 		return Ext.create('Ext.data.Store', {
 		     model: 'Brain.model.Teaching',
@@ -1189,26 +1189,26 @@ function TopicAndTeachingWindow() {
 
 var contextMenu = Ext.create('Ext.menu.Menu', {
 	items:[
-	       { text: 'Add a Knowledge',       iconCls:'book_add', handler : function(item){knowledgeExtWrapper.create();} }, 
-		   { text: 'Rename this Knowledge', iconCls:'book_edit', handler : function(item){knowledgeExtWrapper.update();} }, 
-		   { text: 'Delete this Knowledge', iconCls:'book_delete', handler : function(item){knowledgeExtWrapper.destroy();} }, 
-		   '-', 
+	       { text: 'Add a Knowledge',       iconCls:'book_add', handler : function(item){knowledgeExtWrapper.create();} },
+		   { text: 'Rename this Knowledge', iconCls:'book_edit', handler : function(item){knowledgeExtWrapper.update();} },
+		   { text: 'Delete this Knowledge', iconCls:'book_delete', handler : function(item){knowledgeExtWrapper.destroy();} },
+		   '-',
 		   { text: 'Copy to ...', disabled: true, iconCls:'page_copy', tooltip:'Copies the current state of knowledge and its topic to other knowledge. Changes in the original knowledge was not reflected in the copied knowledge.'},
 		   { text: 'Move to ...', disabled: true, iconCls:'page_go', tooltip:'Moves this knowledge to other parent knowledge.'},
 		   { text: 'Clone in ...', disabled: true, iconCls:'page_attach', tooltip:'Knowledge clones share the same topic. Changes in the original knowledge will be reflected in the copied knowledge.'},
 		   { text: 'Is a ...', disabled: true, iconCls:'page_link', tooltip:'Creates an inheritance relationship among knowledges. Makes this knowledge possess all the topic on other knowledge. Changes in the original knowledge will be reflected in the copied knowledge.'},
-		   '-', 
+		   '-',
 		   { text: 'Topics & Teachings', iconCls:'book_open', handler : function(item){new TopicAndTeachingWindow()}, tooltip: ''}
    ]
 });
 
-function validateEmptyString(str){    
-	if(str && str.trim() != "") return true;    
+function validateEmptyString(str){
+	if(str && str.trim() != "") return true;
 	return "This field can not be empty"
 }
 
 function validateMemorizeField(str){
-	
+
 	if(str && str.trim() != ""){
 		Ext.Ajax.request({
 			url: 'rest/validate/memorize/'+str,

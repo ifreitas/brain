@@ -1,12 +1,12 @@
 /**
  * Copyright 2013 Israel Freitas (israel.araujo.freitas@gmail.com)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -46,9 +46,9 @@ object ContentToValidade{
 
 
 object BrainRest extends RestHelper {
-    
+
     def jsonMessage(success:Boolean, msg:String, httpStatus:Int) = JsonResponse((("success"->success) ~ ("msg"->msg)), httpStatus)
-	
+
     serve("rest"/"validate" prefix {
         case "memorize" :: Nil JsonPost ContentToValidade(fieldContent) -> _ => {
             try{
@@ -69,15 +69,15 @@ object BrainRest extends RestHelper {
         	}
         }
     })
-    
+
     serve("rest"/"chat" prefix{
         case message :: Nil JsonGet _ => {
             jsonMessage(true, ProgramD.response(message), 200)
         }
     })
-    
+
     serve("rest"/"knowledges" prefix{
-        
+
         /*
          * KNOWLEDGE
          */
@@ -93,7 +93,7 @@ object BrainRest extends RestHelper {
                 db.shutdown()
             }
         }
-        
+
         //TODO change to Post!
         case "apply" :: Nil JsonGet _ => {
         	implicit val db = GraphDb.get
@@ -109,7 +109,7 @@ object BrainRest extends RestHelper {
         		db.shutdown()
         	}
         }
-        
+
 
 
         case id :: Nil JsonGet _ => {
@@ -125,7 +125,7 @@ object BrainRest extends RestHelper {
         		db.shutdown()
         	}
         }
-        
+
         // update
         case id :: Nil JsonPut Knowledge(knowledge) -> _ => {
         	implicit val db = GraphDb.get
@@ -144,7 +144,7 @@ object BrainRest extends RestHelper {
         }
 
         // create
-        case Nil JsonPost Knowledge(knowledge) -> _ => { 
+        case Nil JsonPost Knowledge(knowledge) -> _ => {
         	implicit val db = GraphDb.get
 			try{
 			    val vertex = knowledge.save
@@ -159,7 +159,7 @@ object BrainRest extends RestHelper {
         		db.shutdown()
         	}
         }
-        
+
         //requires the id url param
         case id :: Nil JsonDelete _ => {
         	implicit val db = GraphDb.get
@@ -176,7 +176,7 @@ object BrainRest extends RestHelper {
         		db.shutdown()
         	}
         }
-        
+
         /*
          * TOPICS
          */
@@ -192,7 +192,7 @@ object BrainRest extends RestHelper {
                 db.shutdown()
             }
         }
-        
+
               // update
         case knowledgeId :: "topics" :: id :: Nil JsonPut Topic(topic) -> _ => {
         	implicit val db = GraphDb.get
@@ -212,7 +212,7 @@ object BrainRest extends RestHelper {
         }
 
         // create
-        case knowledgeId :: "topics" :: Nil JsonPost Topic(topic) -> _ => { 
+        case knowledgeId :: "topics" :: Nil JsonPost Topic(topic) -> _ => {
         	implicit val db = GraphDb.get
 			try{
 			    //TODO: retornar 404 caso este knowlege nao tenha esta information
@@ -228,7 +228,7 @@ object BrainRest extends RestHelper {
         		db.shutdown()
         	}
         }
-        
+
         //requires the id url param
         case knowledgeId :: "topics" :: id :: Nil JsonDelete _ => {
         	implicit val db = GraphDb.get
@@ -246,7 +246,7 @@ object BrainRest extends RestHelper {
         		db.shutdown()
         	}
         }
-        
+
         /*
          * TEACHINGS
          */
@@ -262,14 +262,14 @@ object BrainRest extends RestHelper {
         		db.shutdown()
         	}
         }
-        
+
         // update
         case knowledgeId :: "topics" :: topicId :: "teachings" :: id :: Nil JsonPut Teaching(teaching) -> _ => {
         	implicit val db = GraphDb.get
 			try{
 				//TODO: retornar 404 caso este knowlege nao tenha esta information
 			    teaching.update
-				
+
 				teaching : JValue
 			}
         	catch{
@@ -279,9 +279,9 @@ object BrainRest extends RestHelper {
         		db.shutdown()
         	}
         }
-        
+
         // create
-        case knowledgeId :: "topics" :: topicId :: "teachings" :: Nil JsonPost Teaching(teaching) -> _ => { 
+        case knowledgeId :: "topics" :: topicId :: "teachings" :: Nil JsonPost Teaching(teaching) -> _ => {
         	implicit val db = GraphDb.get
 			try{
 				//TODO: retornar 404 caso este knowlege nao tenha esta information
@@ -297,7 +297,7 @@ object BrainRest extends RestHelper {
         		db.shutdown()
         	}
         }
-        
+
         //requires the id url param
         case knowledgeId :: "topics" :: topicId :: "teachings" :: id :: Nil JsonDelete _ => {
         	implicit val db = GraphDb.get
@@ -316,5 +316,5 @@ object BrainRest extends RestHelper {
         	}
         }
     })
-    
+
 }

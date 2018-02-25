@@ -15,5 +15,8 @@ profiles
 log/
 .cache
 .settings
+.classpath
+.project
 databases
 knowledge_base
+/bin/
